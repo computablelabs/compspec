@@ -1,6 +1,6 @@
 The current specification for the protocol is spread across many GitHub issues. This issue gathers and organizes these more focused specifications:
 
-- `DataMarketFactory` [#29](https://github.com/computablelabs/goest/issues/29): The top level entry point to create a new market and associated token.
+- `DataMarketFactory` [#29](MarketFactory.md): The top level entry point to create a new market and associated token.
 - `NetworkToken` [#19](https://github.com/computablelabs/goest/issues/19) The top level token for the entire network. (TODO: More description of function of this token)
 - `Market` [14](https://github.com/computablelabs/goest/issues/14) The top level contract for a given data market.
   - `MarketToken` [#12](https://github.com/computablelabs/goest/issues/12): A mintable and burnable token. Each `Market` has its own `MarketToken`
