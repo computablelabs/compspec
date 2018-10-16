@@ -3,6 +3,7 @@ market. The current `Market` implementation has evolved from a `Registry`
 implementation, but differs in a number of critical ways:
 
 - The `Market` has an associated `MarketToken`. This `MarketToken` is created upon construction of the market. This token is minted and burned by various `Market` operations.
+  - The [`MarketToken`](MarketToken.md) is a mintable and burnable ERC20 token.
 - The `Market` holds a "reserve" to the Market. This reserve holds `NetworkToken` that is paid in by investors who want to take positions in market and will pay out to people who want to exit market.
   - `Market.invest(amount)` is a new method that allows an investor to enter the market.
   - `Market.divest()` allows any token holder to exit the market
