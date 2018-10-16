@@ -9,7 +9,7 @@ different `MarketTokens`. The global `Computable` network uses a
 
 ## Top Level Specification
 
-- [`MarketFactory`](MarketFactory.md): The top level entry point to create a new market and associated token.
+- [`MarketFactory`](#Market-Factory): The top level entry point to create a new market and associated token.
 - [`NetworkToken`](NetworkToken.md) The top level token for the entire network.
 - [`Market`](Market.md) The top level contract for a given data market.
   - [`MarketToken`](MarketToken.md): A mintable and burnable token. Each `Market` has its own `MarketToken`
@@ -28,5 +28,15 @@ different `MarketTokens`. The global `Computable` network uses a
 - [Backend Systems](Backend.md): Backend systems are responsible for securely storing data off-chain and allowing authorized users to query this data. https://github.com/computablelabs/crunky
   - [REST API](https://github.com/computablelabs/crunky/issues/1): The backend system must respond to a defined set of REST API commands to perform actions such as authentication, data addition and removal, and query handling 
   - [Query specification](https://github.com/computablelabs/crunky/issues/2): The backend system must accept a structured set of queries (TODO: More details and work needed here)
+
+## Market Factory
+The `MarketFactory` is responsible for creaking new data markets and will store a list of available data markets.
+
+- `MarketFactory.create_data_market()`: Constructs and launches a new data market. This is the only public way to create a new data market. There are a number of arguments needed in this constructor.
+Each data market has an associated token with it. `create_data_market()` should pass in necessary information to initialize this token. It might make sense to pass in a list of `[address_1: allocation_1,...,address_n:allocation_n]` of initial token allocations to `create_data_market()`. The Market token would be initialized with this initial spread of market token.
+- `T_council`: Council membership threshold fraction #28
+- `T_util`: Number of tokens minted when a listing is queried #31
+- `T_submit`: Number of tokens minted when a new listing is listed #31
+- `MarketFactory.get_list_of_data_markets()`: Returns a list of available data markets.
 
 ## Backend Specification
