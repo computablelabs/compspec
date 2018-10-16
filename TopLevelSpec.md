@@ -1,8 +1,8 @@
 The current specification for the protocol is spread across many GitHub issues. This issue gathers and organizes these more focused specifications:
 
-- `DataMarketFactory` [#29](MarketFactory.md): The top level entry point to create a new market and associated token.
-- `NetworkToken` [#19](https://github.com/computablelabs/goest/issues/19) The top level token for the entire network. (TODO: More description of function of this token)
-- `Market` [14](https://github.com/computablelabs/goest/issues/14) The top level contract for a given data market.
+- [`MarketFactory`](MarketFactory.md): The top level entry point to create a new market and associated token.
+- [`NetworkToken`](NetworkToken.md) The top level token for the entire network.
+- [`Market`](Market.md) The top level contract for a given data market.
   - `MarketToken` [#12](https://github.com/computablelabs/goest/issues/12): A mintable and burnable token. Each `Market` has its own `MarketToken`
     - Minting and Burning mechanics [#31](https://github.com/computablelabs/goest/issues/31): Market tokens are minted when either new data is added, existing data is queried, or new investment is added to reserve. Market tokens are burned when data is removed or investment is withdrawn.
   - Voting: Critical decisions within a market are performed by vote of interested stake holders. These include validation of new data, challenges to fraudulent data and changes to market structure.
