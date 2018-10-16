@@ -1,4 +1,13 @@
-The current specification for the protocol is spread across many GitHub issues. This issue gathers and organizes these more focused specifications:
+# The Computable Protocol
+
+The Computable protocol creates a decentralized data market. Conceptually, the
+`Computable` network contains many `Market`s. Each `Market` is a data market
+that controls access to a single dataset. The dynamics of a given `Market` are
+governed by its associated `MarketToken`. Note that different `Market`s have
+different `MarketTokens`. The global `Computable` network uses a
+`NetworkToken`.
+
+## Top Level Specification
 
 - [`MarketFactory`](MarketFactory.md): The top level entry point to create a new market and associated token.
 - [`NetworkToken`](NetworkToken.md) The top level token for the entire network.
@@ -11,13 +20,13 @@ The current specification for the protocol is spread across many GitHub issues. 
   - The Reserve [#20](https://github.com/computablelabs/goest/issues/20): The reserve is the "bank account" associated with the market. 
     - The algorithmic price curve [#21](https://github.com/computablelabs/goest/issues/21): Controls the price at which new investors may invest in market. Investor funds are deposited in reserve and new market token is minted accordingly.
     - Investor and data owner class tokens [#22](https://github.com/computablelabs/goest/issues/22): Holders of market token are investor class or data owner class. Investor class tokens can't own any listings in the market, but have right to withdraw funds from reserve by burning their tokens. Data owner class tokens can own listings in market, but can't withdraw funds from reserve. (TODO: Can one address hold some data owner class and some investor class tokens? Potential attacks?)
-  - Queries: Each data market supports some set of queries against the data in this market. Queries are run on backend systems. (TODO: How are queries specified?)
+  - Queries: Each `Market` supports queries against the data in this market. Queries are run on a `Backend` tied to the market and can be specified in a supported [query language](QueryLanguage.md)
     - [Query Pricing](QueryPricing.md): Users have to pay to run queries. This pricing structure has to reward the various stakeholders including listing owners (data), backend system owners (compute), and the market itself (investors)
     - Query Rake [#33](https://github.com/computablelabs/goest/issues/33): What fraction of the payment goes to each stake holder?
     - Data utilization records [#35](https://github.com/computablelabs/goest/issues/35): The market maintains track of how many times each listing has been requested by different queries.
   - Off-chain data [#30](https://github.com/computablelabs/goest/issues/30): The data listed in the data market is held off-chain in a backend system. A council vote is used to set authorized backend systems for this market.
-- Backend Systems: Backend systems are responsible for securely storing data off-chain and allowing authorized users to query this data. https://github.com/computablelabs/crunky
+- [Backend Systems](Backend.md): Backend systems are responsible for securely storing data off-chain and allowing authorized users to query this data. https://github.com/computablelabs/crunky
   - [REST API](https://github.com/computablelabs/crunky/issues/1): The backend system must respond to a defined set of REST API commands to perform actions such as authentication, data addition and removal, and query handling 
   - [Query specification](https://github.com/computablelabs/crunky/issues/2): The backend system must accept a structured set of queries (TODO: More details and work needed here)
 
-  This specification is incomplete. As clarity is gained on the various TODOs and other holes in the specification, this top level spec will be edited.
+## Backend Specification
