@@ -9,7 +9,7 @@ different `MarketTokens`. The global `Computable` network uses a
 
 ## Top Level Specification
 
-- [`MarketFactory`](#Market-Factory): The top level entry point to create a new market and associated token.
+- [`MarketFactory`](#market-factory): The top level entry point to create a new market and associated token.
 - [`NetworkToken`](NetworkToken.md) The top level token for the entire network.
 - [`Market`](Market.md) The top level contract for a given data market.
   - [`MarketToken`](MarketToken.md): A mintable and burnable token. Each `Market` has its own `MarketToken`
