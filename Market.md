@@ -16,3 +16,5 @@ implementation, but differs in a number of critical ways:
 - Token holders in `Market` belong to one of two classes, data owner and investor.
 	- `Market.convert_to_investor()` converts a data owner to an investor.
   - `Market.get_total_number_investor_tokens()` returns the total number of MarketTokens held by investors. This method will be used by Market.divest() and Market.get_current_investor_price()
+  - `Market.set_access_cost(listing)`: Callable by the owner of a listing to set price for accessing the listing.
+  - `Market.get_access_cost(listing)`: Getter to view cost.
