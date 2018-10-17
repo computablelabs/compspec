@@ -23,9 +23,9 @@ This section provides a high level roadmap of the full protocol with links to mo
     - The [algorithmic price curve](#algorithmic-price-curve): Controls the price at which new investors may invest in market. Investor funds are deposited in reserve and new market token is minted accordingly.
     - [Investor and data owner class tokens](#investor-and-owner-class): Holders of market token are investor class or data owner class. Investor class tokens can't own any listings in the market, but have right to withdraw funds from reserve by burning their tokens. Data owner class tokens can own listings in market, but can't withdraw funds from reserve. (TODO: Can one address hold some data owner class and some investor class tokens? Potential attacks?)
   - Queries: Each `Market` supports queries against the data in this market. Queries are run on a `Backend` tied to the market and can be specified in a supported [query language](#query-language)
-    - [Query Pricing](QueryPricing.md): Users have to pay to run queries. This pricing structure has to reward the various stakeholders including listing owners (data), backend system owners (compute), and the market itself (investors)
-    - Query Rake [#33](https://github.com/computablelabs/goest/issues/33): What fraction of the payment goes to each stake holder?
-    - Data utilization records [#35](https://github.com/computablelabs/goest/issues/35): The market maintains track of how many times each listing has been requested by different queries.
+    - [Query Pricing](#query-pricing): Users have to pay to run queries. This pricing structure has to reward the various stakeholders including listing owners (data), backend system owners (compute), and the market itself (investors)
+    - [Query Rake](#query-rake): What fraction of the payment goes to each stake holder?
+    - [Data utilization](#data-utilization): The market maintains track of how many times each listing has been requested by different queries.
   - Off-chain data [#30](https://github.com/computablelabs/goest/issues/30): The data listed in the data market is held off-chain in a backend system. A council vote is used to set authorized backend systems for this market.
 - [Backend Systems](#backend-specification): Backend systems are responsible for securely storing data off-chain and allowing authorized users to query this data. https://github.com/computablelabs/crunky
   - [REST API](https://github.com/computablelabs/crunky/issues/1): The backend system must respond to a defined set of REST API commands to perform actions such as authentication, data addition and removal, and query handling 
@@ -69,6 +69,10 @@ implementation, but differs in a number of critical ways:
   - `Market.get_total_number_investor_tokens()` returns the total number of MarketTokens held by investors. This method will be used by Market.divest() and Market.get_current_investor_price()
   - `Market.set_access_cost(listing)`: Callable by the owner of a listing to set price for accessing the listing.
   - `Market.get_access_cost(listing)`: Getter to view cost.
+
+### Basic Structure of Market
+
+A market holds a set of listings. Each listing corresponds to an element of the `Market` which is held off-chain in some (possibly multiple) `Backend`. Newcomers to the market can call `Market.apply()` to apply to have their listing added to the market.
 
 ### Market Token
 
@@ -159,11 +163,28 @@ def get_total_cost():
   cost += Market.get_privacy_cost(query)
 ```
 
-### Epsilon Privacy Curve
+#### Epsilon Privacy Curve
 
 ![alt text][epsilon_price_curve]
 
 [epsilon_price_curve]: epsilon_privacy_curve.png "Epsilon Price Curve"
+
+The Epsilon price-curve is the tool used to price for the privacy lost in a
+given query. Here, epsilon is a technical parameter, adapted from the
+differential privacy literature, which is a measure of the information loss
+tied to a particular query. Each query has an associated epsilon.
+
+- `Backend::GET_EPSILON(QUERY_FILE)`: A call to the `Backend` via REST to get the epsilon privacy loss for running specified query.
+
+#### Query Rake
+
+For [query payments](#query-pricing) that come in , a portion of the query payment (the "rake") is paid into the reserve, a portion is paid to listing owners, and a portion is paid to the `Backend`. 
+
+- The owner of a listing is paid the access cost they set with `Market.set_access_cost(listing)`
+- The `Backend` system is paid the compute cost they set with `Market.set_query_compute_cost(query)`
+- The reserve is paid the privacy cost `Market.get_privacy_cost(query)`
+
+TODO: This scheme isn't finalized yet. Leave comments below and will update this top level specification.
 
 ## Backend Specification
 A `Backend` is a system that is responsible for storing data off-chain. Any `Market` contains a list of authorized `Backend`s which hold the raw data associated with the `Market`.
@@ -183,8 +204,15 @@ The `Backend` is responsible for serving a number of endpoints. These endpoints 
 - `Backend::REMOVE_DATAPOINT(auth_token, datapoint)`: Removes the given data point from the `Backend`.
 - `Backend::MARKETS_SUPPORTED()`: Returns the list of `Market`s which `Backend` supports.
 - `Backend::GET_COMPUTE_COST(QUERY_FILE)`: A call to the `Backend` via REST to get the cost for running specified query.
+- `Backend::GET_EPSILON(QUERY_FILE)`: A call to the `Backend` via REST to get the epsilon privacy loss for running specified query.
 
 ### Query Language
 Queries to a `Backend` node must be in a recognized query language.
 - SQL: A subset of SQL are allowed.
 - Python: Queries are allowed the be phrased in a restricted subset of python. This subset does not allow for network or filesystem access. In addition, the data tables are pre-loaded.
+
+### Data Utilization
+
+The market is responsible for maintaining record of which queries have accessed which datapoints. The backend system will report datapoints accessed by a given query to the market.
+
+- `Market.report_listings_accessed(query_i)`: Called by backend system after running a query. This information is stored on-chain. For reasons of gas, this may just be a simple count; each listing may maintain a simple count field which is incremented for each additional query that accesses it. (See also discussion in #32 around pricing)
