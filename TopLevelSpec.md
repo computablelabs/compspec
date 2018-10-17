@@ -157,9 +157,13 @@ def get_total_cost():
   cost += Market.get_query_compute_cost(query)
   # Privacy cost
   cost += Market.get_privacy_cost(query)
+```
 
 ### Epsilon Privacy Curve
-```
+
+![alt text][epsilon_price_curve]
+
+[epsilon_price_curve]: epsilon_privacy_curve.png "Epsilon Price Curve"
 
 ## Backend Specification
 A `Backend` is a system that is responsible for storing data off-chain. Any `Market` contains a list of authorized `Backend`s which hold the raw data associated with the `Market`.
