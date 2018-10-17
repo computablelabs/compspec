@@ -9,6 +9,8 @@ different `MarketTokens`. The global `Computable` network uses a
 
 ## Top Level Specification
 
+This section provides a high level roadmap of the full protocol with links to more detailed specifications in subsequent sections.
+
 - [`MarketFactory`](#market-factory): The top level entry point to create a new market and associated token.
 - [`NetworkToken`](#network-token) The top level token for the entire network.
 - [`Market`](#market) The top level contract for a given data market.
@@ -18,9 +20,9 @@ different `MarketTokens`. The global `Computable` network uses a
     - [All token holder vote](#all-token-holder): At present all holders of `MarketToken` vote on decisions.
     - [Council member vote](#council-member-vote): an ownership threshold `T_council` is imposed for franchise. The threshold will be set upon construction.
   - [Market Reserve](#market-reserve): The reserve is the "bank account" associated with the market. 
-    - The algorithmic price curve [#21](https://github.com/computablelabs/goest/issues/21): Controls the price at which new investors may invest in market. Investor funds are deposited in reserve and new market token is minted accordingly.
-    - Investor and data owner class tokens [#22](https://github.com/computablelabs/goest/issues/22): Holders of market token are investor class or data owner class. Investor class tokens can't own any listings in the market, but have right to withdraw funds from reserve by burning their tokens. Data owner class tokens can own listings in market, but can't withdraw funds from reserve. (TODO: Can one address hold some data owner class and some investor class tokens? Potential attacks?)
-  - Queries: Each `Market` supports queries against the data in this market. Queries are run on a `Backend` tied to the market and can be specified in a supported [query language](QueryLanguage.md)
+    - The [algorithmic price curve](#algorithmic-price-curve): Controls the price at which new investors may invest in market. Investor funds are deposited in reserve and new market token is minted accordingly.
+    - [Investor and data owner class tokens](#investor-and-owner-class): Holders of market token are investor class or data owner class. Investor class tokens can't own any listings in the market, but have right to withdraw funds from reserve by burning their tokens. Data owner class tokens can own listings in market, but can't withdraw funds from reserve. (TODO: Can one address hold some data owner class and some investor class tokens? Potential attacks?)
+  - Queries: Each `Market` supports queries against the data in this market. Queries are run on a `Backend` tied to the market and can be specified in a supported [query language](#query-language)
     - [Query Pricing](QueryPricing.md): Users have to pay to run queries. This pricing structure has to reward the various stakeholders including listing owners (data), backend system owners (compute), and the market itself (investors)
     - Query Rake [#33](https://github.com/computablelabs/goest/issues/33): What fraction of the payment goes to each stake holder?
     - Data utilization records [#35](https://github.com/computablelabs/goest/issues/35): The market maintains track of how many times each listing has been requested by different queries.
@@ -95,6 +97,20 @@ Market participants who hold more than `T_council` units of `MarketToken` are
 referred to as council members. Non-council members will not be allowed to vote
 on market actions in this scheme.
 
+### Investor and Owner Class
+
+The `Market` will have two classes of token holder, investors and data owners.
+Note the contrast with a `Registry` which tracks only listings and challenges, and
+doesn't track investors. A new data structure `mapping` will have to be added that tracks
+the class of each token holder in the data market. In addition, new token
+holders will have to be entered into this `mapping`. Methods that will interact
+with `mapping`:
+
+- `Market.invest()` will add a new investor class member (if not already added)
+- `Market.divest()` will check if given member is investor class and remvoe them if so
+- `Market.apply()` will add the given member to the data owner class (A data owner must be listed). (This method corresponds to `Registry.apply()`)
+- `Market.exit()` will remove a data owner if they are not present any further listings. (This method corresponds to `Registry.exit()`).
+
 ### Market Reserve
 Each Data market should hold a reserve of [`Network Token`](#network-token). Here's a brief summary of methods that interact with reserve
 
@@ -102,16 +118,69 @@ Each Data market should hold a reserve of [`Network Token`](#network-token). Her
 - `Market.divest(num_tokens)` allows investor class token holders to burn Market Token and withdraw Network Token from the reserve.
   - `divest()` first checks that its caller is an investor class token holder. If so, it computes the fractional ownership this investor has (`num_tokens/total_num_investor_tokens`). For example, if `num_tokens=5` and `total_num_investor_tokens=100`, this would be 5% fractional ownership. Then `num_tokens` market tokens are burned. Then the fractional part of the reserve belonging to this investor is transferred to the investor. For example, in the case above, 5% of the reserve would be transferred to the investor's address.
 
+### Algorithmic Price Curve
+The price curve dictates the conversion rate between Network Token and Market Token. Note this issue is a dependency for #14. Methods that interact with the price curve
+
+- `Market.get_current_investment_price()` reports the current NetworkToken/MarketToken conversion rate. Mathematically, the first version will be a linear function. That is, `Market.get_current_investment_price() = base_conversion_rate + conversion_slope * Market.get_reserve_size()` where `base_conversion_rate` and `conversion_slope` are parameters defined by the market creator. 
+- `Market.get_reserve_size()` returns the size of current market reserve in NetworkToken
+- `Market.invest()` consults `Market.get_current_investment_price()` to perform the exchange.
+
+Note that the linear form of the price curve above is not necessarily set in stone. It's likely that future iterations will allow users to choose alternate forms of the price curve.
+
+### Query Pricing
+The `Market` controls the payment layer for queries. Users who wish to query
+the data listed in a data market must first make a payment to `Market`. Any
+`Backend` associated with `Market` will check that payments have gone through
+before allowing for queries.
+
+- Listing owners can set an access cost for their listing (in network token). For listings which are owned by the market itself, a council vote is required to update this access cost.
+  - `Market.set_access_cost(listing)`: Callable by listing owner to set price.
+  - `Market.get_access_cost(listing)`: Getter to view cost.
+- To submit a query, the querier sends a [query file](#query-language) to `Backend`. A `Backend` can set its asking price to run computation for this query. Each listing will access some specified subset of listings in market.
+  - `Backend::GET_COMPUTE_COST(QUERY_FILE)`: A call to the `Backend` via REST to get the cost for running this query.
+  - `Market.set_query_compute_cost(query_i, backend_j, cost)`: `query_i` is one of supported queries. `backend_j` is some approved backend. `cost` is in network token.
+  - `Market.get_query_compute_cost(query_i)`: Returns cheapest cost available (TODO: More refined scheme?)
+  - `Market.report_listings_accessed(query_i)`: Reports the listings which the given query will access. (TODO: How does this change as new listings are added?)
+
+- Each query causes some loss in data privacy. A charge is leveled to account for this cost. This charge may be adaptive and depend on history of past queries by given user. This loss in price is governed by the [epsilon price curve](EpsilonPriceCurve.md).
+  - `Market.get_privacy_cost(query_i)`: Cost will depend on user invoking and past queries they've run.
+- The total cost for running a query is the sum of all these terms. Here's some python-esque pseudo-code
+```
+def get_total_cost():
+  cost = 0
+  query = Query to run
+  listings_accessed = Market.listings_accessed(query)
+  # Data access cost
+  for listing in listings_accessed:
+    cost += Market.get_access_cost(listing)
+  # Query compute cost (assume one backend)
+  cost += Market.get_query_compute_cost(query)
+  # Privacy cost
+  cost += Market.get_privacy_cost(query)
+
+### Epsilon Privacy Curve
+```
+
 ## Backend Specification
 A `Backend` is a system that is responsible for storing data off-chain. Any `Market` contains a list of authorized `Backend`s which hold the raw data associated with the `Market`.
 
 Broadly speaking, `Backend`s are either trusted or untrusted. A trusted `Backend` is allowed to view the unencrypted data that belongs to a `Market`. On the other hand, an untrusted `Backend` is never allowed to view unencrypted data belonging to the data market.
 
-A `Backend` is responsible for serving queries against a given `Market`. Each query is sent as a file in an acceptable [query language](QueryLanguage.md). The `Backend` is responsible for serving a number of endpoints. These endpoints are specified below. The syntax `Backend::ENDPOINT(input)` is used to specify that the `Backend` supports an `ENDPOINt` which expects `input`.
+A `Backend` is responsible for serving queries against a given `Market`. Each query is sent as a file in an acceptable [query language](QueryLanguage.md). 
+
+### REST API
+
+The `Backend` is responsible for serving a number of endpoints. These endpoints are specified below. The syntax `Backend::ENDPOINT(input)` is used to specify that the `Backend` supports an `ENDPOINt` which expects `input`.
 
 - `Backend::AUTHENTICATE(user_credentials)`: Authenticates the given user. Returns an authorization token.
 - `Backend::GET_SCHEMA(market)`: Returns the schema for the given market.
 - `Backend::RUN_QUERY(query_file)`: Runs the given query. The query is sent in a query file.
 - `Backend::ADD_DATAPOINT(auth_token, datapoint)`: Adds the given data point to the `Backend` along with necessary authorization.
 - `Backend::REMOVE_DATAPOINT(auth_token, datapoint)`: Removes the given data point from the `Backend`.
-- `Backend::MARKETS_SUPPORTED()`: Returns the list of `Market`s which this backend supports.
+- `Backend::MARKETS_SUPPORTED()`: Returns the list of `Market`s which `Backend` supports.
+- `Backend::GET_COMPUTE_COST(QUERY_FILE)`: A call to the `Backend` via REST to get the cost for running specified query.
+
+### Query Language
+Queries to a `Backend` node must be in a recognized query language.
+- SQL: A subset of SQL are allowed.
+- Python: Queries are allowed the be phrased in a restricted subset of python. This subset does not allow for network or filesystem access. In addition, the data tables are pre-loaded.
