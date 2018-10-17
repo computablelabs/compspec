@@ -7,6 +7,11 @@ governed by its associated `MarketToken`. Note that different `Market`s have
 different `MarketTokens`. The global `Computable` network uses a
 `NetworkToken`.
 
+![alt text][protocol_flowchart]
+
+[protocol_flowchart]: Protocol_Flowchart.png "Protocol Flowchart"
+
+
 ## Top Level Specification
 
 This section provides a high level roadmap of the full protocol with links to more detailed specifications in subsequent sections.
