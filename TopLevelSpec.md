@@ -10,14 +10,14 @@ different `MarketTokens`. The global `Computable` network uses a
 ## Top Level Specification
 
 - [`MarketFactory`](#market-factory): The top level entry point to create a new market and associated token.
-- [`NetworkToken`](NetworkToken.md) The top level token for the entire network.
+- [`NetworkToken`](#network-token) The top level token for the entire network.
 - [`Market`](#market) The top level contract for a given data market.
-  - [`MarketToken`](MarketToken.md): A mintable and burnable token. Each `Market` has its own `MarketToken`
+  - [`MarketToken`](#market-token): A mintable and burnable token. Each `Market` has its own `MarketToken`
     - Minting and Burning mechanics: Market tokens are minted when either new data is added, existing data is queried, or new investment is added to reserve. Market tokens are burned when data is removed or investment is withdrawn.
   - Voting: Critical decisions within a market are performed by vote of interested stake holders. These include validation of new data, challenges to fraudulent data and changes to market structure.
-    - All token holder vote [#13](https://github.com/computablelabs/goest/issues/13): At present all holders of `MarketToken` vote on decisions.
-    - Council member vote [#28](https://github.com/computablelabs/goest/issues/28): In v3, an ownership threshold `T_council` will be imposed for franchise. The threshold will be set upon construction.
-  - The Reserve [#20](https://github.com/computablelabs/goest/issues/20): The reserve is the "bank account" associated with the market. 
+    - [All token holder vote](#all-token-holder): At present all holders of `MarketToken` vote on decisions.
+    - [Council member vote](#council-member-vote): an ownership threshold `T_council` is imposed for franchise. The threshold will be set upon construction.
+  - [Market Reserve](#market-reserve): The reserve is the "bank account" associated with the market. 
     - The algorithmic price curve [#21](https://github.com/computablelabs/goest/issues/21): Controls the price at which new investors may invest in market. Investor funds are deposited in reserve and new market token is minted accordingly.
     - Investor and data owner class tokens [#22](https://github.com/computablelabs/goest/issues/22): Holders of market token are investor class or data owner class. Investor class tokens can't own any listings in the market, but have right to withdraw funds from reserve by burning their tokens. Data owner class tokens can own listings in market, but can't withdraw funds from reserve. (TODO: Can one address hold some data owner class and some investor class tokens? Potential attacks?)
   - Queries: Each `Market` supports queries against the data in this market. Queries are run on a `Backend` tied to the market and can be specified in a supported [query language](QueryLanguage.md)
@@ -39,6 +39,12 @@ Each data market has an associated token with it. `create_data_market()` should 
 - `T_submit`: Number of tokens minted when a new listing is listed #31
 - `MarketFactory.get_list_of_data_markets()`: Returns a list of available data markets.
 
+## Network Token
+The `NetworkToken` is the central token that powers the Computable network. It
+is used by the [MarketFactory](MarketFactory.md) to perform operations and is
+used to pay for queries executed by a `Backend`. The `NetworkToken` is implemented
+by a `StandardToken` (ERC) for now. 
+
 ## Market
 
 The `Market` is the central contract that governs the behavior of a data
@@ -47,7 +53,7 @@ implementation, but differs in a number of critical ways:
 
 - The `Market` has an associated `MarketToken`. This `MarketToken` is created upon construction of the market. This token is minted and burned by various `Market` operations.
   - The [`MarketToken`](MarketToken.md) is a mintable and burnable ERC20 token.
-- The `Market` holds a "reserve" to the Market. This reserve holds `NetworkToken` that is paid in by investors who want to take positions in market and will pay out to people who want to exit market.
+- The `Market` holds a [reserve](#market-reserve) to the Market. This reserve holds `NetworkToken` that is paid in by investors who want to take positions in market and will pay out to people who want to exit market.
   - `Market.invest(amount)` is a new method that allows an investor to enter the market.
   - `Market.divest()` allows any token holder to exit the market
 - The market holds an "algorithmic price curve" that provides an automatic conversion rate from `NetworkToken` to `MarketToken`. The price curve is used by `Market.invest()` to determine the current conversion rate.
@@ -61,6 +67,40 @@ implementation, but differs in a number of critical ways:
   - `Market.get_total_number_investor_tokens()` returns the total number of MarketTokens held by investors. This method will be used by Market.divest() and Market.get_current_investor_price()
   - `Market.set_access_cost(listing)`: Callable by the owner of a listing to set price for accessing the listing.
   - `Market.get_access_cost(listing)`: Getter to view cost.
+
+### Market Token
+
+`MarketToken` is a mintable and burnable ERC20 token. The `MarketToken` is tied to a particular `Market` and is created when the `Market` is created. Note the contrast with token curated registries, which don't hold a mechanism for minting and burning their associated token.
+
+- Minting: Minting happens in one of three ways.
+  - Minting happens when new listings are added to the market. These listings have to pass through the validation process and be whitelisted before minting occurs.
+    - `listedReward` is the number of new `MarketTokens` that are created upon whitelisting.
+  - Minting happens when an investor enters the market through calling `Market.invest()`. This rate is set by the algorithmic price curve.
+  - Minting happens when the backend reports that a listing has been queried. This results in creation of `T_util` new tokens which are awarded to listing owner (which may be the market itself).
+- Burning: Burning happens in one of two ways. 
+  - If a listing is removed from the market, its associated tokens should be burned. This happens when the listing owner removes the listing or when a successful challenge forces removal of the listing.
+  - If an investor class token holder divests from the market, their divested tokens are burned. The origin of the tokens being burned does not matter.
+
+### Voting Structure
+
+Decisions in the market are made by token holder vote.
+
+#### All Token Holder
+At present, decisions are made by vote of all token holders.
+
+#### Council Member Vote
+In near future, a threshold `T_council` will be imposed, and only token holders
+who hold more than `T_council` units of `MarketToken`will be allowed to vote.
+Market participants who hold more than `T_council` units of `MarketToken` are
+referred to as council members. Non-council members will not be allowed to vote
+on market actions in this scheme.
+
+### Market Reserve
+Each Data market should hold a reserve of [`Network Token`](#network-token). Here's a brief summary of methods that interact with reserve
+
+- `Market.invest()` adds investor Network Token to reserve and mints and returns Market Token to investor. Pricing dictated by price curve.
+- `Market.divest(num_tokens)` allows investor class token holders to burn Market Token and withdraw Network Token from the reserve.
+  - `divest()` first checks that its caller is an investor class token holder. If so, it computes the fractional ownership this investor has (`num_tokens/total_num_investor_tokens`). For example, if `num_tokens=5` and `total_num_investor_tokens=100`, this would be 5% fractional ownership. Then `num_tokens` market tokens are burned. Then the fractional part of the reserve belonging to this investor is transferred to the investor. For example, in the case above, 5% of the reserve would be transferred to the investor's address.
 
 ## Backend Specification
 A `Backend` is a system that is responsible for storing data off-chain. Any `Market` contains a list of authorized `Backend`s which hold the raw data associated with the `Market`.
