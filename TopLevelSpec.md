@@ -229,6 +229,10 @@ Queries to a `Backend` node must be in a recognized query language.
 - SQL: A subset of SQL are allowed.
 - Python: Queries are allowed the be phrased in a restricted subset of python. This subset does not allow for network or filesystem access. In addition, the data tables are pre-loaded.
 
+![alt text][multi_market_join]
+
+[multi_market_join]: Multi_Market_Join.png "Multi Market Join"
+
 ### Data Utilization
 
 The market is responsible for maintaining record of which queries have accessed which datapoints. The backend system will report datapoints accessed by a given query to the market.
