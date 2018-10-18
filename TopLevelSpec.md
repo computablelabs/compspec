@@ -31,10 +31,10 @@ This section provides a high level roadmap of the full protocol with links to mo
     - [Query Pricing](#query-pricing): Users have to pay to run queries. This pricing structure has to reward the various stakeholders including listing owners (data), backend system owners (compute), and the market itself (investors)
     - [Query Rake](#query-rake): What fraction of the payment goes to each stake holder?
     - [Data utilization](#data-utilization): The market maintains track of how many times each listing has been requested by different queries.
-  - Off-chain data [#30](https://github.com/computablelabs/goest/issues/30): The data listed in the data market is held off-chain in a backend system. A council vote is used to set authorized backend systems for this market.
-- [Backend Systems](#backend-specification): Backend systems are responsible for securely storing data off-chain and allowing authorized users to query this data. https://github.com/computablelabs/crunky
-  - [REST API](https://github.com/computablelabs/crunky/issues/1): The backend system must respond to a defined set of REST API commands to perform actions such as authentication, data addition and removal, and query handling 
-  - [Query specification](https://github.com/computablelabs/crunky/issues/2): The backend system must accept a structured set of queries (TODO: More details and work needed here)
+  - [Authorized Backends](#authorized-backends): The data listed in the data market is held off-chain in a backend system. A council vote is used to set authorized backend systems for this market.
+- [Backend Systems](#backend-specification): Backend systems are responsible for securely storing data off-chain and allowing authorized users to query this data. 
+  - [REST API](#rest-api): The backend system must respond to a defined set of REST API commands to perform actions such as authentication, data addition and removal, and query handling 
+  - [Query specification](#query-language): The backend system must accept a structured set of queries (TODO: More details and work needed here)
 
 ## Market Factory
 The `MarketFactory` is responsible for creaking new data markets and will store a list of available data markets.
@@ -191,6 +191,14 @@ For [query payments](#query-pricing) that come in , a portion of the query payme
 
 TODO: This scheme isn't finalized yet. Leave comments below and will update this top level specification.
 
+### Authorized Backends
+Each data market will maintain a list of authorized backend systems. A full vote of the council (#28) will be needed to add, remove, or authorize backends.
+
+- `Market.get_backend_system()`: Returns list of authorized backend systems for the market
+- `Market.add_backend_system(id)`: This must be authorized by a vote of the council.
+- `Market.remove_backend_system(id)`: This must be authorized by a vote of the council
+
+
 ## Backend Specification
 A `Backend` is a system that is responsible for storing data off-chain. Any `Market` contains a list of authorized `Backend`s which hold the raw data associated with the `Market`.
 
@@ -212,6 +220,11 @@ The `Backend` is responsible for serving a number of endpoints. These endpoints 
 - `Backend::GET_EPSILON(QUERY_FILE)`: A call to the `Backend` via REST to get the epsilon privacy loss for running specified query.
 
 ### Query Language
+
+![alt text][query_flow]
+
+[query_flow]: QueryFlow.png "Query Flow"
+
 Queries to a `Backend` node must be in a recognized query language.
 - SQL: A subset of SQL are allowed.
 - Python: Queries are allowed the be phrased in a restricted subset of python. This subset does not allow for network or filesystem access. In addition, the data tables are pre-loaded.
