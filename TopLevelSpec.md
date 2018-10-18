@@ -154,11 +154,13 @@ Each Data market should hold a reserve of [`Network Token`](#network-token). Her
   - `divest()` first checks that its caller is an investor class token holder. If so, it computes the fractional ownership this investor has (`num_tokens/total_num_investor_tokens`). For example, if `num_tokens=5` and `total_num_investor_tokens=100`, this would be 5% fractional ownership. Then `num_tokens` market tokens are burned. Then the fractional part of the reserve belonging to this investor is transferred to the investor. For example, in the case above, 5% of the reserve would be transferred to the investor's address.
 
 #### Algorithmic Price Curve
-The price curve dictates the conversion rate between Network Token and Market Token. Note this issue is a dependency for #14. Methods that interact with the price curve
+The price curve dictates the conversion rate between `NetworkToken` and `MarketToken` for new investors.
 
 ![alt text][algorithmic_price_curve]
 
 [algorithmic_price_curve]: Algorithmic_Price_Curve.png "Protocol Flowchart"
+
+Methods that interact with the price curve
 
 
 - `Market.get_current_investment_price()` reports the current `NetworkToken`/`MarketToken` conversion rate. Mathematically, the first version will be a linear function. That is, `Market.get_current_investment_price() = base_conversion_rate + conversion_slope * Market.get_reserve_size()` where `base_conversion_rate` and `conversion_slope` are parameters defined by the market creator. 
@@ -224,7 +226,7 @@ For [query payments](#query-pricing) that come in , a portion of the query payme
 - The `Backend` system is paid the compute cost they set with `Market.set_query_compute_cost(query)`
 - The reserve is paid the privacy cost `Market.get_privacy_cost(query)`
 
-TODO: This scheme isn't finalized yet. Leave comments below and will update this top level specification.
+TODO: This scheme isn't finalized yet; will likely change.
 
 #### Authorized Backends
 Each data market will maintain a list of authorized backend systems. A full vote of the council (#28) will be needed to add, remove, or authorize backends.
