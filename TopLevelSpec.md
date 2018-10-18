@@ -1,11 +1,33 @@
 # The Computable Protocol
 
-The Computable protocol creates a decentralized data market. Conceptually, the
-`Computable` network contains many `Market` instances. Each `Market` is a data market
-that controls access to a single dataset. The dynamics of a given `Market` are
-governed by its associated `MarketToken`. Note that different `Market`instances have
-different `MarketTokens`. The global `Computable` network uses a
-`NetworkToken` to coordinate different `Market` instances.
+The Computable protocol creates a decentralized data market.  The global
+network is made up of many individual `Market` instances. Each `Market`
+conceptually holds a single dataset and is created and controlled by the owners
+of the dataset. These owners could correspond to existing organizations, or
+could be a decentralized set of interested parties. The coordination and access
+control for these individual `Market` instances is coordinated by a set of
+smart contracts. Each `Market` allows for a set of associated financial
+operations. These operations allow interested parties to invest in a particular
+`Market` or pay for the ability to query the data associated with that
+`Market`. To facilitate these transactions, each `Market` has a unique
+associated `MarketToken`. It is also possible for transactions to involve
+multiple `Market` instances. For these purposes, the Computable network has a
+global `NetworkToken` which mediates cross-`Market` interactions.
+
+Everything described above is implemented in a set of smart contracts which
+currently live on the Ethereum blockchain. However, it's important to note that
+data itself can't live on smart contracts. For one, datasets can be very large
+(gigabytes, terabytes, petabytes, exabytes or more). It would be infeasible to
+store such large collections of data on existing smart contract systems. For
+this reason, data lives "off-chain" in `Backend` systems. A `Backend` is
+software system that is responsible for storing data and coordinating with
+on-chain permissions layers. Note that many possible `Backend` implementations
+are possible by different vendors or groups, so long as each implementation
+responds to the API specified within this document. 
+
+This document is a living, versioned specification. As understanding of the
+core aspects of the Computable protocol grows, this document will be updated
+accordingly.
 
 ![alt text][protocol_flowchart]
 
@@ -16,25 +38,27 @@ different `MarketTokens`. The global `Computable` network uses a
 
 This section provides a high level roadmap of the full protocol with links to more detailed specifications in subsequent sections.
 
-- [`MarketFactory`](#market-factory): The top level entry point to create a new market and associated token.
-- [`NetworkToken`](#network-token) The top level token for the entire network.
-- [`Market`](#market) The top level contract for a given data market.
-  - [`MarketToken`](#market-token): A mintable and burnable token. Each `Market` has its own `MarketToken`
-    - Minting and Burning mechanics: Market tokens are minted when either new data is added, existing data is queried, or new investment is added to reserve. Market tokens are burned when data is removed or investment is withdrawn.
-  - [Voting](#voting): Critical decisions within a market are performed by vote of interested stake holders. These include validation of new data, challenges to fraudulent data and changes to market structure.
-    - [All token holder vote](#all-token-holder): At present all holders of `MarketToken` vote on decisions.
-    - [Council member vote](#council-member-vote): an ownership threshold `T_council` is imposed for franchise. The threshold will be set upon construction.
-  - [Market Reserve](#market-reserve): The reserve is the "bank account" associated with a given `Market`. 
-    - The [algorithmic price curve](#algorithmic-price-curve): Controls the price at which new investors may invest in market. Investor funds are deposited in reserve and new market token is minted accordingly.
-    - [Investor and data owner class tokens](#investor-and-owner-class): Holders of market token are investor class or data owner class. Investor class tokens can't own any listings in the market, but have right to withdraw funds from reserve by burning their tokens. Data owner class tokens can own listings in market, but can't withdraw funds from reserve. 
-  - [Queries](#queries): Each `Market` supports queries against the data in this market. Queries are run on a `Backend` tied to the market and can be specified in a supported [query language](#query-language)
-    - [Query Pricing](#query-pricing): Users have to pay to run queries. This pricing structure has to reward the various stakeholders including listing owners (data), backend system owners (compute), and the market itself (investors)
-    - [Query Rake](#query-rake): What fraction of the payment goes to each stake holder?
-    - [Data utilization](#data-utilization): The market maintains track of how many times each listing has been requested by different queries.
-  - [Authorized Backends](#authorized-backends): The data listed in the data market is held off-chain in a `Backend`. A council vote is used to set authorized backend systems for this market.
-- [Backend Systems](#backend-specification): A `Backend` is responsible for securely storing data off-chain and allowing authorized users to query this data. Note that a `Backend` may serve multiple markets, and that a `Market` may have multiple backends. The `Backend` is an off-chain system that responds to the API specified in this document, and which understands how to interact with the on-chain Computable contracts.
-  - [REST API](#rest-api): The `Backend`must respond to a defined set of REST API commands to perform actions such as authentication, data addition and removal, and query handling 
-  - [Query Language](#query-language): Queries must be provided to `Backend` in query files that are written in a supported query language.
+- On-chain smart contracts:
+	- [`MarketFactory`](#market-factory): The top level entry point to create a new market and associated token.
+	- [`NetworkToken`](#network-token) The top level token for the entire network.
+	- [`Market`](#market) The top level contract for a given data market.
+		- [`MarketToken`](#market-token): A mintable and burnable token. Each `Market` has its own `MarketToken`
+			- Minting and Burning mechanics: Market tokens are minted when either new data is added, existing data is queried, or new investment is added to reserve. Market tokens are burned when data is removed or investment is withdrawn.
+		- [Voting](#voting): Critical decisions within a market are performed by vote of interested stake holders. These include validation of new data, challenges to fraudulent data and changes to market structure.
+			- [All token holder vote](#all-token-holder): At present all holders of `MarketToken` vote on decisions.
+			- [Council member vote](#council-member-vote): an ownership threshold `T_council` is imposed for franchise. The threshold will be set upon construction.
+		- [Market Reserve](#market-reserve): The reserve is the "bank account" associated with a given `Market`. 
+			- The [algorithmic price curve](#algorithmic-price-curve): Controls the price at which new investors may invest in market. Investor funds are deposited in reserve and new market token is minted accordingly.
+			- [Investor and data owner class tokens](#investor-and-owner-class): Holders of market token are investor class or data owner class. Investor class tokens can't own any listings in the market, but have right to withdraw funds from reserve by burning their tokens. Data owner class tokens can own listings in market, but can't withdraw funds from reserve. 
+		- [Queries](#queries): Each `Market` supports queries against the data in this market. Queries are run on a `Backend` tied to the market and can be specified in a supported [query language](#query-language)
+			- [Query Pricing](#query-pricing): Users have to pay to run queries. This pricing structure has to reward the various stakeholders including listing owners (data), backend system owners (compute), and the market itself (investors)
+			- [Query Rake](#query-rake): What fraction of the payment goes to each stake holder?
+			- [Data utilization](#data-utilization): The market maintains track of how many times each listing has been requested by different queries.
+		- [Authorized Backends](#authorized-backends): The data listed in the data market is held off-chain in a `Backend`. A council vote is used to set authorized backend systems for this market.
+- Off-chain storage and compute systems
+	- [Backend Systems](#backend-specification): A `Backend` is responsible for securely storing data off-chain and allowing authorized users to query this data. Note that a `Backend` may serve multiple markets, and that a `Market` may have multiple backends. The `Backend` is an off-chain system that responds to the API specified in this document, and which understands how to interact with the on-chain Computable contracts.
+		- [REST API](#rest-api): The `Backend`must respond to a defined set of REST API commands to perform actions such as authentication, data addition and removal, and query handling 
+		- [Query Language](#query-language): Queries must be provided to `Backend` in query files that are written in a supported query language.
 
 ## Market Factory
 The `MarketFactory` is responsible for creaking new data markets and will store a list of available data markets.
