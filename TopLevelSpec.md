@@ -21,7 +21,7 @@ This section provides a high level roadmap of the full protocol with links to mo
 - [`Market`](#market) The top level contract for a given data market.
   - [`MarketToken`](#market-token): A mintable and burnable token. Each `Market` has its own `MarketToken`
     - Minting and Burning mechanics: Market tokens are minted when either new data is added, existing data is queried, or new investment is added to reserve. Market tokens are burned when data is removed or investment is withdrawn.
-  - Voting: Critical decisions within a market are performed by vote of interested stake holders. These include validation of new data, challenges to fraudulent data and changes to market structure.
+  - [Voting](#voting): Critical decisions within a market are performed by vote of interested stake holders. These include validation of new data, challenges to fraudulent data and changes to market structure.
     - [All token holder vote](#all-token-holder): At present all holders of `MarketToken` vote on decisions.
     - [Council member vote](#council-member-vote): an ownership threshold `T_council` is imposed for franchise. The threshold will be set upon construction.
   - [Market Reserve](#market-reserve): The reserve is the "bank account" associated with a given `Market`. 
@@ -31,11 +31,10 @@ This section provides a high level roadmap of the full protocol with links to mo
     - [Query Pricing](#query-pricing): Users have to pay to run queries. This pricing structure has to reward the various stakeholders including listing owners (data), backend system owners (compute), and the market itself (investors)
     - [Query Rake](#query-rake): What fraction of the payment goes to each stake holder?
     - [Data utilization](#data-utilization): The market maintains track of how many times each listing has been requested by different queries.
-		- [Query Language](#query-language)
-  - [Authorized Backends](#authorized-backends): The data listed in the data market is held off-chain in a backend system. A council vote is used to set authorized backend systems for this market.
-- [Backend Systems](#backend-specification): Backend systems are responsible for securely storing data off-chain and allowing authorized users to query this data. 
-  - [REST API](#rest-api): The backend system must respond to a defined set of REST API commands to perform actions such as authentication, data addition and removal, and query handling 
-  - [Query specification](#query-language): The backend system must accept a structured set of queries (TODO: More details and work needed here)
+  - [Authorized Backends](#authorized-backends): The data listed in the data market is held off-chain in a `Backend`. A council vote is used to set authorized backend systems for this market.
+- [Backend Systems](#backend-specification): A `Backend` is responsible for securely storing data off-chain and allowing authorized users to query this data. Note that a `Backend` may serve multiple markets, and that a `Market` may have multiple backends. The `Backend` is an off-chain system that responds to the API specified in this document, and which understands how to interact with the on-chain Computable contracts.
+  - [REST API](#rest-api): The `Backend`must respond to a defined set of REST API commands to perform actions such as authentication, data addition and removal, and query handling 
+  - [Query Language](#query-language): Queries must be provided to `Backend` in query files that are written in a supported query language.
 
 ## Market Factory
 The `MarketFactory` is responsible for creaking new data markets and will store a list of available data markets.
@@ -51,7 +50,7 @@ Each data market has an associated token with it. `create_data_market()` should 
 The `NetworkToken` is the central token that powers the Computable network. It
 is used by the [MarketFactory](MarketFactory.md) to perform operations and is
 used to pay for queries executed by a `Backend`. The `NetworkToken` is implemented
-by a `StandardToken` (ERC) for now. 
+by a `StandardToken` (ERC20) for now. 
 
 ## Market
 
@@ -78,7 +77,7 @@ implementation, but differs in a number of critical ways:
 
 ### Basic Structure of Market
 
-A market holds a set of listings. Each listing corresponds to an element of the `Market` which is held off-chain in some (possibly multiple) `Backend`. Newcomers to the market can call `Market.apply()` to apply to have their listing added to the market.
+A market holds a set of listings. Each listing corresponds to an element of the `Market` which is held off-chain in some (possibly multiple) `Backend` systems. Newcomers to the market can call `Market.apply()` to apply to have their listing added to the market.
 
 ### Market Token
 
@@ -93,9 +92,9 @@ A market holds a set of listings. Each listing corresponds to an element of the 
   - If a listing is removed from the market, its associated tokens should be burned. This happens when the listing owner removes the listing or when a successful challenge forces removal of the listing.
   - If an investor class token holder divests from the market, their divested tokens are burned. The origin of the tokens being burned does not matter.
 
-### Voting Structure
+### Voting 
 
-Decisions in the market are made by token holder vote.
+Major decisions in the market are made by token holder vote. These decisions include which new listings should be added to the `Market`, which challenged listings should be removed, and more.
 
 #### All Token Holder
 At present, decisions are made by vote of all token holders.
@@ -131,8 +130,13 @@ Each Data market should hold a reserve of [`Network Token`](#network-token). Her
 ### Algorithmic Price Curve
 The price curve dictates the conversion rate between Network Token and Market Token. Note this issue is a dependency for #14. Methods that interact with the price curve
 
-- `Market.get_current_investment_price()` reports the current NetworkToken/MarketToken conversion rate. Mathematically, the first version will be a linear function. That is, `Market.get_current_investment_price() = base_conversion_rate + conversion_slope * Market.get_reserve_size()` where `base_conversion_rate` and `conversion_slope` are parameters defined by the market creator. 
-- `Market.get_reserve_size()` returns the size of current market reserve in NetworkToken
+![alt text][algorithmic_price_curve]
+
+[algorithmic_price_curve]: Algorithmic_Price_Curve.png "Protocol Flowchart"
+
+
+- `Market.get_current_investment_price()` reports the current `NetworkToken`/`MarketToken` conversion rate. Mathematically, the first version will be a linear function. That is, `Market.get_current_investment_price() = base_conversion_rate + conversion_slope * Market.get_reserve_size()` where `base_conversion_rate` and `conversion_slope` are parameters defined by the market creator. 
+- `Market.get_reserve_size()` returns the size of current market reserve in `NetworkToken`
 - `Market.invest()` consults `Market.get_current_investment_price()` to perform the exchange.
 
 Note that the linear form of the price curve above is not necessarily set in stone. It's likely that future iterations will allow users to choose alternate forms of the price curve.
