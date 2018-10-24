@@ -253,7 +253,24 @@ vote of the council (#28) will be needed to add, remove, or authorize `Backend` 
 
 ## Off Chain Systems [IN-PROGRESS]
 
-The off-chain portions of the Computable protocol are responsible for storing, querying and computing upon data. All off-chain components are called `Backend` systems, but there are multiple types of backends. A trusted `Backend` is operated by an entity that is trusted by the creator of a particular data market. The operator of this trusted `Backend` is 
+The off-chain portions of the Computable protocol are responsible for storing,
+querying and computing upon data. All off-chain components are called `Backend`
+systems, but there are multiple types of backends. A trusted `Backend` is
+operated by an entity that is trusted by the creator of a particular data
+market. The operator of this trusted `Backend` is authorized by the data
+market's council with this authority. By contrast, an untrusted `Backend` is
+not trusted by the data market council and is *not* authorized to view
+unencrypted data on the network. The untrusted `Backend`operator must use more
+advanced techniques such as cryptography or trusted hardware enclaves to
+perform computation since they may never see unencrypted data.
+
+Note that the implementation of a `Backend` is not specified by this document.
+A `Backend` is any system that responds to the API endpoints defined in this
+section. Notably, this means a `Backend` may be closed source or proprietary.
+In addition, a `Backend` may have arbitrary hardware backing it. It could run
+on a single laptop or could be a cluster of servers on the cloud. It could even
+use novel proprietary hardware such as GPUs, TPUs or ASICs to power needed
+workloads. These choices are left to the operator of the `Backend`.
 
 ### Backend Specification [IN-PROGRESS]
 A `Backend` is a system that is responsible for storing data off-chain. Any `Market` contains a list of authorized `Backend`s which hold the raw data associated with the `Market`.
