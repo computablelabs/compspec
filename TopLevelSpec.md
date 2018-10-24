@@ -62,14 +62,25 @@ This section provides a high level roadmap of the full protocol with links to mo
 
 ## On Chain Components
 
+The on-chain components of the protocol control economics and access control.
+If a user wants to gain access to a particular dataset (in a particular data
+market), or if a user wants to invest in a particular data market, they have to
+seek on-chain authorization. If a user wants to pay for queries, this is also
+done off-chain. The advantage of this structure is that payments and
+authorization can be handled securely by secure on-chain contracts.
+
+At present, on-chain contracts are implemented as Ethereum Solidity contracts.
+This does mean that the transaction/authorization speed is limited by the
+current transaction speed on Ethereum.
+
 ### Market Factory [TO-BE-IMPLEMENTED]
-The `MarketFactory` is responsible for creaking new data markets and will store a list of available data markets.
+The `MarketFactory` contract is responsible for creaking new data markets and will store a list of available data markets.
 
 - `MarketFactory.create_data_market()`: Constructs and launches a new data market. This is the only public way to create a new data market. There are a number of arguments needed in this constructor.
 Each data market has an associated token with it. `create_data_market()` should pass in necessary information to initialize this token. It might make sense to pass in a list of `[address_1: allocation_1,...,address_n:allocation_n]` of initial token allocations to `create_data_market()`. The Market token would be initialized with this initial spread of market token.
-- `T_council`: Council membership threshold fraction #28
-- `T_util`: Number of tokens minted when a listing is queried #31
-- `T_submit`: Number of tokens minted when a new listing is listed #31
+- `MarketFactory.T_council`: Council membership threshold fraction #28
+- `MarketFactory.T_util`: Number of tokens minted when a listing is queried #31
+- `MarketFactory.T_submit`: Number of tokens minted when a new listing is listed #31
 - `MarketFactory.get_list_of_data_markets()`: Returns a list of available data markets.
 
 ### Network Token [IMPLEMENTED]
@@ -103,7 +114,10 @@ implementation, but differs in a number of critical ways:
 
 #### Basic Structure of Market [IMPLEMENTED]
 
-A market holds a set of listings. Each listing corresponds to an element of the `Market` which is held off-chain in some (possibly multiple) `Backend` systems. Newcomers to the market can call `Market.apply()` to apply to have their listing added to the market.
+A market holds a set of listings. Each listing corresponds to an element of the
+`Market` which is held off-chain in some (possibly multiple) `Backend` systems.
+Newcomers to the market can call `Market.apply()` to apply to have their
+listing added to the market.
 
 #### Market Token [IMPLEMENTED]
 
@@ -216,11 +230,12 @@ given query. Here, epsilon is a technical parameter, adapted from the
 differential privacy literature, which is a measure of the information loss
 tied to a particular query. Each query has an associated epsilon.
 
+- `Market.get_current_privacy_price(user)` returns the current price for purchasing additional privacy budget from the epsilon price curve. This depends on the current privacy epsilon used by the provided user.
 - `Backend::GET_EPSILON(QUERY_FILE)`: A call to the `Backend` via REST to get the epsilon privacy loss for running specified query.
 
 ##### Query Rake [TO-BE-IMPLEMENTED]
 
-For [query payments](#query-pricing) that come in , a portion of the query payment (the "rake") is paid into the reserve, a portion is paid to listing owners, and a portion is paid to the `Backend`. 
+For [query payments](#query-pricing) that come in, a portion of the query payment (the "rake") is paid into the reserve, a portion is paid to listing owners, and a portion is paid to the `Backend`. 
 
 - The owner of a listing is paid the access cost they set with `Market.set_access_cost(listing)`
 - The `Backend` system is paid the compute cost they set with `Market.set_query_compute_cost(query)`
@@ -229,13 +244,16 @@ For [query payments](#query-pricing) that come in , a portion of the query payme
 TODO: This scheme isn't finalized yet; will likely change.
 
 #### Authorized Backends [TO-BE-IMPLEMENTED]
-Each data market will maintain a list of authorized backend systems. A full vote of the council (#28) will be needed to add, remove, or authorize backends.
+Each data market will maintain a list of authorized `Backend` systems. A full
+vote of the council (#28) will be needed to add, remove, or authorize `Backend` systems.
 
 - `Market.get_backend_system()`: Returns list of authorized backend systems for the market
 - `Market.add_backend_system(id)`: This must be authorized by a vote of the council.
 - `Market.remove_backend_system(id)`: This must be authorized by a vote of the council
 
 ## Off Chain Systems [IN-PROGRESS]
+
+The off-chain portions of the Computable protocol are responsible for storing, querying and computing upon data. All off-chain components are called `Backend` systems, but there are multiple types of backends. A trusted `Backend` is operated by an entity that is trusted by the creator of a particular data market. The operator of this trusted `Backend` is 
 
 ### Backend Specification [IN-PROGRESS]
 A `Backend` is a system that is responsible for storing data off-chain. Any `Market` contains a list of authorized `Backend`s which hold the raw data associated with the `Market`.
