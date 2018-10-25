@@ -44,7 +44,7 @@ This section provides a high level roadmap of the full protocol with links to mo
 	- [`Market`](#market) [v0.2] The top level contract for a given data market.
 		- [`MarketToken`](#market-token) [v0.2]: A mintable and burnable token. Each `Market` has its own `MarketToken`
 			- Minting and Burning mechanics: Market tokens are minted when either new data is added, existing data is queried, or new investment is added to reserve. Market tokens are burned when data is removed or investment is withdrawn.
-		- [Voting](#voting) [IN-PROGRESS]: Critical decisions within a market are performed by vote of interested stake holders. These include validation of new data, challenges to fraudulent data and changes to market structure.
+		- [Voting](#voting) [v0.1, v0.3]: Critical decisions within a market are performed by vote of interested stake holders. These include validation of new data, challenges to fraudulent data and changes to market structure.
 			- [All token holder vote](#all-token-holder) [v0.1]: At present all holders of `MarketToken` vote on decisions.
 			- [Council member vote](#council-member-vote) [v0.3]: an ownership threshold `T_council` is imposed for franchise. The threshold will be set upon construction.
 		- [Market Reserve](#market-reserve) [v0.2]: The reserve is the "bank account" associated with a given `Market`. 
@@ -55,8 +55,8 @@ This section provides a high level roadmap of the full protocol with links to mo
 			- [Query Rake](#query-rake) [v0.3]: What fraction of the payment goes to each stake holder?
 			- [Data utilization](#data-utilization) [v0.3]: The market maintains track of how many times each listing has been requested by different queries.
 		- [Authorized Backends](#authorized-backends) [v0.2]: The data listed in the data market is held off-chain in a `Backend`. A council vote is used to set authorized backend systems for this market.
-- [Off-chain storage and compute systems](#off-chain-systems) [IN-PROGRESS]
-	- [Backend Systems](#backend-specification) [IN-PROGRESS]: A `Backend` is responsible for securely storing data off-chain and allowing authorized users to query this data. Note that a `Backend` may serve multiple markets, and that a `Market` may have multiple backends. The `Backend` is an off-chain system that responds to the API specified in this document, and which understands how to interact with the on-chain Computable contracts.
+- [Off-chain storage and compute systems](#off-chain-systems) [v0.2, v0.3]
+	- [Backend Systems](#backend-specification) [v0.2, v0.3]: A `Backend` is responsible for securely storing data off-chain and allowing authorized users to query this data. Note that a `Backend` may serve multiple markets, and that a `Market` may have multiple backends. The `Backend` is an off-chain system that responds to the API specified in this document, and which understands how to interact with the on-chain Computable contracts.
 		- [REST API](#rest-api) [v0.3]: The `Backend`must respond to a defined set of REST API commands to perform actions such as authentication, data addition and removal, and query handling 
 		- [Query Language](#query-language) [v0.3]: Queries must be provided to `Backend` in query files that are written in a supported query language.
 
