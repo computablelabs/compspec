@@ -44,9 +44,14 @@ This section provides a high level roadmap of the full protocol with links to mo
 	- [`Market`](#market) [v0.2] The top level contract for a given data market.
 		- [`MarketToken`](#market-token) [v0.2]: A mintable and burnable token. Each `Market` has its own `MarketToken`
 			- Minting and Burning mechanics: Market tokens are minted when either new data is added, existing data is queried, or new investment is added to reserve. Market tokens are burned when data is removed or investment is withdrawn.
-		- [Voting](#voting) [v0.1, v0.3]: Critical decisions within a market are performed by vote of interested stake holders. These include validation of new data, challenges to fraudulent data and changes to market structure.
-			- [All token holder vote](#all-token-holder) [v0.1]: At present all holders of `MarketToken` vote on decisions.
-			- [Council member vote](#council-member-vote) [v0.3]: an ownership threshold `T_council` is imposed for franchise. The threshold will be set upon construction.
+    - [Validation](#####)[v0.1]: How new listings are added to market.
+		  - [Voting](#voting) [v0.1, v0.3]: Critical decisions within a market are performed by vote of interested stake holders. These include validation of new data, challenges to fraudulent data and changes to market structure.
+		  	- [All token holder vote](#all-token-holder) [v0.1]: At present all holders of `MarketToken` vote on decisions.
+		  	- [Council member vote](#council-member-vote) [v0.3]: an ownership threshold `T_council` is imposed for franchise. The threshold will be set upon construction.
+      - [Listings](#######): The basic elements of a data market.
+        - [Applying](#######): Applying to add a listing to a data market
+        - [Challenging](########): Challenging an existing listing within a data market
+        - [Editing](#######): Editing a listing within a data market.
 		- [Market Reserve](#market-reserve) [v0.2]: The reserve is the "bank account" associated with a given `Market`. 
 			- The [algorithmic price curve](#algorithmic-price-curve) [v0.2]: Controls the price at which new investors may invest in market. Investor funds are deposited in reserve and new market token is minted accordingly.
 			- [Investor and data owner class tokens](#investor-and-owner-class) [v0.2]: Holders of market token are investor class or data owner class. Investor class tokens can't own any listings in the market, but have right to withdraw funds from reserve by burning their tokens. Data owner class tokens can own listings in market, but can't withdraw funds from reserve. 
