@@ -48,7 +48,7 @@ This section provides a high level roadmap of the full protocol with links to mo
 		  - [Voting](#voting) [v0.1, v0.3]: Critical decisions within a market are performed by vote of interested stake holders. These include validation of new data, challenges to fraudulent data and changes to market structure.
 		  	- [All token holder vote](#all-token-holder) [v0.1]: At present all holders of `MarketToken` vote on decisions.
 		  	- [Council member vote](#council-member-vote) [v0.3]: an ownership threshold `T_council` is imposed for franchise. The threshold will be set upon construction.
-      - [Listings](#######): The basic elements of a data market.
+      - [Listings](#listings): The basic elements of a data market.
         - [Applying](#######): Applying to add a listing to a data market
         - [Challenging](########): Challenging an existing listing within a data market
         - [Editing](#######): Editing a listing within a data market.
@@ -117,12 +117,27 @@ implementation, but differs in a number of critical ways:
   - `Market.set_access_cost(listing)`: Callable by the owner of a listing to set price for accessing the listing.
   - `Market.get_access_cost(listing)`: Getter to view cost.
 
-#### Basic Structure of Market [v0.2]
+#### Listings  [v0.2]
 
 A market holds a set of listings. Each listing corresponds to an element of the
 `Market` which is held off-chain in some (possibly multiple) `Backend` systems.
 Newcomers to the market can call `Market.apply()` to apply to have their
-listing added to the market.
+listing added to the market. A listing consists of an off-chain datapoint (or
+datapoints) and an on-chain listing structure. We reproduce the fields of the
+on-chain listing structure below.
+
+```
+struct Listing {
+  uint listingHash; // Hash of the off-chain data-point this listing corresponds to
+	uint applicationExpiry; // Expiration date of apply stage
+	bool listed; // a 'listing' if true
+	address owner; // owns the listing
+	uint supply; // Number of tokens in the listing (both deposited and minted).
+	uint challenge; // corresponts to a poll id in Voting if present
+	string data; // A pointer to the actual data this listing represents (or possibly some small data primitive)
+	uint minted; // Number of Market tokens that have been minted for this listing.
+}
+```
 
 #### Market Token [v0.2]
 
