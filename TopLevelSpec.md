@@ -39,31 +39,31 @@ accordingly.
 This section provides a high level roadmap of the full protocol with links to more detailed specifications in subsequent sections. Various sections are tagged with the Computable protocol version in which they become available. Specifications for future versions are still in flux and may change.
 
 - [On-chain smart contracts](#on-chain-components):
-	- [`MarketFactory`](#market-factory) [v0.3]: The top level entry point to create a new market and associated token.
-	- [`NetworkToken`](#network-token) [v0.2]: The top level token for the entire network.
-	- [`Market`](#market) [v0.2] The top level contract for a given data market.
-		- [`MarketToken`](#market-token) [v0.2]: A mintable and burnable token. Each `Market` has its own `MarketToken`
-			- Minting and Burning mechanics: Market tokens are minted when either new data is added, existing data is queried, or new investment is added to reserve. Market tokens are burned when data is removed or investment is withdrawn.
+  - [`MarketFactory`](#market-factory) [v0.3]: The top level entry point to create a new market and associated token.
+  - [`NetworkToken`](#network-token) [v0.2]: The top level token for the entire network.
+  - [`Market`](#market) [v0.2] The top level contract for a given data market.
+    - [`MarketToken`](#market-token) [v0.2]: A mintable and burnable token. Each `Market` has its own `MarketToken`
+      - Minting and Burning mechanics: Market tokens are minted when either new data is added, existing data is queried, or new investment is added to reserve. Market tokens are burned when data is removed or investment is withdrawn.
     - [Validation](#####)[v0.1]: How new listings are added to market.
-		  - [Voting](#voting) [v0.1, v0.3]: Critical decisions within a market are performed by vote of interested stake holders. These include validation of new data, challenges to fraudulent data and changes to market structure.
-		  	- [All token holder vote](#all-token-holder) [v0.1]: At present all holders of `MarketToken` vote on decisions.
-		  	- [Council member vote](#council-member-vote) [v0.3]: an ownership threshold `T_council` is imposed for franchise. The threshold will be set upon construction.
+      - [Voting](#voting) [v0.1, v0.3]: Critical decisions within a market are performed by vote of interested stake holders. These include validation of new data, challenges to fraudulent data and changes to market structure.
+        - [All token holder vote](#all-token-holder) [v0.1]: At present all holders of `MarketToken` vote on decisions.
+        - [Council member vote](#council-member-vote) [v0.3]: an ownership threshold `T_council` is imposed for franchise. The threshold will be set upon construction.
       - [Listings](#listings): The basic elements of a data market.
-        - [Applying](#######): Applying to add a listing to a data market
-        - [Challenging](########): Challenging an existing listing within a data market
+        - [Applying](#applying): Applying to add a listing to a data market
+        - [Challenging](#challenging): Challenging an existing listing within a data market
         - [Editing](#######): Editing a listing within a data market.
-		- [Market Reserve](#market-reserve) [v0.2]: The reserve is the "bank account" associated with a given `Market`. 
-			- The [algorithmic price curve](#algorithmic-price-curve) [v0.2]: Controls the price at which new investors may invest in market. Investor funds are deposited in reserve and new market token is minted accordingly.
-			- [Investor and data owner class tokens](#investor-and-owner-class) [v0.2]: Holders of market token are investor class or data owner class. Investor class tokens can't own any listings in the market, but have right to withdraw funds from reserve by burning their tokens. Data owner class tokens can own listings in market, but can't withdraw funds from reserve. 
-		- [Queries](#queries) [v0.3]: Each `Market` supports queries against the data in this market. Queries are run on a `Backend` tied to the market and can be specified in a supported [query language](#query-language)
-			- [Query Pricing](#query-pricing) [v0.3]: Users have to pay to run queries. This pricing structure has to reward the various stakeholders including listing owners (data), backend system owners (compute), and the market itself (investors)
-			- [Query Rake](#query-rake) [v0.3]: What fraction of the payment goes to each stake holder?
-			- [Data utilization](#data-utilization) [v0.3]: The market maintains track of how many times each listing has been requested by different queries.
-		- [Authorized Backends](#authorized-backends) [v0.2]: The data listed in the data market is held off-chain in a `Backend`. A council vote is used to set authorized backend systems for this market.
+    - [Market Reserve](#market-reserve) [v0.2]: The reserve is the "bank account" associated with a given `Market`. 
+      - The [algorithmic price curve](#algorithmic-price-curve) [v0.2]: Controls the price at which new investors may invest in market. Investor funds are deposited in reserve and new market token is minted accordingly.
+      - [Investor and data owner class tokens](#investor-and-owner-class) [v0.2]: Holders of market token are investor class or data owner class. Investor class tokens can't own any listings in the market, but have right to withdraw funds from reserve by burning their tokens. Data owner class tokens can own listings in market, but can't withdraw funds from reserve. 
+    - [Queries](#queries) [v0.3]: Each `Market` supports queries against the data in this market. Queries are run on a `Backend` tied to the market and can be specified in a supported [query language](#query-language)
+      - [Query Pricing](#query-pricing) [v0.3]: Users have to pay to run queries. This pricing structure has to reward the various stakeholders including listing owners (data), backend system owners (compute), and the market itself (investors)
+      - [Query Rake](#query-rake) [v0.3]: What fraction of the payment goes to each stake holder?
+      - [Data utilization](#data-utilization) [v0.3]: The market maintains track of how many times each listing has been requested by different queries.
+    - [Authorized Backends](#authorized-backends) [v0.2]: The data listed in the data market is held off-chain in a `Backend`. A council vote is used to set authorized backend systems for this market.
 - [Off-chain storage and compute systems](#off-chain-systems) [v0.2, v0.3]
-	- [Backend Systems](#backend-specification) [v0.2, v0.3]: A `Backend` is responsible for securely storing data off-chain and allowing authorized users to query this data. Note that a `Backend` may serve multiple markets, and that a `Market` may have multiple backends. The `Backend` is an off-chain system that responds to the API specified in this document, and which understands how to interact with the on-chain Computable contracts.
-		- [REST API](#rest-api) [v0.3]: The `Backend`must respond to a defined set of REST API commands to perform actions such as authentication, data addition and removal, and query handling 
-		- [Query Language](#query-language) [v0.3]: Queries must be provided to `Backend` in query files that are written in a supported query language.
+  - [Backend Systems](#backend-specification) [v0.2, v0.3]: A `Backend` is responsible for securely storing data off-chain and allowing authorized users to query this data. Note that a `Backend` may serve multiple markets, and that a `Market` may have multiple backends. The `Backend` is an off-chain system that responds to the API specified in this document, and which understands how to interact with the on-chain Computable contracts.
+    - [REST API](#rest-api) [v0.3]: The `Backend`must respond to a defined set of REST API commands to perform actions such as authentication, data addition and removal, and query handling 
+    - [Query Language](#query-language) [v0.3]: Queries must be provided to `Backend` in query files that are written in a supported query language.
 
 ## On Chain Components
 
@@ -106,13 +106,13 @@ implementation, but differs in a number of critical ways:
   - `Market.invest(amount)` is a new method that allows an investor to enter the market.
   - `Market.divest()` allows any token holder to exit the market
 - The market holds an "algorithmic price curve" that provides an automatic conversion rate from `NetworkToken` to `MarketToken`. The price curve is used by `Market.invest()` to determine the current conversion rate.
-	- `Market.get_current_investment_price()` returns the current NetworkToken/MarketToken exchange rate from the price curve. This depends on the number of `NetworkToken` in the reserve.
+  - `Market.get_current_investment_price()` returns the current NetworkToken/MarketToken exchange rate from the price curve. This depends on the number of `NetworkToken` in the reserve.
 - The `Market` supports a payment layer for queries against the underlying data market. Query payments must be performed via `Market` before backends will accept queries.
-	- `T_util` units of `MarketToken` are minted for the owner of a listing when that listing is queried. The backend is responsible for reporting queried listings.
+  - `T_util` units of `MarketToken` are minted for the owner of a listing when that listing is queried. The backend is responsible for reporting queried listings.
 
-	- `Market.report_accessed(element_id)` can only be called by a backend for the market.
+  - `Market.report_accessed(element_id)` can only be called by a backend for the market.
 - Token holders in `Market` belong to one of two classes, data owner and investor.
-	- `Market.convert_to_investor()` converts a data owner to an investor.
+  - `Market.convert_to_investor()` converts a data owner to an investor.
   - `Market.get_total_number_investor_tokens()` returns the total number of MarketTokens held by investors. This method will be used by Market.divest() and Market.get_current_investor_price()
   - `Market.set_access_cost(listing)`: Callable by the owner of a listing to set price for accessing the listing.
   - `Market.get_access_cost(listing)`: Getter to view cost.
@@ -128,16 +128,39 @@ on-chain listing structure below.
 
 ```
 struct Listing {
-  uint listingHash; // Hash of the off-chain data-point this listing corresponds to
-	uint applicationExpiry; // Expiration date of apply stage
-	bool listed; // a 'listing' if true
-	address owner; // owns the listing
-	uint supply; // Number of tokens in the listing (both deposited and minted).
-	uint challenge; // corresponts to a poll id in Voting if present
-	string data; // A pointer to the actual data this listing represents (or possibly some small data primitive)
-	uint minted; // Number of Market tokens that have been minted for this listing.
+  bytes32 listingHash; // Hash of the off-chain data-point this listing corresponds to
+  uint applicationExpiry; // Expiration date of apply stage
+  bool listed; // a 'listing' if true
+  address owner; // owns the listing
+  uint supply; // Number of tokens in the listing (both deposited and minted).
+  uint challenge; // corresponts to a poll id in Voting if present
+  string data; // A pointer to the actual data this listing represents (or possibly some small data primitive)
+  uint minted; // Number of Market tokens that have been minted for this listing.
 }
 ```
+![alt text][maker_flow]
+
+[maker_flow]: Maker_Flow.png "Listing flow through data market" 
+
+##### Applying
+
+Applying is the process by which a new listing is added to a data market. To
+apply, a market participant computes the hash of their off-chain data and
+proposes the addition of their data to the market by invoking `Market.apply()`:
+
+```
+function apply(bytes32 listingHash, uint amount, string data) external
+```
+
+All applications trigger a vote on the new listing by appropriate market
+stakeholders (either all token-holders or the market council). If a listing
+vote is cleared, it is said to be listed. Note that application is a *minting*
+event whereby new `MarketTokens` are created. More detail on this can be found
+in the section on minting.
+
+##### Challenging
+
+Challenging is the process by which a listing in a data market can be challenged and potentially removed.
 
 #### Market Token [v0.2]
 
