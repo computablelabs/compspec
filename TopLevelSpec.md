@@ -128,7 +128,7 @@ on-chain listing structure below.
 
 ```
 struct Listing {
-  bytes32 listingHash; // Hash of the off-chain data-point this listing corresponds to
+  bytes32 dataHash; // Hash of the off-chain data-point this listing corresponds to
   uint applicationExpiry; // Expiration date of apply stage
   bool listed; // a 'listing' if true
   address owner; // owns the listing
