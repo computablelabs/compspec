@@ -64,6 +64,9 @@ This section provides a high level roadmap of the full protocol with links to mo
   - [Backend Systems](#backend-specification) [v0.2, v0.3]: A `Backend` is responsible for securely storing data off-chain and allowing authorized users to query this data. Note that a `Backend` may serve multiple markets, and that a `Market` may have multiple backends. The `Backend` is an off-chain system that responds to the API specified in this document, and which understands how to interact with the on-chain Computable contracts.
     - [REST API](#rest-api) [v0.3]: The `Backend`must respond to a defined set of REST API commands to perform actions such as authentication, data addition and removal, and query handling 
     - [Query Language](#query-language) [v0.3]: Queries must be provided to `Backend` in query files that are written in a supported query language.
+- [Case Studies](#case-studies) We consider a few case studies of interesting data markets that can be constructed with the Computable protocol in this section.
+  - [Censorship Resistant Data Market](#censorship-resistant-data-markets) The Computable protocol allows for the construction of data markets that are resistant to censorship efforts.
+
 
 ## On Chain Components
 
@@ -357,3 +360,17 @@ Queries to a `Backend` node must be in a recognized query language. These querie
 The market is responsible for maintaining record of which queries have accessed which datapoints. The backend system will report datapoints accessed by a given query to the market.
 
 - `Market.report_listings_accessed(query_i)`: Called by backend system after running a query. This information is stored on-chain. For reasons of gas, this may just be a simple count; each listing may maintain a simple count field which is incremented for each additional query that accesses it. (See also discussion in #32 around pricing)
+
+## Case Studies
+
+Thus far, we've discussed the Computable protocol in the abstract. In this section, we walk through a few case studies of different types of data markets that can be constructed using the Computable protocol.
+
+### Censorship Resistant Data Markets
+
+It is possible to build data markets that are resistant to censorship efforts.
+
+![alt text][censorship_resistant_data_markets]
+
+[censorship_resistant_data_markets]: Censorship_Resistant_Data_Markets.png "Censorship Resistant Data Markets"
+
+
