@@ -113,7 +113,7 @@ implementation, but differs in a number of critical ways:
 - The `Market` supports a payment layer for queries against the underlying data market. Query payments must be performed via `Market` before backends will accept queries.
   - `T_util` units of `MarketToken` are minted for the owner of a listing when that listing is queried. The backend is responsible for reporting queried listings.
 
-  - `Market.report_accessed(element_id)` can only be called by a backend for the market.
+  - `Market.update_listings_accessed(element_id)` can only be called by a backend for the market.
 - Token holders in `Market` belong to one of two classes, data owner and investor.
   - `Market.convert_to_investor()` converts a data owner to an investor.
   - `Market.get_total_number_investor_tokens()` returns the total number of MarketTokens held by investors. This method will be used by Market.divest() and Market.get_current_investor_price()
@@ -249,7 +249,7 @@ before allowing for queries.
   - `Backend::GET_COMPUTE_COST(QUERY_FILE)`: A call to the `Backend` via REST to get the cost for running this query.
   - `Market.set_query_compute_cost(query_i, backend_j, cost)`: `query_i` is one of supported queries. `backend_j` is some approved backend. `cost` is in network token.
   - `Market.get_query_compute_cost(query_i)`: Returns cheapest cost available (TODO: More refined scheme?)
-  - `Market.report_listings_accessed(query_i)`: Reports the listings which the given query will access. (TODO: How does this change as new listings are added?)
+  - `Market.update_listings_accessed(query_i)`: Reports the listings which the given query will access. (TODO: How does this change as new listings are added?)
 
 - Each query causes some loss in data privacy. A charge is leveled to account for this cost. This charge may be adaptive and depend on history of past queries by given user. This loss in price is governed by the [epsilon price curve](EpsilonPriceCurve.md).
   - `Market.get_privacy_cost(query_i)`: Cost will depend on user invoking and past queries they've run.
@@ -438,7 +438,7 @@ Queries to a `Backend` node must be in a recognized query language. These querie
 
 The market is responsible for maintaining record of which queries have accessed which datapoints. The backend system will report datapoints accessed by a given query to the market.
 
-- `Market.report_listings_accessed(query_i)`: Called by backend system after running a query. This information is stored on-chain. For reasons of gas, this may just be a simple count; each listing may maintain a simple count field which is incremented for each additional query that accesses it. (See also discussion in #32 around pricing)
+- `Market.update_listings_accessed(query_i)`: Called by backend system after running a query. This information is stored on-chain. For reasons of gas, this may just be a simple count; each listing may maintain a simple count field which is incremented for each additional query that accesses it. (See also discussion in #32 around pricing)
 
 ## Case Studies
 
