@@ -334,12 +334,91 @@ The `Backend` is responsible for serving a number of endpoints. These endpoints 
 
 - `Backend::AUTHENTICATE(user_credentials)`: Authenticates the given user. Returns an authorization token.
 - `Backend::GET_SCHEMA(market)`: Returns the schema for the given market.
-- `Backend::RUN_QUERY(query_file)`: Runs the given query. The query is sent in a query file.
-- `Backend::ADD_DATAPOINT(auth_token, datapoint)`: Adds the given data point to the `Backend` along with necessary authorization.
-- `Backend::REMOVE_DATAPOINT(auth_token, datapoint)`: Removes the given data point from the `Backend`.
+- `Backend::RUN_QUERY(auth_token, markets, query)`: Runs the given query against the given markets. The query is sent in a query file.
+- `Backend::ADD_DATA(auth_token, market, data)`: Adds the given data point to the `Backend` along with necessary authorization.
+- `Backend::REMOVE_DATA(auth_token, market, data)`: Removes the given data point from the `Backend`.
 - `Backend::MARKETS_SUPPORTED()`: Returns the list of `Market`s which `Backend` supports.
-- `Backend::GET_COMPUTE_COST(QUERY_FILE)`: A call to the `Backend` via REST to get the cost for running specified query.
-- `Backend::GET_EPSILON(QUERY_FILE)`: A call to the `Backend` via REST to get the epsilon privacy loss for running specified query.
+- `Backend::GET_COMPUTE_COST(query)`: A call to the `Backend` via REST to get the cost for running specified query.
+- `Backend::GET_EPSILON(query)`: A call to the `Backend` via REST to get the epsilon privacy loss for running specified query.
+
+Let's dive into these methods in more detail.
+
+##### AUTHENTICATE
+Calling `Backend::AUTHENTICATE(user_credentials)` will authenticate the given
+user with the particular Backend at hand. An authenticated user will be able to
+submit queries directly to the Backend system without needing to constantly
+communicate with the blockchain itself. Note however, that the authentication
+process *will* check against the blockchain to see if a particular user is
+authorized to access the data on this Backend system. This means that the
+`user_credentials` will likely include a signature using the user's private
+key.
+
+Note in addition that the implementation of the specific authentication system
+is not specified in this document. Different backend creators may choose to
+create separate implementations. In addition, note that each Backend system is
+responsible for implementing its own authentication layer. However, since a
+given Backend may serve many data markets, an authenticated user may be able to
+easily query against multiple markets or run multi-market queries on a given
+Backend system.
+
+
+##### GET_SCHEMA
+
+`Backend::GET_SCHEMA(market)` returns the schema associated with a particular
+data market. Note that the schema is associated closely with an individual
+market. In a future iteration of the design, the schema may be an on-chain
+entity.
+
+##### RUN_QUERY
+Calling `Backend::RUN_QUERY(auth_token, markets, query)` will execute the provided
+query. Note that an `auth_token` is required since the user running the query
+must be authorized to do so. Note in addition that `query` may be run against a
+set of `markets` (where `markets` is a list of strings specifying the names of
+different markets). For such queries, `markets` must be a subset of
+`Backend::MARKETS_SUPPORTED()`.
+
+We don't specify in this document the structure of the query engine.
+Conceivably, queries could include SQL, machine learning scripts, ETL
+transformations and more. A future iteration of this document may specify the
+precise forms of query strings accepted by this API.
+
+##### ADD_DATA
+
+The call `Backend::ADD_DATA(auth_token, market, data)` adds the specified
+`data` to the specified `market`. Here `data` is a list of datapoints. Each
+datapoint is a bytestring. The hash of this bytestring must be listed within
+the on-chain data market contract as approved in order for `ADD_DATA` to
+succeed.
+
+##### REMOVE_DATA
+The call `Backend::REMOVE_DATA(auth_token, market, data)` removes the specified
+`data` from the specified market. As before, `data` is alist of datapoints,
+where each datapoint is a bytestring. `data` must have previously been added in
+a call to `ADD_DATA`. In addition, the hash of this bytestring must appear as
+the hash of a listing that has been *removed* from the on-chain data market.
+(Note that the on-chain ledger is maintains the listings for removed
+data-points on-chain even after they are no longer formally listed).
+
+##### MARKETS_SUPPORTED
+The call to `Backend::MARKETS_SUPPORTED()` returns a list of the markets which
+are supported on this Backend. Note that no authentication is needed for this
+call.
+
+##### GET_COMPUTE_COST
+
+The `Backend::GET_COMPUTE_COST(query)` API call provides a Backend system's
+estimated cost to run the query. Note that the method in which
+a particular Backend system estimates these costs is not specified in this
+document. Different Backend systems may have different cost estimation methods.
+For example, a Backend could use current price estimates on cloud providers to
+set cost, or perhaps its own internal statistics.
+
+##### GET_EPSILON
+The call to `Backend::GET_EPSILON(query)` computes the differential privacy
+parameter epsilon that is associated with this given query. Note that this call
+may sometimes fail, when it is not possible to compute epsilon for the query at
+hand.
+
 
 #### Query Language [v0.3]
 
