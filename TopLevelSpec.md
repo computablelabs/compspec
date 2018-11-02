@@ -371,6 +371,6 @@ It is possible to build data markets that are resistant to censorship efforts.
 
 ![alt text][censorship_resistant_data_markets]
 
-[censorship_resistant_data_markets]: Censorship_Resistant_Data_Markets.png "Censorship Resistant Data Markets"
+[censorship_resistant_data_markets]: Censorship_Resistant_Data_Market.png "Censorship Resistant Data Markets"
 
 
