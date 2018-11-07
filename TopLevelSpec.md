@@ -97,6 +97,12 @@ is used by the [MarketFactory](MarketFactory.md) to perform operations and is
 used to pay for queries executed by a `Backend`. The `NetworkToken` is implemented
 by a `StandardToken` (ERC20) for now. 
 
+The `NetworkToken` is denominated in units of "network wei". As with Ethereum,
+a network wei is 1/10^18 of a single `NetworkToken`. Using units this small
+makes arithmetic much easier to handle and reduces problem with "token dust"
+(since solidity lacks floating point, it's easy for rounding errors to build up
+and propagate).
+
 ### Market [v0.2]
 
 The `Market` is the central contract that governs the behavior of a data
@@ -120,6 +126,13 @@ implementation, but differs in a number of critical ways:
   - `Market.set_access_cost(listing)`: Callable by the owner of a listing to set price for accessing the listing.
   - `Market.get_access_cost(listing)`: Getter to view cost.
 
+#### MarketToken
+
+As with the `NetworkToken`, the `MarketToken` is denominated in "market wei".
+As with Ethereum, a "market wei" denominates 1/10^18 of a `MarketToken`. Using
+wei units throughout prevents rounding error propagation and keeps contracts
+simple.
+
 #### Listings  [v0.2]
 
 A market holds a set of `Listings`. Each listing corresponds to an element of the
@@ -131,13 +144,12 @@ here yet.) We reproduce the fields of the on-chain listing structure below.
 
 ```
 struct Listing {
-  bytes32 dataHash; // Hash of the off-chain data-point this listing corresponds to
-  uint voteBy; // Date by which this listing must be voted on 
   bool listed; // a 'listing' if true
   address owner; // owns the listing
-  uint challengeStake; // Number of tokens in the listing (both deposited and minted).
+  uint supply; // Number of tokens in the listing (both deposited and minted).
   uint challenge; // corresponts to a poll id in Voting if present
-  uint minted; // Number of Market tokens that have been minted for this listing.
+  bytes32 dataHash; // Hash of the off-chain data-point this listing corresponds to
+  uint rewards; // Number of Market tokens that have been minted for this listing.
 }
 ```
 
@@ -157,14 +169,14 @@ owns this listing. If this owner has converted to investor class, ownership of
 the listing will be transferred to the market itself and the `address` in this
 field will be the market address.
 
-The `challengeStake` field is the number of `MarketToken` that the listing proposer is
+The `supply` field is the number of `MarketToken` that the listing proposer is
 willing to stake to see this listing listed in the `Market`. This must exceed
 the `minDeposit` that is demanded by the `Parameterizer` tied to this market.
 The purpose of this stake is to reward challengers who remove useless listings
 from a given market.
 
 The `challenge` field tracks if there's an active challenge to this `Listing`
-at present. `minted` tracks how many new `MarketToken` have been minted for
+at present. `rewards` tracks how many new `MarketToken` have been minted for
 this `Listing`. Note that this field is only nonzero for `Listings` which have
 successfully been listed.
 
@@ -210,7 +222,11 @@ in the section on minting.
 
 ##### Challenging
 
-Challenging is the process by which a listing in a data market can be challenged and potentially removed.
+Challenging is the process by which a listing in a data market can be
+challenged and potentially removed. A challenge triggers a vote. If the
+challenge succeeds, the challenged listing is de-listed from the data market.
+If the challenge fails, the challenging party is penalized with a loss of stake
+(note that posting a challenge requires placing `MarketToken` at stake).
 
 #### Market Token [v0.2]
 
@@ -232,15 +248,18 @@ include which new listings should be added to the `Market`, which challenged
 listings should be removed, and more. Market creators have multiple possible
 voting options.
 
-##### All Token Holder [v0.1]
-At present, decisions are made by vote of all token holders.
-
 ##### Council Member Vote [v0.3]
-In near future, a threshold `T_council` will be imposed, and only token holders
+A threshold `T_council` will be imposed, and only token holders
 who hold more than `T_council` units of `MarketToken`will be allowed to vote.
 Market participants who hold more than `T_council` units of `MarketToken` are
 referred to as council members. Non-council members will not be allowed to vote
 on market actions in this scheme.
+
+The votes here are *not* stake-weighted. All council members have precisely one
+vote. So a council member with `5*T_council` and `1.1*T_council` have the same
+voting power. In addition, all council votes at present are cast publicly with
+no lock-commit-reveal scheme. This allows for the implementation of a simple
+voting mechanism with smaller attack surface.
 
 #### Investor and Owner Class [v0.2]
 
@@ -417,6 +436,11 @@ Backend system.
 data market. Note that the schema is associated closely with an individual
 market. In a future iteration of the design, the schema may be an on-chain
 entity.
+
+Note that the results of `Backend::GET_SCHEMA(market)` should specify the
+bytestring format that is accepted by `Backend::ADD_DATAPOINT`. The `Backend`
+is responsible for rejecting malformed bytestrings that don't adhere to the
+schema.
 
 ##### RUN_QUERY
 Calling `Backend::RUN_QUERY(auth_token, markets, query)` will execute the provided
