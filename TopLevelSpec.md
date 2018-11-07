@@ -122,28 +122,75 @@ implementation, but differs in a number of critical ways:
 
 #### Listings  [v0.2]
 
-A market holds a set of listings. Each listing corresponds to an element of the
+A market holds a set of `Listings`. Each listing corresponds to an element of the
 `Market` which is held off-chain in some (possibly multiple) `Backend` systems.
 Newcomers to the market can call `Market.apply()` to apply to have their
 listing added to the market. A listing consists of an off-chain datapoint (or
-datapoints) and an on-chain listing structure. We reproduce the fields of the
-on-chain listing structure below.
+datapoints) and an on-chain listing structure. (We haven't defined "datapoint"
+here yet.) We reproduce the fields of the on-chain listing structure below.
 
 ```
 struct Listing {
   bytes32 dataHash; // Hash of the off-chain data-point this listing corresponds to
-  uint applicationExpiry; // Expiration date of apply stage
+  uint voteBy; // Date by which this listing must be voted on 
   bool listed; // a 'listing' if true
   address owner; // owns the listing
-  uint supply; // Number of tokens in the listing (both deposited and minted).
+  uint challengeStake; // Number of tokens in the listing (both deposited and minted).
   uint challenge; // corresponts to a poll id in Voting if present
-  string data; // A pointer to the actual data this listing represents (or possibly some small data primitive)
   uint minted; // Number of Market tokens that have been minted for this listing.
 }
 ```
+
+Let's take a minute to walk through the fields of this struct to explain how
+the `Listing` works. The `Listing` is an on-chain record of a chunk of
+off-chain data. The `dataHash` is the hash of the set of off-chain data that
+this listing corresponds to. For our purposes, this off-chain data is simply an
+arbitrary blob (a bytestring of arbitrary length) that is hashed down to a
+single `bytes32` value.
+
+The `voteBy` field specifies when this listing must be voted upon by the
+council for this market.
+
+The `listed` boolean field specifies whether this listing is officially listed
+or not in this given market. The `owner` field is the market participant who
+owns this listing. If this owner has converted to investor class, ownership of
+the listing will be transferred to the market itself and the `address` in this
+field will be the market address.
+
+The `challengeStake` field is the number of `MarketToken` that the listing proposer is
+willing to stake to see this listing listed in the `Market`. This must exceed
+the `minDeposit` that is demanded by the `Parameterizer` tied to this market.
+The purpose of this stake is to reward challengers who remove useless listings
+from a given market.
+
+The `challenge` field tracks if there's an active challenge to this `Listing`
+at present. `minted` tracks how many new `MarketToken` have been minted for
+this `Listing`. Note that this field is only nonzero for `Listings` which have
+successfully been listed.
+
+Let's pause here and say a few words about the has function used to generate
+`dataHash`. It's important that this hash function be a cryptographic hash
+function which is collision resistant. This means that given `dataHash`, it
+isn't feasible to spoof a fake datapoint that has the same hash. This means
+that `dataHash` can be treated as a unique identifier of the datapoint.
+
+TODO: Specify the exact hash-function used for `dataHash`
+
 ![alt text][maker_flow]
 
 [maker_flow]: Maker_Flow.png "Listing flow through data market" 
+
+##### What is a datapoint?
+
+We haven't clearly specified what a "datapoint" is in the preceding material.
+Part of the challenge is that a "datapoint" will mean different things for
+different markets. A record in an off-chain SQL database is very different from
+an image file for a deep learning backend. For this reason, we say that the
+"datapoint" tied to a listing is simply an arbitrary bytestring. This
+bytestring may correspond to multiple "logical datapoints". For example, the
+bytestring may correspond to 10 SQL rows or to 50 images. This batching might
+be crucial for efficiency, since the transaction rate of Ethereum is not yet
+sufficient to do bulk uploads of datasets otherwise.
 
 ##### Applying
 
@@ -335,11 +382,14 @@ The `Backend` is responsible for serving a number of endpoints. These endpoints 
 - `Backend::AUTHENTICATE(user_credentials)`: Authenticates the given user. Returns an authorization token.
 - `Backend::GET_SCHEMA(market)`: Returns the schema for the given market.
 - `Backend::RUN_QUERY(auth_token, markets, query)`: Runs the given query against the given markets. The query is sent in a query file.
-- `Backend::ADD_DATA(auth_token, market, data)`: Adds the given data point to the `Backend` along with necessary authorization.
-- `Backend::REMOVE_DATA(auth_token, market, data)`: Removes the given data point from the `Backend`.
+- `Backend::ADD_DATAPOINT(auth_token, market, data)`: Adds the given data point to the `Backend` along with necessary authorization.
+- `Backend::REMOVE_DATAPOINT(auth_token, market, data)`: Removes the given data point from the `Backend`.
+- `Backend::GET_DATAPOINT(auth_token, market, dataHash)`: Fetches the data point uniquely associated with `dataHash` from the `Backend`.
 - `Backend::MARKETS_SUPPORTED()`: Returns the list of `Market`s which `Backend` supports.
 - `Backend::GET_COMPUTE_COST(query)`: A call to the `Backend` via REST to get the cost for running specified query.
 - `Backend::GET_EPSILON(query)`: A call to the `Backend` via REST to get the epsilon privacy loss for running specified query.
+
+We've represented these REST queries as methods, but remember that these "methods" are actually REST API calls. The `auth_token` will be contained in the request header and the other arguments will be passed in the request body.
 
 Let's dive into these methods in more detail.
 
@@ -349,9 +399,8 @@ user with the particular Backend at hand. An authenticated user will be able to
 submit queries directly to the Backend system without needing to constantly
 communicate with the blockchain itself. Note however, that the authentication
 process *will* check against the blockchain to see if a particular user is
-authorized to access the data on this Backend system. This means that the
-`user_credentials` will likely include a signature using the user's private
-key.
+authorized to access the data on this Backend system. More specifically, 
+`user_credentials` will be a nonce that is signed with the user's private key. 
 
 Note in addition that the implementation of the specific authentication system
 is not specified in this document. Different backend creators may choose to
@@ -382,22 +431,65 @@ Conceivably, queries could include SQL, machine learning scripts, ETL
 transformations and more. A future iteration of this document may specify the
 precise forms of query strings accepted by this API.
 
-##### ADD_DATA
+##### ADD_DATAPOINT
 
-The call `Backend::ADD_DATA(auth_token, market, data)` adds the specified
-`data` to the specified `market`. Here `data` is a list of datapoints. Each
-datapoint is a bytestring. The hash of this bytestring must be listed within
-the on-chain data market contract as approved in order for `ADD_DATA` to
+The call `Backend::ADD_DATAPOINT(auth_token, market, data)` adds the specified
+`data` to the specified `market`. Here `data` is an arbitrary bytestring. The hash of this bytestring must be listed within
+the on-chain data market contract as `listing.dataHash` for some listing in order for `ADD_DATAPOINT` to
 succeed.
 
-##### REMOVE_DATA
-The call `Backend::REMOVE_DATA(auth_token, market, data)` removes the specified
-`data` from the specified market. As before, `data` is alist of datapoints,
-where each datapoint is a bytestring. `data` must have previously been added in
-a call to `ADD_DATA`. In addition, the hash of this bytestring must appear as
-the hash of a listing that has been *removed* from the on-chain data market.
-(Note that the on-chain ledger is maintains the listings for removed
-data-points on-chain even after they are no longer formally listed).
+##### REMOVE_DATAPOINT
+The call `Backend::REMOVE_DATAPOINT(auth_token, market, data)` removes the
+specified `data` from the specified market. As before, `data` is an arbitrary
+bytestring.  `data` must have previously been added in a call to
+`ADD_DATAPOINT`. In addition, the hash of this bytestring must appear as the
+`listing.dataHash` for a `listing` that has been removed from the on-chain
+`Market` by its owner.  (Note that the on-chain ledger is maintains the
+listings for removed data-points on-chain even after they are no longer
+formally listed).
+
+
+##### GET_DATAPOINT
+The call `Backend::GET_DATAPOINT(auth_token, market, dataHash)` fetches the
+data point uniquely associated with `dataHash` from the backend. It's worth
+pausing a bit here to unpack this statement. Recall that a datapoint is a
+bytestring of arbitrary length. Why is `dataHash` guaranteed to be uniquely
+identified with this given bytestring? Recall that the hash function we use is
+a cryptographic hash function. This means that it's really hard to find
+collisions in cryptographic hash functions (effectively impossible for a good
+choice of cryptographic hash). So if the API call returns a particular
+bytestring, the caller can recompute the cryptographic hash locally and verify
+that the hash of the returned value equals `dataHash`.
+
+Let's take a brief digression and chat about implementations. Although
+`dataHash` uniquely specifies a datapoint, the `Backend` implementation must
+have an implemented method to retrieve a given datapoint given `dataHash`. The
+simplest possible implementation would be for the `Backend` to store a flat
+file on disk of form
+```
+[bytestring_1,...,bytestring_n]
+```
+Now let's suppose `H` is our cryptographic hash function. Given `dataHash`, the
+backend could retrieve the associated bytestring with asimple for-loop
+```
+for bytestring in [bytestring_1,...,bytestring_n]:
+  if H(bytestring) == dataHash:
+    return bytestring
+```
+This is very inefficient since it requires a full `O(n)` traversal for every
+retrieval. Alternatively, we could create a SQL table that stores this mapping
+for us
+```
+hash, data
+H(bytestring_1), bytestring_1
+.
+.
+.
+H(bytestring_n), bytestring_n
+```
+Then if we denote `hash` as the primary key for this table, we can use a
+standard SQL lookup command to retrieve the correct bytestring associated with
+`dataHash`.
 
 ##### MARKETS_SUPPORTED
 The call to `Backend::MARKETS_SUPPORTED()` returns a list of the markets which
