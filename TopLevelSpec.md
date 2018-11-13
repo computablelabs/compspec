@@ -39,26 +39,34 @@ accordingly.
 This section provides a high level roadmap of the full protocol with links to more detailed specifications in subsequent sections. Various sections are tagged with the Computable protocol version in which they become available. Specifications for future versions are still in flux and may change.
 
 - [On-chain smart contracts](#on-chain-components):
-	- [`MarketFactory`](#market-factory) [v0.3]: The top level entry point to create a new market and associated token.
-	- [`NetworkToken`](#network-token) [v0.2]: The top level token for the entire network.
-	- [`Market`](#market) [v0.2] The top level contract for a given data market.
-		- [`MarketToken`](#market-token) [v0.2]: A mintable and burnable token. Each `Market` has its own `MarketToken`
-			- Minting and Burning mechanics: Market tokens are minted when either new data is added, existing data is queried, or new investment is added to reserve. Market tokens are burned when data is removed or investment is withdrawn.
-		- [Voting](#voting) [v0.1, v0.3]: Critical decisions within a market are performed by vote of interested stake holders. These include validation of new data, challenges to fraudulent data and changes to market structure.
-			- [All token holder vote](#all-token-holder) [v0.1]: At present all holders of `MarketToken` vote on decisions.
-			- [Council member vote](#council-member-vote) [v0.3]: an ownership threshold `T_council` is imposed for franchise. The threshold will be set upon construction.
-		- [Market Reserve](#market-reserve) [v0.2]: The reserve is the "bank account" associated with a given `Market`. 
-			- The [algorithmic price curve](#algorithmic-price-curve) [v0.2]: Controls the price at which new investors may invest in market. Investor funds are deposited in reserve and new market token is minted accordingly.
-			- [Investor and data owner class tokens](#investor-and-owner-class) [v0.2]: Holders of market token are investor class or data owner class. Investor class tokens can't own any listings in the market, but have right to withdraw funds from reserve by burning their tokens. Data owner class tokens can own listings in market, but can't withdraw funds from reserve. 
-		- [Queries](#queries) [v0.3]: Each `Market` supports queries against the data in this market. Queries are run on a `Backend` tied to the market and can be specified in a supported [query language](#query-language)
-			- [Query Pricing](#query-pricing) [v0.3]: Users have to pay to run queries. This pricing structure has to reward the various stakeholders including listing owners (data), backend system owners (compute), and the market itself (investors)
-			- [Query Rake](#query-rake) [v0.3]: What fraction of the payment goes to each stake holder?
-			- [Data utilization](#data-utilization) [v0.3]: The market maintains track of how many times each listing has been requested by different queries.
-		- [Authorized Backends](#authorized-backends) [v0.2]: The data listed in the data market is held off-chain in a `Backend`. A council vote is used to set authorized backend systems for this market.
+  - [`MarketFactory`](#market-factory) [v0.3]: The top level entry point to create a new market and associated token.
+  - [`NetworkToken`](#network-token) [v0.2]: The top level token for the entire network.
+  - [`Market`](#market) [v0.2] The top level contract for a given data market.
+    - [`MarketToken`](#market-token) [v0.2]: A mintable and burnable token. Each `Market` has its own `MarketToken`
+      - Minting and Burning mechanics: Market tokens are minted when either new data is added, existing data is queried, or new investment is added to reserve. Market tokens are burned when data is removed or investment is withdrawn.
+    - [Validation](#####)[v0.1]: How new listings are added to market.
+      - [Voting](#voting) [v0.1, v0.3]: Critical decisions within a market are performed by vote of interested stake holders. These include validation of new data, challenges to fraudulent data and changes to market structure.
+        - [All token holder vote](#all-token-holder) [v0.1]: At present all holders of `MarketToken` vote on decisions.
+        - [Council member vote](#council-member-vote) [v0.3]: an ownership threshold `T_council` is imposed for franchise. The threshold will be set upon construction.
+      - [Listings](#listings): The basic elements of a data market.
+        - [Applying](#applying): Applying to add a listing to a data market
+        - [Challenging](#challenging): Challenging an existing listing within a data market
+        - [Editing](#######): Editing a listing within a data market.
+    - [Market Reserve](#market-reserve) [v0.2]: The reserve is the "bank account" associated with a given `Market`. 
+      - The [algorithmic price curve](#algorithmic-price-curve) [v0.2]: Controls the price at which new investors may invest in market. Investor funds are deposited in reserve and new market token is minted accordingly.
+      - [Investor and data owner class tokens](#investor-and-owner-class) [v0.2]: Holders of market token are investor class or data owner class. Investor class tokens can't own any listings in the market, but have right to withdraw funds from reserve by burning their tokens. Data owner class tokens can own listings in market, but can't withdraw funds from reserve. 
+    - [Queries](#queries) [v0.3]: Each `Market` supports queries against the data in this market. Queries are run on a `Backend` tied to the market and can be specified in a supported [query language](#query-language)
+      - [Query Pricing](#query-pricing) [v0.3]: Users have to pay to run queries. This pricing structure has to reward the various stakeholders including listing owners (data), backend system owners (compute), and the market itself (investors)
+      - [Query Rake](#query-rake) [v0.3]: What fraction of the payment goes to each stake holder?
+      - [Data utilization](#data-utilization) [v0.3]: The market maintains track of how many times each listing has been requested by different queries.
+    - [Authorized Backends](#authorized-backends) [v0.2]: The data listed in the data market is held off-chain in a `Backend`. A council vote is used to set authorized backend systems for this market.
 - [Off-chain storage and compute systems](#off-chain-systems) [v0.2, v0.3]
-	- [Backend Systems](#backend-specification) [v0.2, v0.3]: A `Backend` is responsible for securely storing data off-chain and allowing authorized users to query this data. Note that a `Backend` may serve multiple markets, and that a `Market` may have multiple backends. The `Backend` is an off-chain system that responds to the API specified in this document, and which understands how to interact with the on-chain Computable contracts.
-		- [REST API](#rest-api) [v0.3]: The `Backend`must respond to a defined set of REST API commands to perform actions such as authentication, data addition and removal, and query handling 
-		- [Query Language](#query-language) [v0.3]: Queries must be provided to `Backend` in query files that are written in a supported query language.
+  - [Backend Systems](#backend-specification) [v0.2, v0.3]: A `Backend` is responsible for securely storing data off-chain and allowing authorized users to query this data. Note that a `Backend` may serve multiple markets, and that a `Market` may have multiple backends. The `Backend` is an off-chain system that responds to the API specified in this document, and which understands how to interact with the on-chain Computable contracts.
+    - [REST API](#rest-api) [v0.3]: The `Backend`must respond to a defined set of REST API commands to perform actions such as authentication, data addition and removal, and query handling 
+    - [Query Language](#query-language) [v0.3]: Queries must be provided to `Backend` in query files that are written in a supported query language.
+- [Case Studies](#case-studies) We consider a few case studies of interesting data markets that can be constructed with the Computable protocol in this section.
+  - [Censorship Resistant Data Market](#censorship-resistant-data-markets) The Computable protocol allows for the construction of data markets that are resistant to censorship efforts.
+
 
 ## On Chain Components
 
@@ -89,6 +97,12 @@ is used by the [MarketFactory](MarketFactory.md) to perform operations and is
 used to pay for queries executed by a `Backend`. The `NetworkToken` is implemented
 by a `StandardToken` (ERC20) for now. 
 
+The `NetworkToken` is denominated in units of "network wei". As with Ethereum,
+a network wei is 1/10^18 of a single `NetworkToken`. Using units this small
+makes arithmetic much easier to handle and reduces problem with "token dust"
+(since solidity lacks floating point, it's easy for rounding errors to build up
+and propagate).
+
 ### Market [v0.2]
 
 The `Market` is the central contract that governs the behavior of a data
@@ -101,23 +115,118 @@ implementation, but differs in a number of critical ways:
   - `Market.invest(amount)` is a new method that allows an investor to enter the market.
   - `Market.divest()` allows any token holder to exit the market
 - The market holds an "algorithmic price curve" that provides an automatic conversion rate from `NetworkToken` to `MarketToken`. The price curve is used by `Market.invest()` to determine the current conversion rate.
-	- `Market.get_current_investment_price()` returns the current NetworkToken/MarketToken exchange rate from the price curve. This depends on the number of `NetworkToken` in the reserve.
+  - `Market.get_current_investment_price()` returns the current NetworkToken/MarketToken exchange rate from the price curve. This depends on the number of `NetworkToken` in the reserve.
 - The `Market` supports a payment layer for queries against the underlying data market. Query payments must be performed via `Market` before backends will accept queries.
-	- `T_util` units of `MarketToken` are minted for the owner of a listing when that listing is queried. The backend is responsible for reporting queried listings.
+  - `T_util` units of `MarketToken` are minted for the owner of a listing when that listing is queried. The backend is responsible for reporting queried listings.
 
-	- `Market.report_accessed(element_id)` can only be called by a backend for the market.
+  - `Market.update_listings_accessed(element_id)` can only be called by a backend for the market.
 - Token holders in `Market` belong to one of two classes, data owner and investor.
-	- `Market.convert_to_investor()` converts a data owner to an investor.
+  - `Market.convert_to_investor()` converts a data owner to an investor.
   - `Market.get_total_number_investor_tokens()` returns the total number of MarketTokens held by investors. This method will be used by Market.divest() and Market.get_current_investor_price()
   - `Market.set_access_cost(listing)`: Callable by the owner of a listing to set price for accessing the listing.
   - `Market.get_access_cost(listing)`: Getter to view cost.
 
-#### Basic Structure of Market [v0.2]
+#### MarketToken
 
-A market holds a set of listings. Each listing corresponds to an element of the
+As with the `NetworkToken`, the `MarketToken` is denominated in "market wei".
+As with Ethereum, a "market wei" denominates 1/10^18 of a `MarketToken`. Using
+wei units throughout prevents rounding error propagation and keeps contracts
+simple.
+
+#### Listings  [v0.2]
+
+A market holds a set of `Listings`. Each listing corresponds to an element of the
 `Market` which is held off-chain in some (possibly multiple) `Backend` systems.
 Newcomers to the market can call `Market.apply()` to apply to have their
-listing added to the market.
+listing added to the market. A listing consists of an off-chain datapoint (or
+datapoints) and an on-chain listing structure. (We haven't defined "datapoint"
+here yet.) We reproduce the fields of the on-chain listing structure below.
+
+```
+struct Listing {
+  bool listed; // a 'listing' if true
+  address owner; // owns the listing
+  uint supply; // Number of tokens in the listing (both deposited and minted).
+  uint challenge; // corresponts to a poll id in Voting if present
+  bytes32 dataHash; // Hash of the off-chain data-point this listing corresponds to
+  uint rewards; // Number of Market tokens that have been minted for this listing.
+}
+```
+
+Let's take a minute to walk through the fields of this struct to explain how
+the `Listing` works. The `Listing` is an on-chain record of a chunk of
+off-chain data. The `dataHash` is the hash of the set of off-chain data that
+this listing corresponds to. For our purposes, this off-chain data is simply an
+arbitrary blob (a bytestring of arbitrary length) that is hashed down to a
+single `bytes32` value.
+
+The `voteBy` field specifies when this listing must be voted upon by the
+council for this market.
+
+The `listed` boolean field specifies whether this listing is officially listed
+or not in this given market. The `owner` field is the market participant who
+owns this listing. If this owner has converted to investor class, ownership of
+the listing will be transferred to the market itself and the `address` in this
+field will be the market address.
+
+The `supply` field is the number of `MarketToken` that the listing proposer is
+willing to stake to see this listing listed in the `Market`. This must exceed
+the `minDeposit` that is demanded by the `Parameterizer` tied to this market.
+The purpose of this stake is to reward challengers who remove useless listings
+from a given market.
+
+The `challenge` field tracks if there's an active challenge to this `Listing`
+at present. `rewards` tracks how many new `MarketToken` have been minted for
+this `Listing`. Note that this field is only nonzero for `Listings` which have
+successfully been listed.
+
+Let's pause here and say a few words about the has function used to generate
+`dataHash`. It's important that this hash function be a cryptographic hash
+function which is collision resistant. This means that given `dataHash`, it
+isn't feasible to spoof a fake datapoint that has the same hash. This means
+that `dataHash` can be treated as a unique identifier of the datapoint.
+
+TODO: Specify the exact hash-function used for `dataHash`
+
+![alt text][maker_flow]
+
+[maker_flow]: Maker_Flow.png "Listing flow through data market" 
+
+##### What is a datapoint?
+
+We haven't clearly specified what a "datapoint" is in the preceding material.
+Part of the challenge is that a "datapoint" will mean different things for
+different markets. A record in an off-chain SQL database is very different from
+an image file for a deep learning backend. For this reason, we say that the
+"datapoint" tied to a listing is simply an arbitrary bytestring. This
+bytestring may correspond to multiple "logical datapoints". For example, the
+bytestring may correspond to 10 SQL rows or to 50 images. This batching might
+be crucial for efficiency, since the transaction rate of Ethereum is not yet
+sufficient to do bulk uploads of datasets otherwise.
+
+##### Applying
+
+Applying is the process by which a new listing is added to a data market. To
+apply, a market participant computes the hash of their off-chain data and
+proposes the addition of their data to the market by invoking `Market.apply()`:
+
+```
+function apply(bytes32 listingHash, uint amount, string data) external
+```
+
+All applications trigger a vote on the new listing by appropriate market
+stakeholders (either all token-holders or the market council). If a listing
+vote is cleared, it is said to be listed. Note that application is a *minting*
+event whereby new `MarketTokens` are created. More detail on this can be found
+in the section on minting.
+
+##### Challenging
+
+Challenging is the process by which a listing in a data market can be
+challenged and potentially removed. A challenge triggers a vote. If the
+challenge succeeds, the challenged listing is de-listed from the data market.
+If the challenge fails, the challenging party is penalized with a loss of stake
+(note that posting a challenge requires placing `MarketToken` at stake).
 
 #### Market Token [v0.2]
 
@@ -139,15 +248,18 @@ include which new listings should be added to the `Market`, which challenged
 listings should be removed, and more. Market creators have multiple possible
 voting options.
 
-##### All Token Holder [v0.1]
-At present, decisions are made by vote of all token holders.
-
 ##### Council Member Vote [v0.3]
-In near future, a threshold `T_council` will be imposed, and only token holders
+A threshold `T_council` will be imposed, and only token holders
 who hold more than `T_council` units of `MarketToken`will be allowed to vote.
 Market participants who hold more than `T_council` units of `MarketToken` are
 referred to as council members. Non-council members will not be allowed to vote
 on market actions in this scheme.
+
+The votes here are *not* stake-weighted. All council members have precisely one
+vote. So a council member with `5*T_council` and `1.1*T_council` have the same
+voting power. In addition, all council votes at present are cast publicly with
+no lock-commit-reveal scheme. This allows for the implementation of a simple
+voting mechanism with smaller attack surface.
 
 #### Investor and Owner Class [v0.2]
 
@@ -203,7 +315,7 @@ before allowing for queries.
   - `Backend::GET_COMPUTE_COST(QUERY_FILE)`: A call to the `Backend` via REST to get the cost for running this query.
   - `Market.set_query_compute_cost(query_i, backend_j, cost)`: `query_i` is one of supported queries. `backend_j` is some approved backend. `cost` is in network token.
   - `Market.get_query_compute_cost(query_i)`: Returns cheapest cost available (TODO: More refined scheme?)
-  - `Market.report_listings_accessed(query_i)`: Reports the listings which the given query will access. (TODO: How does this change as new listings are added?)
+  - `Market.update_listings_accessed(query_i)`: Reports the listings which the given query will access. (TODO: How does this change as new listings are added?)
 
 - Each query causes some loss in data privacy. A charge is leveled to account for this cost. This charge may be adaptive and depend on history of past queries by given user. This loss in price is governed by the [epsilon price curve](EpsilonPriceCurve.md).
   - `Market.get_privacy_cost(query_i)`: Cost will depend on user invoking and past queries they've run.
@@ -288,12 +400,141 @@ The `Backend` is responsible for serving a number of endpoints. These endpoints 
 
 - `Backend::AUTHENTICATE(user_credentials)`: Authenticates the given user. Returns an authorization token.
 - `Backend::GET_SCHEMA(market)`: Returns the schema for the given market.
-- `Backend::RUN_QUERY(query_file)`: Runs the given query. The query is sent in a query file.
-- `Backend::ADD_DATAPOINT(auth_token, datapoint)`: Adds the given data point to the `Backend` along with necessary authorization.
-- `Backend::REMOVE_DATAPOINT(auth_token, datapoint)`: Removes the given data point from the `Backend`.
+- `Backend::RUN_QUERY(auth_token, markets, query)`: Runs the given query against the given markets. The query is sent in a query file.
+- `Backend::ADD_DATAPOINT(auth_token, market, data)`: Adds the given data point to the `Backend` along with necessary authorization.
+- `Backend::REMOVE_DATAPOINT(auth_token, market, data)`: Removes the given data point from the `Backend`.
+- `Backend::GET_DATAPOINT(auth_token, market, dataHash)`: Fetches the data point uniquely associated with `dataHash` from the `Backend`.
 - `Backend::MARKETS_SUPPORTED()`: Returns the list of `Market`s which `Backend` supports.
-- `Backend::GET_COMPUTE_COST(QUERY_FILE)`: A call to the `Backend` via REST to get the cost for running specified query.
-- `Backend::GET_EPSILON(QUERY_FILE)`: A call to the `Backend` via REST to get the epsilon privacy loss for running specified query.
+- `Backend::GET_COMPUTE_COST(query)`: A call to the `Backend` via REST to get the cost for running specified query.
+- `Backend::GET_EPSILON(query)`: A call to the `Backend` via REST to get the epsilon privacy loss for running specified query.
+
+We've represented these REST queries as methods, but remember that these "methods" are actually REST API calls. The `auth_token` will be contained in the request header and the other arguments will be passed in the request body.
+
+Let's dive into these methods in more detail.
+
+##### AUTHENTICATE
+Calling `Backend::AUTHENTICATE(user_credentials)` will authenticate the given
+user with the particular Backend at hand. An authenticated user will be able to
+submit queries directly to the Backend system without needing to constantly
+communicate with the blockchain itself. Note however, that the authentication
+process *will* check against the blockchain to see if a particular user is
+authorized to access the data on this Backend system. More specifically, 
+`user_credentials` will be a nonce that is signed with the user's private key. 
+
+Note in addition that the implementation of the specific authentication system
+is not specified in this document. Different backend creators may choose to
+create separate implementations. In addition, note that each Backend system is
+responsible for implementing its own authentication layer. However, since a
+given Backend may serve many data markets, an authenticated user may be able to
+easily query against multiple markets or run multi-market queries on a given
+Backend system.
+
+
+##### GET_SCHEMA
+
+`Backend::GET_SCHEMA(market)` returns the schema associated with a particular
+data market. Note that the schema is associated closely with an individual
+market. In a future iteration of the design, the schema may be an on-chain
+entity.
+
+Note that the results of `Backend::GET_SCHEMA(market)` should specify the
+bytestring format that is accepted by `Backend::ADD_DATAPOINT`. The `Backend`
+is responsible for rejecting malformed bytestrings that don't adhere to the
+schema.
+
+##### RUN_QUERY
+Calling `Backend::RUN_QUERY(auth_token, markets, query)` will execute the provided
+query. Note that an `auth_token` is required since the user running the query
+must be authorized to do so. Note in addition that `query` may be run against a
+set of `markets` (where `markets` is a list of strings specifying the names of
+different markets). For such queries, `markets` must be a subset of
+`Backend::MARKETS_SUPPORTED()`.
+
+We don't specify in this document the structure of the query engine.
+Conceivably, queries could include SQL, machine learning scripts, ETL
+transformations and more. A future iteration of this document may specify the
+precise forms of query strings accepted by this API.
+
+##### ADD_DATAPOINT
+
+The call `Backend::ADD_DATAPOINT(auth_token, market, data)` adds the specified
+`data` to the specified `market`. Here `data` is an arbitrary bytestring. The hash of this bytestring must be listed within
+the on-chain data market contract as `listing.dataHash` for some listing in order for `ADD_DATAPOINT` to
+succeed.
+
+##### REMOVE_DATAPOINT
+The call `Backend::REMOVE_DATAPOINT(auth_token, market, data)` removes the
+specified `data` from the specified market. As before, `data` is an arbitrary
+bytestring.  `data` must have previously been added in a call to
+`ADD_DATAPOINT`. In addition, the hash of this bytestring must appear as the
+`listing.dataHash` for a `listing` that has been removed from the on-chain
+`Market` by its owner.  (Note that the on-chain ledger is maintains the
+listings for removed data-points on-chain even after they are no longer
+formally listed).
+
+
+##### GET_DATAPOINT
+The call `Backend::GET_DATAPOINT(auth_token, market, dataHash)` fetches the
+data point uniquely associated with `dataHash` from the backend. It's worth
+pausing a bit here to unpack this statement. Recall that a datapoint is a
+bytestring of arbitrary length. Why is `dataHash` guaranteed to be uniquely
+identified with this given bytestring? Recall that the hash function we use is
+a cryptographic hash function. This means that it's really hard to find
+collisions in cryptographic hash functions (effectively impossible for a good
+choice of cryptographic hash). So if the API call returns a particular
+bytestring, the caller can recompute the cryptographic hash locally and verify
+that the hash of the returned value equals `dataHash`.
+
+Let's take a brief digression and chat about implementations. Although
+`dataHash` uniquely specifies a datapoint, the `Backend` implementation must
+have an implemented method to retrieve a given datapoint given `dataHash`. The
+simplest possible implementation would be for the `Backend` to store a flat
+file on disk of form
+```
+[bytestring_1,...,bytestring_n]
+```
+Now let's suppose `H` is our cryptographic hash function. Given `dataHash`, the
+backend could retrieve the associated bytestring with asimple for-loop
+```
+for bytestring in [bytestring_1,...,bytestring_n]:
+  if H(bytestring) == dataHash:
+    return bytestring
+```
+This is very inefficient since it requires a full `O(n)` traversal for every
+retrieval. Alternatively, we could create a SQL table that stores this mapping
+for us
+```
+hash, data
+H(bytestring_1), bytestring_1
+.
+.
+.
+H(bytestring_n), bytestring_n
+```
+Then if we denote `hash` as the primary key for this table, we can use a
+standard SQL lookup command to retrieve the correct bytestring associated with
+`dataHash`.
+
+##### MARKETS_SUPPORTED
+The call to `Backend::MARKETS_SUPPORTED()` returns a list of the markets which
+are supported on this Backend. Note that no authentication is needed for this
+call.
+
+##### GET_COMPUTE_COST
+
+The `Backend::GET_COMPUTE_COST(query)` API call provides a Backend system's
+estimated cost to run the query. Note that the method in which
+a particular Backend system estimates these costs is not specified in this
+document. Different Backend systems may have different cost estimation methods.
+For example, a Backend could use current price estimates on cloud providers to
+set cost, or perhaps its own internal statistics.
+
+##### GET_EPSILON
+The call to `Backend::GET_EPSILON(query)` computes the differential privacy
+parameter epsilon that is associated with this given query. Note that this call
+may sometimes fail, when it is not possible to compute epsilon for the query at
+hand.
+
 
 #### Query Language [v0.3]
 
@@ -313,4 +554,18 @@ Queries to a `Backend` node must be in a recognized query language. These querie
 
 The market is responsible for maintaining record of which queries have accessed which datapoints. The backend system will report datapoints accessed by a given query to the market.
 
-- `Market.report_listings_accessed(query_i)`: Called by backend system after running a query. This information is stored on-chain. For reasons of gas, this may just be a simple count; each listing may maintain a simple count field which is incremented for each additional query that accesses it. (See also discussion in #32 around pricing)
+- `Market.update_listings_accessed(query_i)`: Called by backend system after running a query. This information is stored on-chain. For reasons of gas, this may just be a simple count; each listing may maintain a simple count field which is incremented for each additional query that accesses it. (See also discussion in #32 around pricing)
+
+## Case Studies
+
+Thus far, we've discussed the Computable protocol in the abstract. In this section, we walk through a few case studies of different types of data markets that can be constructed using the Computable protocol.
+
+### Censorship Resistant Data Markets
+
+It is possible to build data markets that are resistant to censorship efforts.
+
+![alt text][censorship_resistant_data_markets]
+
+[censorship_resistant_data_markets]: Censorship_Resistant_Data_Market.png "Censorship Resistant Data Markets"
+
+
