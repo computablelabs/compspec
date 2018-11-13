@@ -59,9 +59,9 @@ This section provides a high level roadmap of the full protocol with links to mo
         - [Applying](#applying): Applying to add a listing to a data market
         - [Challenging](#challenging): Challenging an existing listing within a data market
         - [Editing](#######): Editing a listing within a data market.
+      - [Investor and Owner Class](#investor-and-owner-class): All `MarketToken` holders are either investor class or owner class. These two token holder classes have different rights and responsibilities.  
       - [Market Reserve](#market-reserve) [v0.2]: The reserve is the "bank account" associated with a given `Market`. 
-        - The [algorithmic price curve](#algorithmic-price-curve) [v0.2]: Controls the price at which new investors may invest in market. Investor funds are deposited in reserve and new market token is minted accordingly.
-        - [Investor and data owner class tokens](#investor-and-owner-class) [v0.2]: Holders of market token are investor class or data owner class. Investor class tokens can't own any listings in the market, but have right to withdraw funds from reserve by burning their tokens. Data owner class tokens can own listings in market, but can't withdraw funds from reserve. 
+      - [Algorithmic Price Curve](#algorithmic-price-curve) [v0.2]: Controls the price at which new investors may invest in market. Investor funds are deposited in reserve and new market token is minted accordingly.
       - [Queries](#queries) [v0.3]: Each `Market` supports queries against the data in this market. Queries are run on a `Backend` tied to the market and can be specified in a supported [query language](#query-language)
         - [Query Pricing](#query-pricing) [v0.3]: Users have to pay to run queries. This pricing structure has to reward the various stakeholders including listing owners (data), backend system owners (compute), and the market itself (investors)
         - [Query Rake](#query-rake) [v0.3]: What fraction of the payment goes to each stake holder?
@@ -69,11 +69,14 @@ This section provides a high level roadmap of the full protocol with links to mo
       - [Authorized Backends](#authorized-backends) [v0.2]: The data listed in the data market is held off-chain in a `Backend`. A council vote is used to set authorized backend systems for this market.
   - [Off-chain storage and compute systems](#off-chain-systems) [v0.2, v0.3]
     - [Backend Systems](#backend-specification) [v0.2, v0.3]: A `Backend` is responsible for securely storing data off-chain and allowing authorized users to query this data. Note that a `Backend` may serve multiple markets, and that a `Market` may have multiple backends. The `Backend` is an off-chain system that responds to the API specified in this document, and which understands how to interact with the on-chain Computable contracts.
+      - [Authentication](): Backends should allow users to authenticate with them. 
+      - [Storage](): Backends must be able to persist off-chain data securely.
+      - [Encryption](): All stored data must be encrypted.
+      - [Computational Workloads](#computational-workloads) [v0.3]: Queries must be provided to `Backend` in query files that are written in a supported query language.
       - [REST API](#rest-api) [v0.3]: The `Backend`must respond to a defined set of REST API commands to perform actions such as authentication, data addition and removal, and query handling 
-      - [Query Language](#query-language) [v0.3]: Queries must be provided to `Backend` in query files that are written in a supported query language.
   - [Case Studies](#case-studies) We consider a few case studies of interesting data markets that can be constructed with the Computable protocol in this section.
     - [Censorship Resistant Data Market](#censorship-resistant-data-markets) The Computable protocol allows for the construction of data markets that are resistant to censorship efforts.
-- Forward looking research projections: Features in this section are currently being researched with the goal of eventual inclusion into the core Computable protocol. However, these features are not yet formally on the roadmap for any given Computable version release.
+- [Forward Looking Research](#forward-looking-research): Features in this section are currently being researched with the goal of eventual inclusion into the core Computable protocol. However, these features are not yet formally on the roadmap for any given Computable version release.
   - [Epsilon Privacy Curve](#epsilon-privacy-curve): A curve that prices queries by the amount of privacy loss they cost to the data market owner.
   - [Untrusted Backend](): A Backend system which is not trusted by the owners of the data market.
 
@@ -187,20 +190,6 @@ council votes at present are cast publicly with no lock-commit-reveal scheme.
 This allows for the implementation of a simple voting mechanism with smaller
 attack surface.
 
-#### Investor and Owner Class [v0.2]
-
-The `Market` will have two classes of token holder, investors and data owners.
-Note the contrast with a `Registry` which tracks only listings and challenges, and
-doesn't track investors. A new data structure `mapping` will have to be added that tracks
-the class of each token holder in the data market. In addition, new token
-holders will have to be entered into this `mapping`. Methods that will interact
-with `mapping`:
-
-- `Market.invest()` will add a new investor class member (if not already added)
-- `Market.divest()` will check if given member is investor class and remvoe them if so
-- `Market.apply()` will add the given member to the data owner class (A data owner must be listed). (This method corresponds to `Registry.apply()`)
-- `Market.exit()` will remove a data owner if they are not present any further listings. (This method corresponds to `Registry.exit()`).
-
 
 ##### Listings 
 **(versions 0.2,0.3):** A market holds a set of `Listings`. Each listing corresponds to an element of the
@@ -298,16 +287,47 @@ Note that unlike a token curated registry, the council receives no reward for
 voting upon a challenge. Only the victor of the challenge receives a financial
 reward which comes directly from the loser of of the challenge.
 
+#### Investor and Owner Class
+**(version 0.2):** The `Market` will have two classes of `MarketToken` holders,
+investors and data owners. Data owners can own particular listings in the
+`Market`. However, they are not allowed to purchase new `MarketTokens` by
+calling `Market.invest()` and they are not allowed to withdraw tokens from the
+reserve by calling `Market.divest()`. Oppositely, an investor class
+`MarketToken` holder is not allowed to own any listings in the market.
 
-#### Market Reserve [v0.2]
-Each Data market should hold a reserve of [`Network Token`](#network-token). Here's a brief summary of methods that interact with reserve
+If a data owner wishes, they may convert to investor class by calling
+`Market.convert_to_investor()`. This will surrender ownership of all owned
+listings to the `Market`, and will convert the data owner to an investor. The
+transformation is not reversible at present; investors cannot become data
+owners. Note that enforcement of this separation is currently only performed at
+the level of Ethereum accounts; an investor can always create a new Ethereum
+account and use that account to become a data owner.
 
-- `Market.invest()` adds investor Network Token to reserve and mints and returns Market Token to investor. Pricing dictated by price curve.
+
+On the implementation end, an internal data structure will track
+the class of each token holder in the `Market`. In addition, new token
+holders will have to be entered into this internal data structure. Relevant methods:
+
+- `Market.invest()` will add a new investor class member (if not already added)
+- `Market.divest()` will check if given member is investor class and remove them if so
+- `Market.apply()` will add the given member to the data owner class (A data owner must be listed).
+- `Market.exit()` will remove a data owner if they are not present any further listings.
+
+
+
+##### Market Reserve
+**(version 0.2):** The `Market` holds with it an associated "reserve." Think of the reserve as holding earnings from the data in the `Market` that belong to all the `MarketToken` holders associated with the market. These earnings can come from either query payments or from investor purchases of `MarketToken`. Investor class `MarketToken` holders are allowed to withdraw earnings from the reserve by burning their `MarketToken` holdings.
+
+At present, the reserve is denominated in [`NetworkToken`](#network-token). Here's a brief summary of methods that interact with reserve
+
+- `Market.invest()` adds investor `NetworkToken` to reserve and mints and returns `MarketToken` to investor. This pricing is dictated by price curve.
 - `Market.divest(num_tokens)` allows investor class token holders to burn Market Token and withdraw Network Token from the reserve.
   - `divest()` first checks that its caller is an investor class token holder. If so, it computes the fractional ownership this investor has (`num_tokens/total_num_investor_tokens`). For example, if `num_tokens=5` and `total_num_investor_tokens=100`, this would be 5% fractional ownership. Then `num_tokens` market tokens are burned. Then the fractional part of the reserve belonging to this investor is transferred to the investor. For example, in the case above, 5% of the reserve would be transferred to the investor's address.
 
-#### Algorithmic Price Curve [v0.2]
-The price curve dictates the conversion rate between `NetworkToken` and `MarketToken` for new investors.
+##### Algorithmic Price Curve [v0.2]
+The price curve dictates the conversion rate between `NetworkToken` and
+`MarketToken` for new investors. Investors purchase new `MarketToken` at the
+rate dictated by the price-curve.
 
 ![alt text][algorithmic_price_curve]
 
@@ -357,20 +377,6 @@ def get_total_cost():
   # Privacy cost
   cost += Market.get_privacy_cost(query)
 ```
-
-##### Epsilon Privacy Curve [v0.3]
-
-![alt text][epsilon_price_curve]
-
-[epsilon_price_curve]: epsilon_privacy_curve.png "Epsilon Price Curve"
-
-The Epsilon price-curve is the tool used to price for the privacy lost in a
-given query. Here, epsilon is a technical parameter, adapted from the
-differential privacy literature, which is a measure of the information loss
-tied to a particular query. Each query has an associated epsilon.
-
-- `Market.get_current_privacy_price(user)` returns the current price for purchasing additional privacy budget from the epsilon price curve. This depends on the current privacy epsilon used by the provided user.
-- `Backend::GET_EPSILON(QUERY_FILE)`: A call to the `Backend` via REST to get the epsilon privacy loss for running specified query.
 
 ##### Query Rake [v0.3]
 
@@ -560,7 +566,8 @@ may sometimes fail, when it is not possible to compute epsilon for the query at
 hand.
 
 
-#### Query Language [v0.3]
+#### Computational Workloads 
+**(version 0.3):**
 
 ![alt text][query_flow]
 
@@ -592,4 +599,26 @@ It is possible to build data markets that are resistant to censorship efforts.
 
 [censorship_resistant_data_markets]: Censorship_Resistant_Data_Market.png "Censorship Resistant Data Markets"
 
+## Forwarding Looking Research
+
+Features in this section are being actively researched by the Computable team,
+but at present are not on the roadmap for a particular Computable release. This
+is expected to change as development matures, and it is expected that all work
+in this section will eventually migrate up into the concrete specifications
+part of this document.
+
+### Epsilon Privacy Curve
+
+![alt text][epsilon_price_curve]
+
+[epsilon_price_curve]: epsilon_privacy_curve.png "Epsilon Price Curve"
+
+The Epsilon price-curve is the tool used to price for the privacy lost in a
+given query. Here, epsilon is a technical parameter, adapted from the
+differential privacy literature, which is a measure of the information loss
+tied to a particular query. Each query has an associated epsilon. Here are some
+possible APIs for this feature.
+
+- `Market.get_current_privacy_price(user)` returns the current price for purchasing additional privacy budget from the epsilon price curve. This depends on the current privacy epsilon used by the provided user.
+- `Backend::GET_EPSILON(QUERY_FILE)`: A call to the `Backend` via REST to get the epsilon privacy loss for running specified query.
 
