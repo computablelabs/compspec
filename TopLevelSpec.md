@@ -58,11 +58,11 @@ This section provides a high level roadmap of the full protocol with links to mo
         - [What is a Datapoint?](#what-is-a-datapoint): Each listing corresponds to an off-chain "datapoint." This section defines precisely what a "datapoint" is. Briefly, a "datapoint" is just an arbitrary bytestring.
         - [Applying](#applying): Applying to add a listing to a data market
         - [Challenging](#challenging): Challenging an existing listing within a data market
-        - [Editing](#######): Editing a listing within a data market.
-      - [Investor and Owner Class](#investor-and-owner-class): All `MarketToken` holders are either investor class or owner class. These two token holder classes have different rights and responsibilities.  
+        - [Exiting](#exiting): Yanking a listing from a data market. 
       - [Market Reserve](#market-reserve) [v0.2]: The reserve is the "bank account" associated with a given `Market`. 
+      - [Investor and Owner Class](#investor-and-owner-class): All `MarketToken` holders are either investor class or owner class. These two token holder classes have different rights and responsibilities.  
       - [Algorithmic Price Curve](#algorithmic-price-curve) [v0.2]: Controls the price at which new investors may invest in market. Investor funds are deposited in reserve and new market token is minted accordingly.
-      - [Queries](#queries) [v0.3]: Each `Market` supports queries against the data in this market. Queries are run on a `Backend` tied to the market and can be specified in a supported [query language](#query-language)
+      - [Paying for Computation](#paying-for-computation) [v0.3]: Each `Market` supports queries against the data in this market. Queries are run on a `Backend` tied to the market and can be specified in a supported [query language](#query-language)
         - [Query Pricing](#query-pricing) [v0.3]: Users have to pay to run queries. This pricing structure has to reward the various stakeholders including listing owners (data), backend system owners (compute), and the market itself (investors)
         - [Query Rake](#query-rake) [v0.3]: What fraction of the payment goes to each stake holder?
         - [Data utilization](#data-utilization) [v0.3]: The market maintains track of how many times each listing has been requested by different queries.
@@ -101,14 +101,22 @@ This does mean that the transaction/authorization speed is limited by the
 current transaction speed on Ethereum.
 
 #### Market Factory
-**(version 0.3):** The `MarketFactory` contract is responsible for creaking new data markets and will store a list of available data markets.
+**(version 0.3):** The `MarketFactory` contract is responsible for creaking new
+data markets and will store a list of available data markets.
 
-- `MarketFactory.create_data_market()`: Constructs and launches a new data market. This is the only public way to create a new data market. There are a number of arguments needed in this constructor.
-Each data market has an associated token with it. `create_data_market()` should pass in necessary information to initialize this token. It might make sense to pass in a list of `[address_1: allocation_1,...,address_n:allocation_n]` of initial token allocations to `create_data_market()`. The Market token would be initialized with this initial spread of market token.
-- `MarketFactory.T_council`: Council membership threshold fraction
-- `MarketFactory.T_util`: Number of tokens minted when a listing is queried
-- `MarketFactory.T_submit`: Number of tokens minted when a new listing is listed
-- `MarketFactory.get_list_of_data_markets()`: Returns a list of available data markets.
+```
+function create_data_market({address_1:allocation_1,...,address_n:allocation_n}, uint t_council, uint t_util, uint t_submit) external
+```
+
+TODO: The above isn't valid solidity (can't pass in lists in this fashion).
+
+`MarketFactory.create_data_market()`: Constructs and launches a new data market. This is the only public way to create a new data market. There are a number of arguments needed in this constructor.
+Each data market has an associated token with it. `create_data_market()` must receive necessary information to initialize this token. It might make sense to pass in a list of `[address_1: allocation_1,...,address_n:allocation_n]` of initial token allocations to `create_data_market()`. The `MarketToken` is initialized with this initial spread of market token.
+
+```
+function get_list_of_data_data_markets() view public returns ([string])
+```
+Returns a list of available data markets.
 
 #### Network Token
 **(version 0.2):** The `NetworkToken` is the central token that powers the Computable network. It
@@ -143,7 +151,7 @@ implementation, but differs in a number of critical ways:
   - `Market.set_access_cost(listing)`: Callable by the owner of a listing to set price for accessing the listing.
   - `Market.get_access_cost(listing)`: Getter to view cost.
 
-##### Market Token
+#### Market Token
 **(version 0.2):** `MarketToken` is a mintable and burnable ERC20 token. The
 `MarketToken` is tied to a particular `Market` and is created when the `Market`
 is created. Note the contrast with token curated registries, which don't hold a
@@ -154,24 +162,24 @@ As with ETH, a "market wei" denominates 1/10^18 of a `MarketToken`. Using
 wei units throughout prevents rounding error propagation and keeps contracts
 simple.
 
-##### Minting and Burning Mechanics
+#### Minting and Burning Mechanics
 **(version 0.2):**
 
 Minting happens in one of three ways:
-  - Minting happens when new listings are added to the market. These listings have to pass through the validation process and be whitelisted before minting occurs.
-    - `listedReward` is the number of new `MarketTokens` that are created upon whitelisting.
-  - Minting happens when an investor enters the market through calling `Market.invest()`. This rate is set by the algorithmic price curve.
-  - Minting happens when the backend reports that a listing has been queried. This results in creation of `T_util` new tokens which are awarded to listing owner (which may be the market itself).
+- Minting happens when new listings are added to the market. These listings have to pass through the validation process and be whitelisted before minting occurs.
+  - `listedReward` is the number of new `MarketTokens` that are created upon whitelisting.
+- Minting happens when an investor enters the market through calling `Market.invest()`. This rate is set by the algorithmic price curve.
+- Minting happens when the backend reports that a listing has been queried. This results in creation of `T_util` new tokens which are awarded to listing owner (which may be the market itself).
  
 Burning happens in one of two ways:
-  - If a listing is removed from the market, its associated tokens should be burned. This happens when the listing owner removes the listing or when a successful challenge forces removal of the listing.
-  - If an investor class token holder divests from the market, their divested tokens are burned. The origin of the tokens being burned does not matter.
+- If a listing is removed from the market, its associated tokens should be burned. This happens when the listing owner removes the listing or when a successful challenge forces removal of the listing.
+- If an investor class token holder divests from the market, their divested tokens are burned. The origin of the tokens being burned does not matter.
  
-##### Voting
-**(version 0.3):**
-Major decisions in the market are made by token holder vote. These decisions
-include which new listings should be added to the `Market`, which challenged
-listings should be removed, and what changes should be made to the market parameters.
+#### Voting
+**(version 0.3):** Major decisions in the market are made by token holder vote.
+These decisions include which new listings should be added to the `Market`,
+which challenged listings should be removed, and what changes should be made to
+the market parameters.
 
 All votes are made by the "Council." The council is a subset of the
 token-holders in the market who hold a large fraction of the total number of
@@ -191,7 +199,7 @@ This allows for the implementation of a simple voting mechanism with smaller
 attack surface.
 
 
-##### Listings 
+#### Listings 
 **(versions 0.2,0.3):** A market holds a set of `Listings`. Each listing corresponds to an element of the
 `Market` which is held off-chain in some (possibly multiple) `Backend` systems.
 Newcomers to the market can call `Market.apply()` to apply to have their
@@ -250,18 +258,18 @@ hash function that solidity uses on-chain.
 
 [maker_flow]: Maker_Flow.png "Listing flow through data market" 
 
-###### What is a datapoint?
-**(version 0.3):** We haven't clearly specified what a "datapoint" is in the preceding material.
-Part of the challenge is that a "datapoint" will mean different things for
-different markets. A record in an off-chain SQL database is very different from
-an image file for a deep learning `Backend`. For this reason, we say that the
-"datapoint" tied to a listing is simply an arbitrary bytestring. This
-bytestring may correspond to multiple "logical datapoints". For example, the
-bytestring may correspond to 10 SQL rows or to 50 images. This batching might
-be crucial for efficiency, since the transaction rate of Ethereum is not yet
-sufficient to do bulk uploads of datasets otherwise.
+#### What is a datapoint?
+**(version 0.3):** We haven't clearly specified what a "datapoint" is in the
+preceding material.  Part of the challenge is that a "datapoint" will mean
+different things for different markets. A record in an off-chain SQL database
+is very different from an image file for a deep learning `Backend`. For this
+reason, we say that the "datapoint" tied to a listing is simply an arbitrary
+bytestring. This bytestring may correspond to multiple "logical datapoints".
+For example, the bytestring may correspond to 10 SQL rows or to 50 images. This
+batching might be crucial for efficiency, since the transaction rate of
+Ethereum is not yet sufficient to do bulk uploads of datasets otherwise.
 
-###### Applying
+#### Applying
 **(version 0.1):** Applying is the process by which a new listing is added to a data market. To
 apply, a market participant computes the hash of their off-chain data and
 proposes the addition of their data to the market by invoking `Market.apply()`:
@@ -276,7 +284,7 @@ vote is cleared, it is said to be listed. Note that application is a *minting*
 event whereby new `MarketTokens` are created. More detail on this can be found
 in the section on minting.
 
-###### Challenging
+#### Challenging
 **(version 0.1, 0.3):** Challenging is the process by which a listing in a data market can be
 challenged and potentially removed. A challenge triggers a vote. If the
 challenge succeeds, the challenged listing is de-listed from the data market.
@@ -286,6 +294,26 @@ If the challenge fails, the challenging party is penalized with a loss of stake
 Note that unlike a token curated registry, the council receives no reward for
 voting upon a challenge. Only the victor of the challenge receives a financial
 reward which comes directly from the loser of of the challenge.
+
+#### Exiting
+**(version 0.1):** Listing owners can yank their listings from the market. This
+removes the listing from the `Market` and will burn any minted listing reward
+tokens.
+
+```
+function exit(bytes32 listingHash) external
+```
+
+#### Market Reserve
+**(version 0.2):** The `Market` holds with it an associated "reserve." Think of
+the reserve as holding earnings from the data in the `Market` that belong to
+all the `MarketToken` holders associated with the market. These earnings can
+come from either query payments or from investor purchases of `MarketToken`.
+Investor class `MarketToken` holders are allowed to withdraw earnings from the
+reserve by burning their `MarketToken` holdings.
+
+At present, the reserve is denominated in [`NetworkToken`](#network-token).
+
 
 #### Investor and Owner Class
 **(version 0.2):** The `Market` will have two classes of `MarketToken` holders,
@@ -308,21 +336,32 @@ On the implementation end, an internal data structure will track
 the class of each token holder in the `Market`. In addition, new token
 holders will have to be entered into this internal data structure. Relevant methods:
 
-- `Market.invest()` will add a new investor class member (if not already added)
-- `Market.divest()` will check if given member is investor class and remove them if so
-- `Market.apply()` will add the given member to the data owner class (A data owner must be listed).
-- `Market.exit()` will remove a data owner if they are not present any further listings.
+```
+function invest(uint offered) external returns (uint)
+```
+`Market.invest()` consults the [algorithmic price
+curve](#algorithmic-price-curve) to obtain the exchange rate This method can
+only be called from an address which is not already a listing owner. If the
+call succeeds, it will add a new investor class member (if not already added).
+Note that `offered` is in units of `NetworkToken` wei.  The returned value will
+be in terms of `MarketToken` wei. `offered` will be added to the `Market`
+reserve and the returned `MarketToken` will be newly minted.
 
+```
+function divest() external returns (uint)
+```
+`Market.divest()` will check if the caller is investor class. If so, it will
+burn all the `MarketTokens` associated with this investor and will withdraw the
+investor's share of the reserve (the percent of reserve withdrawn equals the
+percent of investor class `MarketToken` this investor owns).
 
+More precisely, the fractional ownership this investor has is
+`num_tokens/total_num_investor_tokens`. For example, if `num_tokens=5` and
+`total_num_investor_tokens=100`, this would be 5% fractional ownership. Then
+`num_tokens` market tokens are burned. Then the fractional part of the reserve
+belonging to this investor is transferred to the investor. For example, in the
+case above, 5% of the reserve would be transferred to the investor's address.
 
-##### Market Reserve
-**(version 0.2):** The `Market` holds with it an associated "reserve." Think of the reserve as holding earnings from the data in the `Market` that belong to all the `MarketToken` holders associated with the market. These earnings can come from either query payments or from investor purchases of `MarketToken`. Investor class `MarketToken` holders are allowed to withdraw earnings from the reserve by burning their `MarketToken` holdings.
-
-At present, the reserve is denominated in [`NetworkToken`](#network-token). Here's a brief summary of methods that interact with reserve
-
-- `Market.invest()` adds investor `NetworkToken` to reserve and mints and returns `MarketToken` to investor. This pricing is dictated by price curve.
-- `Market.divest(num_tokens)` allows investor class token holders to burn Market Token and withdraw Network Token from the reserve.
-  - `divest()` first checks that its caller is an investor class token holder. If so, it computes the fractional ownership this investor has (`num_tokens/total_num_investor_tokens`). For example, if `num_tokens=5` and `total_num_investor_tokens=100`, this would be 5% fractional ownership. Then `num_tokens` market tokens are burned. Then the fractional part of the reserve belonging to this investor is transferred to the investor. For example, in the case above, 5% of the reserve would be transferred to the investor's address.
 
 #### Algorithmic Price Curve
 **(version 0.2):** The price curve dictates the conversion rate between `NetworkToken` and
@@ -333,13 +372,18 @@ rate dictated by the price-curve.
 
 [algorithmic_price_curve]: Algorithmic_Price_Curve.png "Protocol Flowchart"
 
-Methods that interact with the price curve
+Methods associated with the price curve
 
 
 ```
 function get_current_investment_price() pure returns (uint)
 ```
-`Market.get_current_investment_price()` reports the current `NetworkToken`/`MarketToken` conversion rate. Mathematically, the first version will be a linear function. That is, `Market.get_current_investment_price() = base_conversion_rate + conversion_slope * Market.get_reserve_size()` where `base_conversion_rate` and `conversion_slope` are parameters defined by the market creator in the `Parameterizer`.
+`Market.get_current_investment_price()` reports the current
+`NetworkToken`/`MarketToken` conversion rate. Mathematically, the first version
+will be a linear function. That is, `Market.get_current_investment_price() =
+base_conversion_rate + conversion_slope * Market.get_reserve_size()` where
+`base_conversion_rate` and `conversion_slope` are parameters defined by the
+market creator in the `Parameterizer`.
 
 ```
 function get_reserve_size() view returns (uint)
@@ -347,15 +391,16 @@ function get_reserve_size() view returns (uint)
 `Market.get_reserve_size()` returns the size of current market reserve in `NetworkToken` wei
 
 
-```
-function invest(uint offered) external returns (uint)
-```
-`Market.invest()` consults `Market.get_current_investment_price()` to perform the exchange.
 
-Note that the linear form of the price curve above is not necessarily set in stone. It's likely that future iterations will allow users to choose alternate forms of the price curve.
+Note that the linear form of the price curve above is not necessarily set in
+stone. It's likely that future iterations will allow users to choose alternate
+forms of the price curve.
 
-#### Queries [v0.3]
-**(version 0.3)** The data in the market can be queried by users. Queries must be paid for up front by contract calls. 
+#### Paying for Computation 
+**(version 0.3)** Users may wish to run queries against the data in the
+`Market` or may wish to construct machine learning models on this data. In
+order for them to be authorized for such computation, they must first make a
+payment via the `Market` contract.
 
 #### Query Pricing 
 **(version 0.3)** The `Market` controls the payment layer for queries. Users who wish to query
@@ -389,7 +434,7 @@ def get_total_cost():
   cost += Market.get_privacy_cost(query)
 ```
 
-##### Query Rake [v0.3]
+#### Query Rake [v0.3]
 
 For [query payments](#query-pricing) that come in, a portion of the query payment (the "rake") is paid into the reserve, a portion is paid to listing owners, and a portion is paid to the `Backend`. 
 
@@ -453,7 +498,7 @@ We've represented these REST queries as methods, but remember that these "method
 
 Let's dive into these methods in more detail.
 
-##### AUTHENTICATE
+#### AUTHENTICATE
 Calling `Backend::AUTHENTICATE(user_credentials)` will authenticate the given
 user with the particular Backend at hand. An authenticated user will be able to
 submit queries directly to the Backend system without needing to constantly
@@ -471,7 +516,7 @@ easily query against multiple markets or run multi-market queries on a given
 Backend system.
 
 
-##### GET_SCHEMA
+#### GET_SCHEMA
 
 `Backend::GET_SCHEMA(market)` returns the schema associated with a particular
 data market. Note that the schema is associated closely with an individual
@@ -483,7 +528,7 @@ bytestring format that is accepted by `Backend::ADD_DATAPOINT`. The `Backend`
 is responsible for rejecting malformed bytestrings that don't adhere to the
 schema.
 
-##### RUN_QUERY
+#### RUN_QUERY
 Calling `Backend::RUN_QUERY(auth_token, markets, query)` will execute the provided
 query. Note that an `auth_token` is required since the user running the query
 must be authorized to do so. Note in addition that `query` may be run against a
@@ -496,14 +541,14 @@ Conceivably, queries could include SQL, machine learning scripts, ETL
 transformations and more. A future iteration of this document may specify the
 precise forms of query strings accepted by this API.
 
-##### ADD_DATAPOINT
+#### ADD_DATAPOINT
 
 The call `Backend::ADD_DATAPOINT(auth_token, market, data)` adds the specified
 `data` to the specified `market`. Here `data` is an arbitrary bytestring. The hash of this bytestring must be listed within
 the on-chain data market contract as `listing.dataHash` for some listing in order for `ADD_DATAPOINT` to
 succeed.
 
-##### REMOVE_DATAPOINT
+#### REMOVE_DATAPOINT
 The call `Backend::REMOVE_DATAPOINT(auth_token, market, data)` removes the
 specified `data` from the specified market. As before, `data` is an arbitrary
 bytestring.  `data` must have previously been added in a call to
@@ -514,7 +559,7 @@ listings for removed data-points on-chain even after they are no longer
 formally listed).
 
 
-##### GET_DATAPOINT
+#### GET_DATAPOINT
 The call `Backend::GET_DATAPOINT(auth_token, market, dataHash)` fetches the
 data point uniquely associated with `dataHash` from the backend. It's worth
 pausing a bit here to unpack this statement. Recall that a datapoint is a
@@ -556,12 +601,12 @@ Then if we denote `hash` as the primary key for this table, we can use a
 standard SQL lookup command to retrieve the correct bytestring associated with
 `dataHash`.
 
-##### MARKETS_SUPPORTED
+#### MARKETS_SUPPORTED
 The call to `Backend::MARKETS_SUPPORTED()` returns a list of the markets which
 are supported on this Backend. Note that no authentication is needed for this
 call.
 
-##### GET_COMPUTE_COST
+#### GET_COMPUTE_COST
 
 The `Backend::GET_COMPUTE_COST(query)` API call provides a Backend system's
 estimated cost to run the query. Note that the method in which
@@ -570,7 +615,7 @@ document. Different Backend systems may have different cost estimation methods.
 For example, a Backend could use current price estimates on cloud providers to
 set cost, or perhaps its own internal statistics.
 
-##### GET_EPSILON
+#### GET_EPSILON
 The call to `Backend::GET_EPSILON(query)` computes the differential privacy
 parameter epsilon that is associated with this given query. Note that this call
 may sometimes fail, when it is not possible to compute epsilon for the query at
