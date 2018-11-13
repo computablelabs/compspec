@@ -324,8 +324,8 @@ At present, the reserve is denominated in [`NetworkToken`](#network-token). Here
 - `Market.divest(num_tokens)` allows investor class token holders to burn Market Token and withdraw Network Token from the reserve.
   - `divest()` first checks that its caller is an investor class token holder. If so, it computes the fractional ownership this investor has (`num_tokens/total_num_investor_tokens`). For example, if `num_tokens=5` and `total_num_investor_tokens=100`, this would be 5% fractional ownership. Then `num_tokens` market tokens are burned. Then the fractional part of the reserve belonging to this investor is transferred to the investor. For example, in the case above, 5% of the reserve would be transferred to the investor's address.
 
-##### Algorithmic Price Curve [v0.2]
-The price curve dictates the conversion rate between `NetworkToken` and
+#### Algorithmic Price Curve
+**(version 0.2):** The price curve dictates the conversion rate between `NetworkToken` and
 `MarketToken` for new investors. Investors purchase new `MarketToken` at the
 rate dictated by the price-curve.
 
@@ -336,9 +336,21 @@ rate dictated by the price-curve.
 Methods that interact with the price curve
 
 
-- `Market.get_current_investment_price()` reports the current `NetworkToken`/`MarketToken` conversion rate. Mathematically, the first version will be a linear function. That is, `Market.get_current_investment_price() = base_conversion_rate + conversion_slope * Market.get_reserve_size()` where `base_conversion_rate` and `conversion_slope` are parameters defined by the market creator. 
-- `Market.get_reserve_size()` returns the size of current market reserve in `NetworkToken`
-- `Market.invest()` consults `Market.get_current_investment_price()` to perform the exchange.
+```
+function get_current_investment_price() pure returns (uint)
+```
+`Market.get_current_investment_price()` reports the current `NetworkToken`/`MarketToken` conversion rate. Mathematically, the first version will be a linear function. That is, `Market.get_current_investment_price() = base_conversion_rate + conversion_slope * Market.get_reserve_size()` where `base_conversion_rate` and `conversion_slope` are parameters defined by the market creator in the `Parameterizer`.
+
+```
+function get_reserve_size() view returns (uint)
+```
+`Market.get_reserve_size()` returns the size of current market reserve in `NetworkToken` wei
+
+
+```
+function invest(uint offered) external returns (uint)
+```
+`Market.invest()` consults `Market.get_current_investment_price()` to perform the exchange.
 
 Note that the linear form of the price curve above is not necessarily set in stone. It's likely that future iterations will allow users to choose alternate forms of the price curve.
 
@@ -569,10 +581,6 @@ hand.
 #### Computational Workloads 
 **(version 0.3):**
 
-![alt text][query_flow]
-
-[query_flow]: QueryFlow.png "Query Flow"
-
 Queries to a `Backend` node must be in a recognized query language. These queries are sent to the `Backend` system within query files.
 - SQL: A subset of SQL are allowed.
 - Python: Queries are allowed the be phrased in a restricted subset of python. This subset does not allow for network or filesystem access. In addition, the data tables are pre-loaded.
@@ -621,4 +629,11 @@ possible APIs for this feature.
 
 - `Market.get_current_privacy_price(user)` returns the current price for purchasing additional privacy budget from the epsilon price curve. This depends on the current privacy epsilon used by the provided user.
 - `Backend::GET_EPSILON(QUERY_FILE)`: A call to the `Backend` via REST to get the epsilon privacy loss for running specified query.
+
+### Differential Privacy on Queries
+
+
+![alt text][query_flow]
+
+[query_flow]: QueryFlow.png "Query Flow"
 
