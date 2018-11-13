@@ -64,7 +64,6 @@ This section provides a high level roadmap of the full protocol with links to mo
       - [Algorithmic Price Curve](#algorithmic-price-curve) [v0.2]: Controls the price at which new investors may invest in market. Investor funds are deposited in reserve and new market token is minted accordingly.
       - [Paying for Computation](#paying-for-computation) [v0.3]: Each `Market` supports queries against the data in this market. Queries are run on a `Backend` tied to the market and can be specified in a supported [query language](#query-language)
         - [Query Pricing](#query-pricing) [v0.3]: Users have to pay to run queries. This pricing structure has to reward the various stakeholders including listing owners (data), backend system owners (compute), and the market itself (investors)
-        - [Query Rake](#query-rake) [v0.3]: What fraction of the payment goes to each stake holder?
         - [Data utilization](#data-utilization) [v0.3]: The market maintains track of how many times each listing has been requested by different queries.
       - [Authorized Backends](#authorized-backends) [v0.2]: The data listed in the data market is held off-chain in a `Backend`. A council vote is used to set authorized backend systems for this market.
   - [Off-chain storage and compute systems](#off-chain-systems) [v0.2, v0.3]
@@ -77,8 +76,9 @@ This section provides a high level roadmap of the full protocol with links to mo
   - [Case Studies](#case-studies) We consider a few case studies of interesting data markets that can be constructed with the Computable protocol in this section.
     - [Censorship Resistant Data Market](#censorship-resistant-data-markets) The Computable protocol allows for the construction of data markets that are resistant to censorship efforts.
 - [Forward Looking Research](#forward-looking-research): Features in this section are currently being researched with the goal of eventual inclusion into the core Computable protocol. However, these features are not yet formally on the roadmap for any given Computable version release.
+  - [Query Rake](#query-rake): What fraction of the payment goes to each stake holder?
   - [Epsilon Privacy Curve](#epsilon-privacy-curve): A curve that prices queries by the amount of privacy loss they cost to the data market owner.
-  - [Untrusted Backend](): A Backend system which is not trusted by the owners of the data market.
+  - [Untrusted Backend](): A `Backend` system which is not trusted by the owners of the data market.
 
 
 ## Concrete Engineering Specification
@@ -108,7 +108,7 @@ data markets and will store a list of available data markets.
 function create_data_market({address_1:allocation_1,...,address_n:allocation_n}, uint t_council, uint t_util, uint t_submit) external
 ```
 
-TODO: The above isn't valid solidity (can't pass in lists in this fashion).
+TODO: The form of the function above may not work in practice due to gas costs. TBD 
 
 `MarketFactory.create_data_market()`: Constructs and launches a new data market. This is the only public way to create a new data market. There are a number of arguments needed in this constructor.
 Each data market has an associated token with it. `create_data_market()` must receive necessary information to initialize this token. It might make sense to pass in a list of `[address_1: allocation_1,...,address_n:allocation_n]` of initial token allocations to `create_data_market()`. The `MarketToken` is initialized with this initial spread of market token.
@@ -163,9 +163,7 @@ wei units throughout prevents rounding error propagation and keeps contracts
 simple.
 
 #### Minting and Burning Mechanics
-**(version 0.2):**
-
-Minting happens in one of three ways:
+**(version 0.2):** Minting happens in one of three ways:
 - Minting happens when new listings are added to the market. These listings have to pass through the validation process and be whitelisted before minting occurs.
   - `listedReward` is the number of new `MarketTokens` that are created upon whitelisting.
 - Minting happens when an investor enters the market through calling `Market.invest()`. This rate is set by the algorithmic price curve.
@@ -434,16 +432,6 @@ def get_total_cost():
   cost += Market.get_privacy_cost(query)
 ```
 
-#### Query Rake [v0.3]
-
-For [query payments](#query-pricing) that come in, a portion of the query payment (the "rake") is paid into the reserve, a portion is paid to listing owners, and a portion is paid to the `Backend`. 
-
-- The owner of a listing is paid the access cost they set with `Market.set_access_cost(listing)`
-- The `Backend` system is paid the compute cost they set with `Market.set_query_compute_cost(query)`
-- The reserve is paid the privacy cost `Market.get_privacy_cost(query)`
-
-TODO: This scheme isn't finalized yet; will likely change.
-
 #### Authorizing a Backend [v0.3]
 Each data market will maintain a list of authorized `Backend` systems. A full
 vote of the council (#28) will be needed to add, remove, or authorize `Backend` systems.
@@ -674,6 +662,22 @@ but at present are not on the roadmap for a particular Computable release. This
 is expected to change as development matures, and it is expected that all work
 in this section will eventually migrate up into the concrete specifications
 part of this document.
+
+### Query Rake 
+
+For query payments that come in, a portion of the query payment (the "rake") is
+paid into the reserve, a portion is paid to listing owners, and a portion is
+paid to the `Backend`. It isn't yet clear how this payment should be split up
+amongst these three participants. Economic modeling will have to be done to
+understand the consequences of this split.
+
+Very simple (likely wrong) split:
+
+- The owner of a listing is paid the access cost they set with `Market.set_access_cost(listing)`
+- The `Backend` system is paid the compute cost they set with `Market.set_query_compute_cost(query)`
+- The reserve is paid the privacy cost `Market.get_privacy_cost(query)`
+
+
 
 ### Epsilon Privacy Curve
 
