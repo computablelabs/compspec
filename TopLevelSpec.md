@@ -355,11 +355,10 @@ function invest(uint offered) external returns (uint)
 Note that the linear form of the price curve above is not necessarily set in stone. It's likely that future iterations will allow users to choose alternate forms of the price curve.
 
 #### Queries [v0.3]
+**(version 0.3)** The data in the market can be queried by users. Queries must be paid for up front by contract calls. 
 
-The data in the market can be queried by users. Queries must be paid for up front and must be written in an allowable query language.
-
-#### Query Pricing [v0.3]
-The `Market` controls the payment layer for queries. Users who wish to query
+#### Query Pricing 
+**(version 0.3)** The `Market` controls the payment layer for queries. Users who wish to query
 the data listed in a data market must first make a payment to `Market`. Any
 `Backend` associated with `Market` will check that payments have gone through
 before allowing for queries.
@@ -579,11 +578,27 @@ hand.
 
 
 #### Computational Workloads 
-**(version 0.3):**
+**(version 0.3):** The Computable protocol allows users to run workloads on
+off-chain data. Payments for these workloads must be made on-chain before
+workloads will be allowed to run. In the current version of the protocol,
+security and privacy guarantees are not enforced upon workloads, but it is
+expected that future protocol iterations will enforce such guarantees.
 
-Queries to a `Backend` node must be in a recognized query language. These queries are sent to the `Backend` system within query files.
-- SQL: A subset of SQL are allowed.
-- Python: Queries are allowed the be phrased in a restricted subset of python. This subset does not allow for network or filesystem access. In addition, the data tables are pre-loaded.
+Users can expect that their workloads will run within a fairly standard
+computing environment (some sandboxed Linux environment likely) and that the
+raw data will be exposed to the sandbox. Users will be able to run standard SQL
+queries, and will also be able to use standard Python machine learning tools to
+train models and implement ETL pipelines. (Note that since the sandbox will be
+some standard Linux, users are free to use alternative pipelines).
+
+The specification does not constrain Backend implementers on their design
+choices, but to first approximation, this feature should likely be implemented
+by having new sandboxed compute nodes being spun up dynamically to handle
+inbound queries.
+
+Note furthermore that compute workloads may draw upon data from multiple data
+markets. (The limitation of course is that the `Backend` that the compute is
+running on must be authorized for both data markets).
 
 ![alt text][multi_market_join]
 
