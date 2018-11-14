@@ -70,17 +70,20 @@ This section provides a high level roadmap of the full protocol with links to mo
         - [Reparameterization](#reparameterization) [v0.3]: The parameters that govern the `Market` can be modified with a council vote.
   - [Off-chain storage and compute systems](#off-chain-systems) [v0.2, v0.3]
     - [Backend Systems](#backend-specification) [v0.2, v0.3]: A `Backend` is responsible for securely storing data off-chain and allowing authorized users to query this data. Note that a `Backend` may serve multiple markets, and that a `Market` may have multiple backends. The `Backend` is an off-chain system that responds to the API specified in this document, and which understands how to interact with the on-chain Computable contracts.
-      - [Authentication](): Backends should allow users to authenticate with them. 
-      - [Storage](): Backends must be able to persist off-chain data securely.
-      - [Encryption](): All stored data must be encrypted.
-      - [Computational Workloads](#computational-workloads) [v0.3]: Queries must be provided to `Backend` in query files that are written in a supported query language.
+      - [Authentication](#authentication): `Backends` should allow users to authenticate with them. 
+      - [Storage](#storage): `Backends` must be able to persist off-chain data securely.
+      - [Encryption at Rest](#encryption-at-rest): All stored data must be encrypted.
+      - [Computational Workloads](#computational-workloads) [v0.3]: A `Backend` must be able to run computational workloads against its data. 
       - [REST API](#rest-api) [v0.3]: The `Backend`must respond to a defined set of REST API commands to perform actions such as authentication, data addition and removal, and query handling 
-  - [Case Studies](#case-studies) We consider a few case studies of interesting data markets that can be constructed with the Computable protocol in this section.
-    - [Censorship Resistant Data Market](#censorship-resistant-data-markets) The Computable protocol allows for the construction of data markets that are resistant to censorship efforts.
 - [Forward Looking Research](#forward-looking-research): Features in this section are currently being researched with the goal of eventual inclusion into the core Computable protocol. However, these features are not yet formally on the roadmap for any given Computable version release.
   - [Query Rake](#query-rake): What fraction of the payment goes to each stake holder?
   - [Epsilon Privacy Curve](#epsilon-privacy-curve): A curve that prices queries by the amount of privacy loss they cost to the data market owner.
-  - [Untrusted Backend](): A `Backend` system which is not trusted by the owners of the data market.
+  - [Untrusted Backend](#untrusted-backend): A `Backend` system which is not trusted by the owners of the data market.
+- [Attacks](#attacks) This section catalogs known attacks on the protocol and known defenses against such attacks.
+  - [Data Flood](#data-flood): Attackers attempt to flood market with low-quality listings
+  - [Council DDOS](#council-ddos): Attackers overwhelm the council with a glut of candidates
+- [Case Studies](#case-studies) We consider a few case studies of interesting data markets that can be constructed with the Computable protocol in this section.
+  - [Censorship Resistant Data Market](#censorship-resistant-data-markets) The Computable protocol allows for the construction of data markets that are resistant to censorship efforts.
 
 
 ## Concrete Engineering Specification
@@ -532,11 +535,65 @@ use novel proprietary hardware such as GPUs, TPUs or ASICs to power needed
 workloads. These choices are left to the operator of the `Backend`.
 
 ### Backend Specification [v0.3]
-A `Backend` is a system that is responsible for storing data off-chain. Any `Market` contains a list of authorized `Backend`s which hold the raw data associated with the `Market`.
+A `Backend` is a system that is responsible for storing data off-chain. Any
+`Market` contains a list of authorized `Backend`s which hold the raw data
+associated with the `Market`.
 
-Broadly speaking, `Backend`s are either trusted or untrusted. A trusted `Backend` is allowed to view the unencrypted data that belongs to a `Market`. On the other hand, an untrusted `Backend` is never allowed to view unencrypted data belonging to the data market.
+Currently, `Backends` are assumed to be trustworthy. A trusted `Backend` is
+allowed to view the unencrypted data that belongs to a `Market`.
 
-A `Backend` is responsible for serving queries against a given `Market`. Each query is sent as a file in an acceptable [query language](QueryLanguage.md). 
+`Backend` systems are responsible for user authentication, data storage,
+encryption-at-rest, and computational workloads. In this section, we start by
+describing these responsibilities qualitatively, then walk through the precise
+REST API that the `Backend` must support.
+
+#### Authentication
+The `Backend` should provide a mechanism for users to authenticate. The first
+step of the authentication process will require the `Backend` to consult with
+the blockchain and will likely require the user to use a system like Metamask
+to prove their identity. Once initial authentication is complete, users can be
+issued an authentication token which they can use for a set time.
+
+#### Storage
+The `Backend` is responsible for storing the off-chain data associated with
+listings. Listing candidates must convey their off-chain candidate data to a
+`Backend` node in order to be listed. This is enforced by the council vote; the
+council is responsible for querying a `Backend` to verify that off-chain data
+for the candidate listing is available before voting to list the candidate.
+
+#### Encryption at Rest
+The `Backend` is responsible for storing all off-chain data in a fashion that's
+encrypted-at-rest. This means that plain text off-chain data should never be
+stored on disk.
+
+#### Computational Workloads 
+**(version 0.3):** The Computable protocol allows users to run workloads on
+off-chain data. Payments for these workloads must be made on-chain before
+workloads will be allowed to run. In the current version of the protocol,
+security and privacy guarantees are not enforced upon workloads, but it is
+expected that future protocol iterations will enforce such guarantees.
+
+Users can expect that their workloads will run within a fairly standard
+computing environment (some sandboxed Linux environment likely) and that the
+raw data will be exposed to the sandbox. Users will be able to run standard SQL
+queries, and will also be able to use standard Python machine learning tools to
+train models and implement ETL pipelines. (Note that since the sandbox will be
+some standard Linux, users are free to use alternative pipelines).
+
+The specification does not constrain `Backend` implementers on their design
+choices, but to first approximation, this feature should likely be implemented
+by having new sandboxed compute nodes being spun up dynamically to handle
+inbound queries. This might be implemented for example by running the
+computation within a docker container on a new EC2 node.
+
+Note furthermore that compute workloads may draw upon data from multiple data
+markets. (The limitation of course is that the `Backend` that the compute is
+running on must be authorized for both data markets).
+
+![alt text][multi_market_join]
+
+[multi_market_join]: Multi_Market_Join.png "Multi Market Join"
+
 
 #### REST API [v0.3]
 
@@ -680,50 +737,11 @@ may sometimes fail, when it is not possible to compute epsilon for the query at
 hand.
 
 
-#### Computational Workloads 
-**(version 0.3):** The Computable protocol allows users to run workloads on
-off-chain data. Payments for these workloads must be made on-chain before
-workloads will be allowed to run. In the current version of the protocol,
-security and privacy guarantees are not enforced upon workloads, but it is
-expected that future protocol iterations will enforce such guarantees.
-
-Users can expect that their workloads will run within a fairly standard
-computing environment (some sandboxed Linux environment likely) and that the
-raw data will be exposed to the sandbox. Users will be able to run standard SQL
-queries, and will also be able to use standard Python machine learning tools to
-train models and implement ETL pipelines. (Note that since the sandbox will be
-some standard Linux, users are free to use alternative pipelines).
-
-The specification does not constrain Backend implementers on their design
-choices, but to first approximation, this feature should likely be implemented
-by having new sandboxed compute nodes being spun up dynamically to handle
-inbound queries.
-
-Note furthermore that compute workloads may draw upon data from multiple data
-markets. (The limitation of course is that the `Backend` that the compute is
-running on must be authorized for both data markets).
-
-![alt text][multi_market_join]
-
-[multi_market_join]: Multi_Market_Join.png "Multi Market Join"
-
 #### Data Utilization [v0.3]
 
 The market is responsible for maintaining record of which queries have accessed which datapoints. The backend system will report datapoints accessed by a given query to the market.
 
 - `Market.update_listings_accessed(query_i)`: Called by backend system after running a query. This information is stored on-chain. For reasons of gas, this may just be a simple count; each listing may maintain a simple count field which is incremented for each additional query that accesses it. (See also discussion in #32 around pricing)
-
-## Case Studies
-
-Thus far, we've discussed the Computable protocol in the abstract. In this section, we walk through a few case studies of different types of data markets that can be constructed using the Computable protocol.
-
-### Censorship Resistant Data Markets
-
-It is possible to build data markets that are resistant to censorship efforts.
-
-![alt text][censorship_resistant_data_markets]
-
-[censorship_resistant_data_markets]: Censorship_Resistant_Data_Market.png "Censorship Resistant Data Markets"
 
 ## Forwarding Looking Research
 
@@ -732,6 +750,10 @@ but at present are not on the roadmap for a particular Computable release. This
 is expected to change as development matures, and it is expected that all work
 in this section will eventually migrate up into the concrete specifications
 part of this document.
+
+### Fine Grained Data Utilization
+
+Tracking fine-grained data usage…
 
 ### Query Rake 
 
@@ -771,3 +793,46 @@ possible APIs for this feature.
 
 [query_flow]: QueryFlow.png "Query Flow"
 
+### Untrusted Backend
+
+An untrusted `Backend` is never allowed to view unencrypted data belonging to
+the data market. This means that all computation performed within an untrusted
+backend must either use cryptographic techniques such as garbled circuits or
+homomorphic computation, or must use trusted hardware enclaves like Intel SGX.
+We are actively researching the design of untrusted `Backend` systems, but
+currently lack the clarity to place them on the engineering roadmap.
+
+## Case Studies
+
+Thus far, we've discussed the Computable protocol in the abstract. In this
+section, we walk through a few case studies of different types of data markets
+that can be constructed using the Computable protocol.
+
+### Censorship Resistant Data Markets
+
+It is possible to build data markets that are resistant to censorship efforts.
+
+![alt text][censorship_resistant_data_markets]
+
+[censorship_resistant_data_markets]: Censorship_Resistant_Data_Market.png "Censorship Resistant Data Markets"
+
+## Attacks
+
+In this section, we list a number of known attacks on the protocol and talk through defenses against these attacks.
+
+### Data Flood
+In this attack, malicious actors attempt to flood a `Market` with low quality
+listings. This attack is mitigated by the enforced council vote needed for
+listings to be listed
+
+### Council DDOS
+Malicious attackers flood the council with a glut of low quality candidate listings.
+
+TODO: Why are we safe against this attack?
+
+### No Off Chain Data
+The "No Off Chain Data" attack occurs when a candidate is listed on a `Market`
+without its off-chain data being transmitted to a `Backend`. This attack is
+defended against by the council vote. The council is responsible for querying a
+`Backend` to verify that off-chain data has been transmitted before voting to
+list the candidate
