@@ -65,7 +65,7 @@ This section provides a high level roadmap of the full protocol with links to mo
       - [Paying for Computation](#paying-for-computation) [v0.3]: Each `Market` supports queries against the data in this market. Queries are run on a `Backend` tied to the market and can be specified in a supported [query language](#query-language)
         - [Query Pricing](#query-pricing) [v0.3]: Users have to pay to run queries. This pricing structure has to reward the various stakeholders including listing owners (data), backend system owners (compute), and the market itself (investors)
         - [Data utilization](#data-utilization) [v0.3]: The market maintains track of how many times each listing has been requested by different queries.
-      - [Authorized Backends](#authorized-backends) [v0.2]: The data listed in the data market is held off-chain in a `Backend`. A council vote is used to set authorized backend systems for this market.
+      - [Authorized Backends](#authorized-backends) [v0.3]: The data listed in the data market is held off-chain in a `Backend`. A council vote is used to set authorized backend systems for this market.
       - [Market Parameters](#market-parameters) [v0.3]: The `Market` is governed by a set of a parameters dictated within the `Parameterizer`.
         - [Reparameterization](#reparameterization) [v0.3]: The parameters that govern the `Market` can be modified with a council vote.
   - [Off-chain storage and compute systems](#off-chain-systems) [v0.2, v0.3]
@@ -404,10 +404,19 @@ the data listed in a data market must first make a payment to `Market`. Any
 `Backend` associated with `Market` will check that payments have gone through
 before allowing for queries.
 
-Listing owners set an access cost for their listing (denominated in `NetworkToken` wei). For listings which are owned by the market itself,  the listing default price is set in the `Parameterizer`.
+Listing owners set an access cost for their listing (denominated in
+`NetworkToken` wei). For listings which are owned by the market itself,  the
+listing default price is set in the `Parameterizer`.
 
-  - `Market.set_access_cost(listing)`: Callable by listing owner to set price.
-  - `Market.get_access_cost(listing)`: Getter to view cost.
+```
+function set_access_cost(bytes32 listingHash, uint cost) external
+```
+Callable only by the listing owner. Sets the price (in `NetworkToken` wei) to access this listing
+
+```
+function get_access_costs(bytes32 listingHash) returns (uint)
+```
+Returns the access cost for a listing.
   
 - To submit a query, the querier sends a [query file](#query-language) to `Backend`. A `Backend` can set its asking price to run computation for this query. Each listing will access some specified subset of listings in market.
   - `Backend::GET_COMPUTE_COST(QUERY_FILE)`: A call to the `Backend` via REST to get the cost for running this query.
@@ -437,9 +446,22 @@ def get_total_cost():
 `Backend` systems. A full vote of the council (#28) will be needed to add,
 remove, or authorize `Backend` systems.
 
-- `Market.get_backend_system()`: Returns list of authorized backend systems for the market
-- `Market.add_backend_system(id)`: This must be authorized by a vote of the council.
-- `Market.remove_backend_system(id)`: This must be authorized by a vote of the council
+```
+function get_backend_system() public view returns ([string])
+```
+Returns list of authorized backend systems for the market
+
+```
+function propose_backend_addition(string backend) external
+```
+Proposes the addition of a new authorized `Backend`. This addition must be
+authorized by a vote of the council.
+
+```
+function propose_backend_removal(string backend) external
+```
+Proposes that the specified `Backend` have its authorization revoked. This
+removal must be authorized by a vote of the council.
 
 #### Market Parameters
 **(version 0.1, 0.2, 0.3):** The `Market` is governed by a set of parameters controlled by the `Parameterizer`.
