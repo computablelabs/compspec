@@ -80,11 +80,11 @@ This section provides a high level roadmap of the full protocol with links to mo
   - [Query Rake](#query-rake): What fraction of the payment goes to each stake holder?
   - [Epsilon Privacy Curve](#epsilon-privacy-curve): A curve that prices queries by the amount of privacy loss they cost to the data market owner.
   - [Untrusted Backend](#untrusted-backend): A `Backend` system which is not trusted by the owners of the data market.
+- [Case Studies](#case-studies) We consider a few case studies of interesting data markets that can be constructed with the Computable protocol in this section.
+  - [Censorship Resistant Data Market](#censorship-resistant-data-markets) The Computable protocol allows for the construction of data markets that are resistant to censorship efforts.
 - [Attacks](#attacks) This section catalogs known attacks on the protocol and known defenses against such attacks.
   - [Data Flood](#data-flood): Attackers attempt to flood market with low-quality listings
   - [Council DDOS](#council-ddos): Attackers overwhelm the council with a glut of candidates
-- [Case Studies](#case-studies) We consider a few case studies of interesting data markets that can be constructed with the Computable protocol in this section.
-  - [Censorship Resistant Data Market](#censorship-resistant-data-markets) The Computable protocol allows for the construction of data markets that are resistant to censorship efforts.
 
 
 ## Concrete Engineering Specification
@@ -593,10 +593,6 @@ Note furthermore that compute workloads may draw upon data from multiple data
 markets. (The limitation of course is that the `Backend` that the compute is
 running on must be authorized for both data markets).
 
-![alt text][multi_market_join]
-
-[multi_market_join]: Multi_Market_Join.png "Multi Market Join"
-
 #### Coarse Data Utilization
 **(version 0.3):** The market is responsible for maintaining a record of which
 listings have been accessed by which queries. Doing this robustly is still an
@@ -825,6 +821,11 @@ backend must either use cryptographic techniques such as garbled circuits or
 homomorphic computation, or must use trusted hardware enclaves like Intel SGX.
 We are actively researching the design of untrusted `Backend` systems, but
 currently lack the clarity to place them on the engineering roadmap.
+
+![alt text][multi_market_join]
+
+[multi_market_join]: Multi_Market_Join.png "Multi Market Join"
+
 
 ## Case Studies
 
