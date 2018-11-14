@@ -76,6 +76,7 @@ This section provides a high level roadmap of the full protocol with links to mo
       - [Computational Workloads](#computational-workloads) [v0.3]: A `Backend` must be able to run computational workloads against its data. 
       - [REST API](#rest-api) [v0.3]: The `Backend`must respond to a defined set of REST API commands to perform actions such as authentication, data addition and removal, and query handling 
 - [Forward Looking Research](#forward-looking-research): Features in this section are currently being researched with the goal of eventual inclusion into the core Computable protocol. However, these features are not yet formally on the roadmap for any given Computable version release.
+  - [Fine Grained Data Utilization](#fine-grained-data-utilization): How can we track data utilization in a fine grained fashion.
   - [Query Rake](#query-rake): What fraction of the payment goes to each stake holder?
   - [Epsilon Privacy Curve](#epsilon-privacy-curve): A curve that prices queries by the amount of privacy loss they cost to the data market owner.
   - [Untrusted Backend](#untrusted-backend): A `Backend` system which is not trusted by the owners of the data market.
@@ -455,13 +456,15 @@ function get_backend_system() public view returns ([string])
 Returns list of authorized backend systems for the market
 
 ```
-function propose_backend_addition(string backend) external
+function propose_backend_addition(string backend, address backend_address) external
 ```
 Proposes the addition of a new authorized `Backend`. This addition must be
-authorized by a vote of the council.
+authorized by a vote of the council. The `string backend` field is an external
+URL for the `Backend`. The `address backend_address` is an Ethereum address
+owned by the `Backend` operator.
 
 ```
-function propose_backend_removal(string backend) external
+function propose_backend_removal(string backend, address backend_address) external
 ```
 Proposes that the specified `Backend` have its authorization revoked. This
 removal must be authorized by a vote of the council.
@@ -593,6 +596,21 @@ running on must be authorized for both data markets).
 ![alt text][multi_market_join]
 
 [multi_market_join]: Multi_Market_Join.png "Multi Market Join"
+
+#### Coarse Data Utilization
+**(version 0.3):** The market is responsible for maintaining a record of which
+listings have been accessed by which queries. Doing this robustly is still an
+open [research problem](#fine-grained-data-utilization). However, the current
+`Backend` spec supports a coarse-grained record by simply tracking the number
+of computations which have been run on this data market. It's assumed that each
+computation touched all listings. (This is obviously wrong, but is useful for
+initial implementation efforts).
+
+```
+function update_listings_accessed(uint num_workloads) external
+```
+This function can only be called by an authorized `Backend`. At present, only reports the number of queries run on this `Backend`.
+
 
 
 #### REST API [v0.3]
@@ -737,12 +755,6 @@ may sometimes fail, when it is not possible to compute epsilon for the query at
 hand.
 
 
-#### Data Utilization [v0.3]
-
-The market is responsible for maintaining record of which queries have accessed which datapoints. The backend system will report datapoints accessed by a given query to the market.
-
-- `Market.update_listings_accessed(query_i)`: Called by backend system after running a query. This information is stored on-chain. For reasons of gas, this may just be a simple count; each listing may maintain a simple count field which is incremented for each additional query that accesses it. (See also discussion in #32 around pricing)
-
 ## Forwarding Looking Research
 
 Features in this section are being actively researched by the Computable team,
@@ -753,7 +765,19 @@ part of this document.
 
 ### Fine Grained Data Utilization
 
-Tracking fine-grained data usage…
+Tracking fine-grained data usage is necessary for fair distribution of user
+rewards. It's expected that some listings in a `Market` will be significantly
+more valuable than others. These listings should receive greater rewards than
+less valuable listings. To first approximation, we can track data usage by
+keeping track of which listings a particular computation touches on the
+`Backend` side. The `Backend` could then report these records to the on-chain
+contracts, which would then update the usage records.
+
+This gets tricky for more complex workloads for example. A deep learning model
+will train on all data, but some listings will contribute more to the value of
+the model than others. Robustly attributing importance to particular data
+points over others is still an open question in machine learning with only a
+few research prototypes out there.
 
 ### Query Rake 
 
