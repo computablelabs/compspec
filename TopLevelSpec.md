@@ -62,8 +62,7 @@ This section provides a high level roadmap of the full protocol with links to mo
       - [Market Reserve](#market-reserve) [v0.2]: The reserve is the "bank account" associated with a given `Market`. 
       - [Investor and Owner Class](#investor-and-owner-class): All `MarketToken` holders are either investor class or owner class. These two token holder classes have different rights and responsibilities.  
       - [Algorithmic Price Curve](#algorithmic-price-curve) [v0.2]: Controls the price at which new investors may invest in market. Investor funds are deposited in reserve and new market token is minted accordingly.
-      - [Paying for Computation](#paying-for-computation) [v0.3]: Each `Market` supports queries against the data in this market. Queries are run on a `Backend` tied to the market and can be specified in a supported [query language](#query-language)
-        - [Query Pricing](#query-pricing) [v0.3]: Users have to pay to run queries. This pricing structure has to reward the various stakeholders including listing owners (data), backend system owners (compute), and the market itself (investors)
+      - [Paying for Computation](#paying-for-computation) [v0.3]: Each `Market` supports running computational workloads against the data in this market. Workloads are run on a `Backend` tied to the market and may include SQL queries and standard programs capable of executing in a standard Linux environment. Users have to pay for workloads before they may execute them on a `Backend`.
         - [Data utilization](#data-utilization) [v0.3]: The market maintains track of how many times each listing has been requested by different queries.
       - [Authorized Backends](#authorized-backends) [v0.3]: The data listed in the data market is held off-chain in a `Backend`. A council vote is used to set authorized backend systems for this market.
       - [Market Parameters](#market-parameters) [v0.3]: The `Market` is governed by a set of a parameters dictated within the `Parameterizer`.
@@ -139,23 +138,13 @@ and propagate).
 #### Market 
 **(version 0.2):** The `Market` is the central contract that governs the behavior of a data
 market. The current `Market` implementation evolved from a token curated registry (TCR) `Registry`
-implementation, but differs in a number of critical ways:
+implementation. Here's a brief overview of the core functionality of the `Market`.
 
-- The `Market` has an associated `MarketToken`. This `MarketToken` is created upon construction of the market. This token is minted and burned by various `Market` operations.
-  - The [`MarketToken`](#market-token) is a mintable and burnable ERC20 token.
-- The `Market` holds a [reserve](#market-reserve) to the Market. This reserve holds `NetworkToken` that is paid in by investors who want to take positions in market and will pay out to people who want to exit market.
-  - `Market.invest(amount)` is a new method that allows an investor to enter the market.
-  - `Market.divest()` allows any token holder to exit the market
-- The market holds an "algorithmic price curve" that provides an automatic conversion rate from `NetworkToken` to `MarketToken`. The price curve is used by `Market.invest()` to determine the current conversion rate.
-  - `Market.get_current_investment_price()` returns the current `NetworkToken`/`MarketToken` exchange rate from the price curve. This depends on the number of `NetworkToken` in the reserve.
-- The `Market` supports a payment layer for queries against the underlying data market. Query payments must be performed via `Market` before `Backends` will accept queries.
-  - `T_util` units of `MarketToken` are minted for the owner of a listing when that listing is queried. The `Backend` is responsible for reporting queried listings.
-  - `Market.update_listings_accessed(element_id)` can only be called by a `Backend` for the market.
-- Token holders in `Market` belong to one of two classes, data owner and investor.
-  - `Market.convert_to_investor()` converts a data owner to an investor.
-  - `Market.get_total_number_investor_tokens()` returns the total number of `MarketTokens` held by investors. This method will be used by Market.divest() and Market.get_current_investor_price()
-  - `Market.set_access_cost(listing)`: Callable by the owner of a listing to set price for accessing the listing.
-  - `Market.get_access_cost(listing)`: Getter to view cost.
+- The `Market` has an associated `MarketToken`. This `MarketToken` is created upon construction of the market. This token is minted and burned by various `Market` operations.The [`MarketToken`](#market-token) is itself a mintable and burnable ERC20 token.
+- The `Market` holds a [reserve](#market-reserve) to the Market. This reserve holds `NetworkToken` that is paid in by investors who want to take positions in market and will pay out to people who want to exit market. Investors can purchase `MarketToken` by paying `NetworkToken` into the reserve. They can withdraw `NetworkToken` from the reserve by burning their `MarketToken` holdings.
+- The `Market` has an "algorithmic price curve" that provides an automatic conversion rate from `NetworkToken` to `MarketToken`. The price curve is used by `Market.invest()` to determine the current conversion rate. The current conversion rate depends on the current size of the reserve.
+- The `Market` supports a payment layer for computational workloads against the underlying data market. Payments must be made via `Market` before any `Backends` will accept queries.
+- `MarketToken` holders in `Market` belong to one of two classes, data owner and investor. Only data owners can own listings in the market, and only investors have the right to withdraw from the reserve. A data owner can convert into investor class by giving up ownership of their listings. 
 
 #### Market Token
 **(version 0.2):** `MarketToken` is a mintable and burnable ERC20 token. The
@@ -169,24 +158,25 @@ wei units throughout prevents rounding error propagation and keeps contracts
 simple.
 
 #### Minting and Burning Mechanics
-**(version 0.2):** Minting happens in one of three ways:
-- Minting happens when new listings are added to the market. These listings have to pass through the validation process and be whitelisted before minting occurs.
-  - `listedReward` is the number of new `MarketTokens` that are created upon whitelisting.
-- Minting happens when an investor enters the market through calling `Market.invest()`. This rate is set by the algorithmic price curve.
-- Minting happens when the backend reports that a listing has been queried. This results in creation of `T_util` new tokens which are awarded to listing owner (which may be the market itself).
+**(version 0.2):** `MarketTokens` are dynamically minted and burned as the `Market` evolves. This flexibility is needed to accurately track the evolving value of data in a data market.
+
+`MarketTokens` are minted in one of a few scenarios explained below. In each case, the amount minted is set by the `Parameterizer` which holds `Market` parameters.
+- Minting happens when new listings are listed in the market. These listings have to be approved by a council vote. 
+- Minting happens when an investor invests in the market by making a payment into its reserve in `NetworkToken`. The algorithmic price curve controls the exchange rate which governs the number of `Markettoken` consequently minted.
+- Minting happens when a `Backend` reports that a listing has been queried. The minted tokens are awarded to the listing owner.
  
-Burning happens in one of two ways:
-- If a listing is removed from the market, its associated tokens should be burned. This happens when the listing owner removes the listing or when a successful challenge forces removal of the listing.
-- If an investor class token holder divests from the market, their divested tokens are burned. The origin of the tokens being burned does not matter.
+Burning happens in the scenarios explained below.
+- If a listing is removed from the `Market`, its associated tokens are burned. This happens when the listing owner removes the listing or when a successful challenge forces removal of the listing.
+- If an investor class token holder divests from the `Market`, their divested tokens are burned. The origin of the tokens being burned does not matter.
  
 #### Voting
-**(version 0.3):** Major decisions in the market are made by token holder vote.
+**(version 0.3):** Major decisions in the `Market` are made by token holder vote.
 These decisions include which new listings should be added to the `Market`,
 which challenged listings should be removed, and what changes should be made to
-the market parameters.
+the `Market` parameters.
 
 All votes are made by the "Council." The council is a subset of the
-token-holders in the market who hold a large fraction of the total number of
+token-holders in the `Market` who hold a large fraction of the total number of
 `MarketTokens`.  A threshold `T_council` will be imposed, and only
 `MarketToken` holders who hold more than `T_council` units of `MarketToken`will
 be allowed to vote.  Market participants who hold more than `T_council` units
@@ -375,7 +365,6 @@ rate dictated by the price-curve.
 
 Methods associated with the price curve
 
-
 ```
 function get_current_investment_price() pure returns (uint)
 ```
@@ -421,29 +410,17 @@ Callable only by the listing owner. Sets the price (in `NetworkToken` wei) to ac
 function get_access_costs(bytes32 listingHash) returns (uint)
 ```
 Returns the access cost for a listing.
-  
-- To submit a query, the querier sends a [query file](#query-language) to `Backend`. A `Backend` can set its asking price to run computation for this query. Each listing will access some specified subset of listings in market.
-  - `Backend::GET_COMPUTE_COST(QUERY_FILE)`: A call to the `Backend` via REST to get the cost for running this query.
-  - `Market.set_query_compute_cost(query_i, backend_j, cost)`: `query_i` is one of supported queries. `backend_j` is some approved backend. `cost` is in network token.
-  - `Market.get_query_compute_cost(query_i)`: Returns cheapest cost available (TODO: More refined scheme?)
-  - `Market.update_listings_accessed(query_i)`: Reports the listings which the given query will access. (TODO: How does this change as new listings are added?)
 
-- Each query causes some loss in data privacy. A charge is leveled to account for this cost. This charge may be adaptive and depend on history of past queries by given user. This loss in price is governed by the [epsilon price curve](EpsilonPriceCurve.md).
-  - `Market.get_privacy_cost(query_i)`: Cost will depend on user invoking and past queries they've run.
-- The total cost for running a query is the sum of all these terms. Here's some python-esque pseudo-code
 ```
-def get_total_cost():
-  cost = 0
-  query = Query to run
-  listings_accessed = Market.listings_accessed(query)
-  # Data access cost
-  for listing in listings_accessed:
-    cost += Market.get_access_cost(listing)
-  # Query compute cost (assume one backend)
-  cost += Market.get_query_compute_cost(query)
-  # Privacy cost
-  cost += Market.get_privacy_cost(query)
+function get_backend_cost(string backend) public view returns (uint)
 ```
+Returns the standard `Backend` cost for compute. In this version, there is only a set fee. A more refined pricing structure is still being actively researched.
+
+```
+function pay_for_compute() external
+```
+Users call this function to pay for one computational workload to be run on a `Backend`. Additional workloads will require additional calls to this function.
+  
 
 #### Authorized Backends 
 **(version 0.3):** Each data market will maintain a list of authorized
@@ -527,7 +504,9 @@ market's council with this authority. By contrast, an untrusted `Backend` is
 not trusted by the data market council and is *not* authorized to view
 unencrypted data on the network. The untrusted `Backend`operator must use more
 advanced techniques such as cryptography or trusted hardware enclaves to
-perform computation since they may never see unencrypted data.
+perform computation since they may never see unencrypted data. At present, the
+design of untrusted `Backends` is still a research problem, and the remainder
+of this section will focus exclusively on trusted `Backends`.
 
 Note that the implementation of a `Backend` is not specified by this document.
 A `Backend` is any system that responds to the API endpoints defined in this
@@ -540,10 +519,9 @@ workloads. These choices are left to the operator of the `Backend`.
 ### Backend Specification [v0.3]
 A `Backend` is a system that is responsible for storing data off-chain. Any
 `Market` contains a list of authorized `Backend`s which hold the raw data
-associated with the `Market`.
-
-Currently, `Backends` are assumed to be trustworthy. A trusted `Backend` is
-allowed to view the unencrypted data that belongs to a `Market`.
+associated with the `Market`. Currently, `Backends` are assumed to be
+trustworthy. A trusted `Backend` is allowed to view the unencrypted data that
+belongs to a `Market`.
 
 `Backend` systems are responsible for user authentication, data storage,
 encryption-at-rest, and computational workloads. In this section, we start by
@@ -553,9 +531,9 @@ REST API that the `Backend` must support.
 #### Authentication
 The `Backend` should provide a mechanism for users to authenticate. The first
 step of the authentication process will require the `Backend` to consult with
-the blockchain and will likely require the user to use a system like Metamask
-to prove their identity. Once initial authentication is complete, users can be
-issued an authentication token which they can use for a set time.
+the on-chain `Market` and will likely require the user to use a system like
+Metamask to prove their identity. Once initial authentication is complete,
+users can be issued an authentication token which they can use for a set time.
 
 #### Storage
 The `Backend` is responsible for storing the off-chain data associated with
@@ -563,6 +541,10 @@ listings. Listing candidates must convey their off-chain candidate data to a
 `Backend` node in order to be listed. This is enforced by the council vote; the
 council is responsible for querying a `Backend` to verify that off-chain data
 for the candidate listing is available before voting to list the candidate.
+
+At the time of the main-net Computable release, the `Backend` should be capable
+of supporting a TB scale datamarket. Note that a `Backend` could support
+multiple data markets, so its total storage footprint might be larger.
 
 #### Encryption at Rest
 The `Backend` is responsible for storing all off-chain data in a fashion that's
@@ -588,6 +570,19 @@ choices, but to first approximation, this feature should likely be implemented
 by having new sandboxed compute nodes being spun up dynamically to handle
 inbound queries. This might be implemented for example by running the
 computation within a docker container on a new EC2 node.
+
+The user sends a string to the `Backend` holding the script to be executed via
+the REST API. This will usually be a bash script of some form coordinating the
+execution of a program in the `Backend` Linux environment. For ease, SQL might
+be handled in a special case so the user doesn't need to set up a suitable SQL
+environment via script each time.
+
+As a note about implementation, a first design for the workload support would
+be to have the `Backend` spin up a preconfigured docker instance for each new
+user script. The script would execute within this container. Since container
+filesystems are ephemeral, scripts wouldn't be capable of altering stored data
+within the `Backend`. Optionally, the container's network access could be
+turned off so the workload can't directly download `Backend` data.
 
 Note furthermore that compute workloads may draw upon data from multiple data
 markets. (The limitation of course is that the `Backend` that the compute is
@@ -737,8 +732,8 @@ call.
 
 #### GET_COMPUTE_COST
 
-The `Backend::GET_COMPUTE_COST(query)` API call provides a Backend system's
-estimated cost to run the query. Note that the method in which
+The `Backend::GET_COMPUTE_COST(script)` API call provides a Backend system's
+estimated cost to run the script. Note that the method in which
 a particular Backend system estimates these costs is not specified in this
 document. Different Backend systems may have different cost estimation methods.
 For example, a Backend could use current price estimates on cloud providers to
@@ -774,6 +769,10 @@ will train on all data, but some listings will contribute more to the value of
 the model than others. Robustly attributing importance to particular data
 points over others is still an open question in machine learning with only a
 few research prototypes out there.
+
+### Pricing for Backend Payments
+
+How should a `Backend` set its required payment for a computational workload?
 
 ### Query Rake 
 
