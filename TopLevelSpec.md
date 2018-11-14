@@ -66,6 +66,8 @@ This section provides a high level roadmap of the full protocol with links to mo
         - [Query Pricing](#query-pricing) [v0.3]: Users have to pay to run queries. This pricing structure has to reward the various stakeholders including listing owners (data), backend system owners (compute), and the market itself (investors)
         - [Data utilization](#data-utilization) [v0.3]: The market maintains track of how many times each listing has been requested by different queries.
       - [Authorized Backends](#authorized-backends) [v0.2]: The data listed in the data market is held off-chain in a `Backend`. A council vote is used to set authorized backend systems for this market.
+      - [Market Parameters](#market-parameters) [v0.3]: The `Market` is governed by a set of a parameters dictated within the `Parameterizer`.
+        - [Reparameterization](#reparameterization) [v0.3]: The parameters that govern the `Market` can be modified with a council vote.
   - [Off-chain storage and compute systems](#off-chain-systems) [v0.2, v0.3]
     - [Backend Systems](#backend-specification) [v0.2, v0.3]: A `Backend` is responsible for securely storing data off-chain and allowing authorized users to query this data. Note that a `Backend` may serve multiple markets, and that a `Market` may have multiple backends. The `Backend` is an off-chain system that responds to the API specified in this document, and which understands how to interact with the on-chain Computable contracts.
       - [Authentication](): Backends should allow users to authenticate with them. 
@@ -222,9 +224,6 @@ off-chain data. The `dataHash` is the hash of the set of off-chain data that
 this listing corresponds to. For our purposes, this off-chain data is simply an
 arbitrary blob (a bytestring of arbitrary length) that is hashed down to a
 single `bytes32` value.
-
-The `voteBy` field specifies when this listing must be voted upon by the
-council for this market.
 
 The `listed` boolean field specifies whether this listing is officially listed
 or not in this given market. The `owner` field is the market participant who
@@ -400,15 +399,16 @@ forms of the price curve.
 order for them to be authorized for such computation, they must first make a
 payment via the `Market` contract.
 
-#### Query Pricing 
-**(version 0.3)** The `Market` controls the payment layer for queries. Users who wish to query
+The `Market` controls the payment layer for computation. Users who wish to query
 the data listed in a data market must first make a payment to `Market`. Any
 `Backend` associated with `Market` will check that payments have gone through
 before allowing for queries.
 
-- Listing owners can set an access cost for their listing (in network token). For listings which are owned by the market itself, a council vote is required to update this access cost.
+Listing owners set an access cost for their listing (denominated in `NetworkToken` wei). For listings which are owned by the market itself,  the listing default price is set in the `Parameterizer`.
+
   - `Market.set_access_cost(listing)`: Callable by listing owner to set price.
   - `Market.get_access_cost(listing)`: Getter to view cost.
+  
 - To submit a query, the querier sends a [query file](#query-language) to `Backend`. A `Backend` can set its asking price to run computation for this query. Each listing will access some specified subset of listings in market.
   - `Backend::GET_COMPUTE_COST(QUERY_FILE)`: A call to the `Backend` via REST to get the cost for running this query.
   - `Market.set_query_compute_cost(query_i, backend_j, cost)`: `query_i` is one of supported queries. `backend_j` is some approved backend. `cost` is in network token.
@@ -432,13 +432,61 @@ def get_total_cost():
   cost += Market.get_privacy_cost(query)
 ```
 
-#### Authorizing a Backend [v0.3]
-Each data market will maintain a list of authorized `Backend` systems. A full
-vote of the council (#28) will be needed to add, remove, or authorize `Backend` systems.
+#### Authorized Backends 
+**(version 0.3):** Each data market will maintain a list of authorized
+`Backend` systems. A full vote of the council (#28) will be needed to add,
+remove, or authorize `Backend` systems.
 
 - `Market.get_backend_system()`: Returns list of authorized backend systems for the market
 - `Market.add_backend_system(id)`: This must be authorized by a vote of the council.
 - `Market.remove_backend_system(id)`: This must be authorized by a vote of the council
+
+#### Market Parameters
+**(version 0.1, 0.2, 0.3):** The `Market` is governed by a set of parameters controlled by the `Parameterizer`.
+
+```
+uint challengeStake
+```
+The stake (in `MarketToken`) needed to issue a challenge to a listing.
+
+```
+uint voteBy
+```
+The time (in seconds) that a poll should remain open. This controls the length
+of the voting window in which council members can vote upon an `Market`
+listing, challenge, or reparameterization.
+
+```
+uint quorum
+```
+The percent (whole number between 0 and 100) of the council which must vote in
+favor of a `Market` modification for it to succeed.
+
+```
+uint dispensation
+```
+
+A percentage (whole number between 0 and 100) that is the fraction of `challengeStake` that the winner of a challenge receives.
+
+```
+uint conversionRate
+```
+
+The constant in the algorithmic price curve
+
+```
+uint conversionSlope
+```
+The slope in the algorithmic price curve.
+
+```
+uint listReward
+```
+The number of new `MarketToken` wei that are minted when a listing is listed.
+
+#### Reparameterization
+
+All market parameters can be changed with a council vote. The process of changing `Market` parameters is referred to as reparameterization.
 
 ## Off Chain Systems [v0.2, v0.3]
 
