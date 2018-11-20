@@ -90,6 +90,7 @@ This section provides a high level roadmap of the full protocol with links to mo
   - [Query Rake](#query-rake): What fraction of the payment goes to each stake holder?
   - [Epsilon Privacy Curve](#epsilon-privacy-curve): A curve that prices queries by the amount of privacy loss they cost to the data market owner.
   - [Untrusted Backend](#untrusted-backend): A `Backend` system which is not trusted by the owners of the data market.
+  - [SNARKs and STARKs](#snarks-and-starks): 
 - [Case Studies](#case-studies) We consider a few case studies of interesting data markets that can be constructed with the Computable protocol in this section.
   - [Censorship Resistant Data Market](#censorship-resistant-data-markets) The Computable protocol allows for the construction of data markets that are resistant to censorship efforts.
 - [Attacks](#attacks) This section catalogs known attacks on the protocol and known defenses against such attacks.
@@ -659,7 +660,6 @@ is done by recording the cryptographic hash of the program that was run and the
 cryptographic hash of the yielded result within the `Market` contract.
 
 
-
 #### REST API [v0.3]
 
 The `Backend` is responsible for serving a number of endpoints. These endpoints are specified below. The syntax `Backend::ENDPOINT(input)` is used to specify that the `Backend` supports an `ENDPOINt` which expects `input`.
@@ -880,6 +880,30 @@ currently lack the clarity to place them on the engineering roadmap.
 ![alt text][multi_market_join]
 
 [multi_market_join]: Multi_Market_Join.png "Multi Market Join"
+
+### SNARKs and STARKs
+
+The attestation and validation schemes in the core protocol use only simple
+cryptographic hash functions. As a result, council votes are required to
+finalize computations. If more sophisticated SNARKs are used for computations,
+the validation process can be verified automatically on-chain, removing the
+need for council votes to finalize computations.
+
+The main challenge with SNARK/STARK validation is scaling. At present, only
+smaller computations are feasible to generate SNARKs/STARKs for easily.
+However, it may be possible to generate SNARKs/STARKs for machine learning
+inference in the not-too-distant future. Some early research work has moved in
+this direction and maturation in cryptographic technologies will mean that basic
+inference SNARKs/STARKs may soon be viable.
+
+What would it take to create SNARKs/STARKs for learning algorithms? One basic
+fact about gradient descent is that the "forward" inference phase and the
+"backward" learning phase are very similar. So given tools for generating
+SNARKs/STARKs for the inference pass, it will be straightforward to generate
+SNARKs/STARKs for one step of learning. Let's call this a "gradient-descent
+step SNARK/STARK". Then a sequence of gradient descent steps can be broken into
+a chain of SNARKs. Using parallelization tricks (cite CODA), this means that a
+sequence of `t` gradient descent steps can be verified in time `O(log t)`.
 
 
 ## Case Studies
