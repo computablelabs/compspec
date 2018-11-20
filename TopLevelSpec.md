@@ -65,13 +65,17 @@ This section provides a high level roadmap of the full protocol with links to mo
       - [Market Reserve](#market-reserve) [v0.2]: The reserve is the "bank account" associated with a given `Market`. 
       - [Investor and Owner Class](#investor-and-owner-class) [v0.2]: All `MarketToken` holders are either investor class or owner class. These two token holder classes have different rights and responsibilities.  
       - [Algorithmic Price Curve](#algorithmic-price-curve) [v0.2]: Controls the price at which new investors may invest in market. Investor funds are deposited in reserve and new market token is minted accordingly.
-      - [Paying for Computation](#paying-for-computation) [v0.3]: Each `Market` supports running computational workloads against the data in this market. Workloads are run on a `Backend` tied to the market and may include SQL queries and standard programs capable of executing in a standard Linux environment. Users have to pay for workloads before they may execute them on a `Backend`.
+      - [Computation](#computation) [v0.3]:
+        - [Authorized Backends](#authorized-backends) [v0.3]: The data listed in the data market is held off-chain in a `Backend`. A council vote is used to set authorized backend systems for this market.
+        - [Paying for Computation](#paying-for-computation) [v0.3]: Each `Market` supports running computational workloads against the data in this market. Workloads are run on a `Backend` tied to the market and may include SQL queries and standard programs capable of executing in a standard Linux environment. Users have to pay for workloads before they may execute them on a `Backend`.
         - [Data utilization](#data-utilization) [v0.3]: The market maintains track of how many times each listing has been requested by different queries.
-      - [Authorized Backends](#authorized-backends) [v0.3]: The data listed in the data market is held off-chain in a `Backend`. A council vote is used to set authorized backend systems for this market.
+        - [Attestation of Results](#attestation-of-results) [v0.4]:
+        - [Validating Computation](#validating-computation) [v0.4]:
       - [Market Parameters](#market-parameters) [v0.3]: The `Market` is governed by a set of a parameters dictated within the `Parameterizer`.
         - [Reparameterization](#reparameterization) [v0.3]: The parameters that govern the `Market` can be modified with a council vote.
     - [`Network`](#network) [v0.4]: The top level entry point to the Computable network.The `Network` contract allows for creation of new `Markets` and associated `MarketTokens`. It also contains the network-level governance for the entire Computable ecosystem.
-    - [`NetworkToken`](#network-token) [v0.2]: The top level token for the entire network.
+      - [`NetworkToken`](#network-token) [v0.2]: The top level token for the entire network.
+      - [Network Governance](#network-governance) [v0.4]: `NetworkToken` holders can vote on governance decisions for the global `Network`.
   - [Off-chain storage and compute systems](#off-chain-systems) [v0.2, v0.3]
     - [Backend Systems](#backend-specification) [v0.2, v0.3]: A `Backend` is responsible for securely storing data off-chain and allowing authorized users to query this data. Note that a `Backend` may serve multiple markets, and that a `Market` may have multiple backends. The `Backend` is an off-chain system that responds to the API specified in this document, and which understands how to interact with the on-chain Computable contracts.
       - [Authentication](#authentication) [v0.3]: `Backends` should allow users to authenticate with them. 
@@ -360,6 +364,10 @@ function get_reserve_size() view returns (uint)
 Note that the linear form of the price curve above is not necessarily set in
 stone. It's likely that future iterations will allow users to choose alternate
 forms of the price curve.
+
+#### Computation
+
+
 
 #### Paying for Computation 
 **(version 0.3)** Users may wish to run queries against the data in the
