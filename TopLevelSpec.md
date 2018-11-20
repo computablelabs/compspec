@@ -69,13 +69,15 @@ This section provides a high level roadmap of the full protocol with links to mo
         - [Authorized Backends](#authorized-backends) [v0.3]: The data listed in the data market is held off-chain in a `Backend`. A council vote is used to set authorized backend systems for this market.
         - [Paying for Computation](#paying-for-computation) [v0.3]: Each `Market` supports running computational workloads against the data in this market. Workloads are run on a `Backend` tied to the market and may include SQL queries and standard programs capable of executing in a standard Linux environment. Users have to pay for workloads before they may execute them on a `Backend`.
         - [Data utilization](#data-utilization) [v0.3]: The market maintains track of how many times each listing has been requested by different queries.
-        - [Attestation of Results](#attestation-of-results) [v0.4]:
+        - [Attestation for Compute](#attestation-of-results) [v0.4]:
         - [Validating Computation](#validating-computation) [v0.4]:
       - [Market Parameters](#market-parameters) [v0.3]: The `Market` is governed by a set of a parameters dictated within the `Parameterizer`.
         - [Reparameterization](#reparameterization) [v0.3]: The parameters that govern the `Market` can be modified with a council vote.
     - [`Network`](#network) [v0.4]: The top level entry point to the Computable network.The `Network` contract allows for creation of new `Markets` and associated `MarketTokens`. It also contains the network-level governance for the entire Computable ecosystem.
       - [`NetworkToken`](#network-token) [v0.2]: The top level token for the entire network.
       - [Network Governance](#network-governance) [v0.4]: `NetworkToken` holders can vote on governance decisions for the global `Network`.
+      - [Network Parameters](#network-parameters) [v0.4]: The parameters that govern `Network` behavior
+      - [Attesting to Multi-Market Compute](#attesting-to-multi-market-compute) [v0.4]
   - [Off-chain storage and compute systems](#off-chain-systems) [v0.2, v0.3]
     - [Backend Systems](#backend-specification) [v0.2, v0.3]: A `Backend` is responsible for securely storing data off-chain and allowing authorized users to query this data. Note that a `Backend` may serve multiple markets, and that a `Market` may have multiple backends. The `Backend` is an off-chain system that responds to the API specified in this document, and which understands how to interact with the on-chain Computable contracts.
       - [Authentication](#authentication) [v0.3]: `Backends` should allow users to authenticate with them. 
@@ -365,8 +367,33 @@ Note that the linear form of the price curve above is not necessarily set in
 stone. It's likely that future iterations will allow users to choose alternate
 forms of the price curve.
 
-#### Computation
+#### Computation [v0.3, v0.4]
 
+The `Market` tracks computations that are performed on the data that it holds. All computation must be performed on authorized `Backend` systems. Completed computations are attested to on the `Market` contract by their hashes. In addition, off-chain computation can be validated and finalized.
+
+#### Authorized Backends 
+**(version 0.3):** Each data market will maintain a list of authorized
+`Backend` systems. A full vote of the council (#28) will be needed to add,
+remove, or authorize `Backend` systems.
+
+```
+function get_backend_system() public view returns ([string])
+```
+Returns list of authorized backend systems for the market
+
+```
+function propose_backend_addition(string backend, address backend_address) external
+```
+Proposes the addition of a new authorized `Backend`. This addition must be
+authorized by a vote of the council. The `string backend` field is an external
+URL for the `Backend`. The `address backend_address` is an Ethereum address
+owned by the `Backend` operator.
+
+```
+function propose_backend_removal(string backend, address backend_address) external
+```
+Proposes that the specified `Backend` have its authorization revoked. This
+removal must be authorized by a vote of the council.
 
 
 #### Paying for Computation 
@@ -405,30 +432,6 @@ function pay_for_compute() external
 Users call this function to pay for one computational workload to be run on a `Backend`. Additional workloads will require additional calls to this function.
   
 
-#### Authorized Backends 
-**(version 0.3):** Each data market will maintain a list of authorized
-`Backend` systems. A full vote of the council (#28) will be needed to add,
-remove, or authorize `Backend` systems.
-
-```
-function get_backend_system() public view returns ([string])
-```
-Returns list of authorized backend systems for the market
-
-```
-function propose_backend_addition(string backend, address backend_address) external
-```
-Proposes the addition of a new authorized `Backend`. This addition must be
-authorized by a vote of the council. The `string backend` field is an external
-URL for the `Backend`. The `address backend_address` is an Ethereum address
-owned by the `Backend` operator.
-
-```
-function propose_backend_removal(string backend, address backend_address) external
-```
-Proposes that the specified `Backend` have its authorization revoked. This
-removal must be authorized by a vote of the council.
-
 #### Market Parameters
 **(version 0.1, 0.2, 0.3):** The `Market` is governed by a set of parameters controlled by the `Parameterizer`.
 
@@ -450,11 +453,6 @@ uint quorum
 The percent (whole number between 0 and 100) of the council which must vote in
 favor of a `Market` modification for it to succeed.
 
-```
-uint dispensation
-```
-
-A percentage (whole number between 0 and 100) that is the fraction of `challengeStake` that the winner of a challenge receives.
 
 ```
 uint conversionRate
@@ -463,9 +461,14 @@ uint conversionRate
 The constant in the algorithmic price curve
 
 ```
-uint conversionSlope
+uint conversionSlopeNumerator
 ```
-The slope in the algorithmic price curve.
+The numerator of slope in the algorithmic price curve.
+
+```
+uint conversionSlopeDenominator
+```
+The numerator of slope in the algorithmic price curve.
 
 ```
 uint listReward
@@ -510,6 +513,33 @@ The critical function of `NetworkToken` is to allow for governance of global Com
 When is this meaningful? Imagine that a particular `Market` holds data that is universally offensive. For example, a child pornography data market would likely meet this criteria. `NetworkToken` holder can band together to challenge and remove this `Market` from the listing.
 
 Note that this is type of challenge-removal is a form of censorship. As a result, it is a heavy power that should be used judiciously. For this reason, the quorum parameter for the `Network` is purposefully set high (TBD, 75%?). Mildly controversial datasets should not be removable from `Network`, only those that are universally unacceptable.
+
+#### Network Parameters
+**(version 0.4:** The `Network` is governed by a set of parameters controlled by the `NetworkParameterizer`.
+
+```
+uint challengeStake
+```
+The stake (in `NetworkToken`) needed to issue a challenge to de-list a `Market` from `Network`.
+
+```
+uint voteBy
+```
+The time (in seconds) that a poll should remain open. This controls the length
+of the voting window in which council members can vote upon an `Market`
+listing, challenge, or reparameterization.
+
+```
+uint quorum
+```
+The percent (whole number between 0 and 100) of the council which must vote in
+favor of a `Network` modification for it to succeed. This parameter is
+intentionally set to a high value (75%) since global `Network` changes are
+powerful events which should not happen frivolously.
+
+#### Attesting to Multi Market Compute
+
+Each `Market` holds attestations to completed computations within that `Market`. However, multi-market computations can't be attested to by any single `Market`. For this reason, multi-market attestations are stored within the top-level `Network`.
 
 
 ## Off Chain Systems [v0.2, v0.3]
@@ -620,6 +650,13 @@ initial implementation efforts).
 function update_listings_accessed(uint num_workloads) external
 ```
 This function can only be called by an authorized `Backend`. At present, only reports the number of queries run on this `Backend`.
+
+#### Attestation for Compute
+
+Attestation is the process by which a `Market` records that a particular
+computation was run at a particular time and yielded a particular result. This
+is done by recording the cryptographic hash of the program that was run and the
+cryptographic hash of the yielded result within the `Market` contract.
 
 
 
