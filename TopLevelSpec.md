@@ -1,6 +1,6 @@
 # The Computable Protocol
 
-The Computable protocol creates a decentralized data market.  The global
+The Computable protocol defines a decentralized data market.  The global
 network is made up of many individual `Market` instances. Each `Market`
 conceptually holds a single dataset and is created and controlled by the owners
 of the dataset. These owners could correspond to existing organizations, or
@@ -13,6 +13,11 @@ operations. These operations allow interested parties to invest in a particular
 associated `MarketToken`. It is also possible for transactions to involve
 multiple `Market` instances. For these purposes, the Computable network has a
 global `NetworkToken` which mediates cross-`Market` interactions.
+
+The `NetworkToken` also controls the governance of the global collection of
+`Markets`. `NetworkToken` holders have the right to vote on critical governance
+parameters that control the flow of data and compute across the Computable
+ecosystem. 
 
 Everything described above is implemented in a set of smart contracts which
 currently live on the Ethereum blockchain. However, it's important to note that
@@ -29,7 +34,7 @@ This document contains both concrete engineering specifications and more
 forward looking research projections. To make the separation clear, we've
 grouped the concrete engineering specifications in one section and research
 projections in another. It's expected that the research projections will
-migrate over time into the concrete engineer section, but the precise timeline
+migrate over time into the concrete engineering section, but the precise timeline
 for this migration isn't yet known. Subsections of the concrete portion of the
 spec are tagged with the version(s) in which these features appear.
 
@@ -47,31 +52,31 @@ accordingly.
 This section provides a high level roadmap of the full protocol with links to more detailed specifications in subsequent sections. Various sections are tagged with the Computable protocol version in which they become available. Specifications for future versions are still in flux and may change.
 
 - [Concrete Engineering Specification](#concrete-engineering-specification): Features within this portion of the spec are tied to a specific version of the Computable protocol and are on the roadmap for the main network launch.
-  - [On-chain smart contracts](#on-chain-components) [v0.1, v0.2, v0.3]:
-    - [`MarketFactory`](#market-factory) [v0.3]: The top level entry point to create a new market and associated token.
-    - [`NetworkToken`](#network-token) [v0.2]: The top level token for the entire network.
+  - [On-chain smart contracts](#on-chain-components) [v0.1, v0.2, v0.3, v0.4]:
     - [`Market`](#market) [v0.2] The top level contract for a given data market.
       - [`MarketToken`](#market-token) [v0.2]: A mintable and burnable token. Each `Market` has its own `MarketToken`
         - [Minting and Burning Mechanics](#minting-and-burning-mechanics): Market tokens are minted when either new data is added, existing data is queried, or new investment is added to reserve. Market tokens are burned when data is removed or investment is withdrawn.
-      - [Voting](#voting) [v0.3]: Critical decisions within a market are performed by vote of the council (significant stake-holders). These include validation of new data, challenges to fraudulent data and changes to market structure. An ownership threshold `T_council` is imposed for franchise. The threshold will be set upon construction.
-      - [Listings](#listings): The basic elements of a data market.
+      - [Voting](#voting) [v0.3, v0.4]: Critical decisions within a market are performed by vote of the council (significant stake-holders). These include validation of new data, challenges to fraudulent data and changes to market structure. An ownership threshold `T_council` is imposed for franchise. The threshold will be set upon construction.
+      - [Listings](#listings) [v0.1, v0.2]: The basic elements of a data market.
         - [What is a Datapoint?](#what-is-a-datapoint): Each listing corresponds to an off-chain "datapoint." This section defines precisely what a "datapoint" is. Briefly, a "datapoint" is just an arbitrary bytestring.
-        - [Applying](#applying): Applying to add a listing to a data market
-        - [Challenging](#challenging): Challenging an existing listing within a data market
-        - [Exiting](#exiting): Yanking a listing from a data market. 
+        - [Applying](#applying) [v0.1]: Applying to add a listing to a data market
+        - [Challenging](#challenging) [v0.1]: Challenging an existing listing within a data market
+        - [Exiting](#exiting) [v0.1]: Yanking a listing from a data market. 
       - [Market Reserve](#market-reserve) [v0.2]: The reserve is the "bank account" associated with a given `Market`. 
-      - [Investor and Owner Class](#investor-and-owner-class): All `MarketToken` holders are either investor class or owner class. These two token holder classes have different rights and responsibilities.  
+      - [Investor and Owner Class](#investor-and-owner-class) [v0.2]: All `MarketToken` holders are either investor class or owner class. These two token holder classes have different rights and responsibilities.  
       - [Algorithmic Price Curve](#algorithmic-price-curve) [v0.2]: Controls the price at which new investors may invest in market. Investor funds are deposited in reserve and new market token is minted accordingly.
       - [Paying for Computation](#paying-for-computation) [v0.3]: Each `Market` supports running computational workloads against the data in this market. Workloads are run on a `Backend` tied to the market and may include SQL queries and standard programs capable of executing in a standard Linux environment. Users have to pay for workloads before they may execute them on a `Backend`.
         - [Data utilization](#data-utilization) [v0.3]: The market maintains track of how many times each listing has been requested by different queries.
       - [Authorized Backends](#authorized-backends) [v0.3]: The data listed in the data market is held off-chain in a `Backend`. A council vote is used to set authorized backend systems for this market.
       - [Market Parameters](#market-parameters) [v0.3]: The `Market` is governed by a set of a parameters dictated within the `Parameterizer`.
         - [Reparameterization](#reparameterization) [v0.3]: The parameters that govern the `Market` can be modified with a council vote.
+    - [`Network`](#network) [v0.4]: The top level entry point to the Computable network.The `Network` contract allows for creation of new `Markets` and associated `MarketTokens`. It also contains the network-level governance for the entire Computable ecosystem.
+    - [`NetworkToken`](#network-token) [v0.2]: The top level token for the entire network.
   - [Off-chain storage and compute systems](#off-chain-systems) [v0.2, v0.3]
     - [Backend Systems](#backend-specification) [v0.2, v0.3]: A `Backend` is responsible for securely storing data off-chain and allowing authorized users to query this data. Note that a `Backend` may serve multiple markets, and that a `Market` may have multiple backends. The `Backend` is an off-chain system that responds to the API specified in this document, and which understands how to interact with the on-chain Computable contracts.
-      - [Authentication](#authentication): `Backends` should allow users to authenticate with them. 
-      - [Storage](#storage): `Backends` must be able to persist off-chain data securely.
-      - [Encryption at Rest](#encryption-at-rest): All stored data must be encrypted.
+      - [Authentication](#authentication) [v0.3]: `Backends` should allow users to authenticate with them. 
+      - [Storage](#storage) [v0.3]: `Backends` must be able to persist off-chain data securely.
+      - [Encryption at Rest](#encryption-at-rest) [v0.3]: All stored data must be encrypted.
       - [Computational Workloads](#computational-workloads) [v0.3]: A `Backend` must be able to run computational workloads against its data. 
       - [REST API](#rest-api) [v0.3]: The `Backend`must respond to a defined set of REST API commands to perform actions such as authentication, data addition and removal, and query handling 
 - [Forward Looking Research](#forward-looking-research): Features in this section are currently being researched with the goal of eventual inclusion into the core Computable protocol. However, these features are not yet formally on the roadmap for any given Computable version release.
@@ -104,36 +109,6 @@ authorization can be handled securely by secure on-chain contracts.
 At present, on-chain contracts are implemented as Ethereum Solidity contracts.
 This does mean that the transaction/authorization speed is limited by the
 current transaction speed on Ethereum.
-
-#### Market Factory
-**(version 0.3):** The `MarketFactory` contract is responsible for creaking new
-data markets and will store a list of available data markets.
-
-```
-function create_data_market({address_1:allocation_1,...,address_n:allocation_n}, uint t_council, uint t_util, uint t_submit) external
-```
-
-TODO: The form of the function above may not work in practice due to gas costs. TBD 
-
-`MarketFactory.create_data_market()`: Constructs and launches a new data market. This is the only public way to create a new data market. There are a number of arguments needed in this constructor.
-Each data market has an associated token with it. `create_data_market()` must receive necessary information to initialize this token. It might make sense to pass in a list of `[address_1: allocation_1,...,address_n:allocation_n]` of initial token allocations to `create_data_market()`. The `MarketToken` is initialized with this initial spread of market token.
-
-```
-function get_list_of_data_data_markets() view public returns ([string])
-```
-Returns a list of available data markets.
-
-#### Network Token
-**(version 0.2):** The `NetworkToken` is the central token that powers the Computable network. It
-is used by the [MarketFactory](MarketFactory.md) to perform operations and is
-used to pay for queries executed by a `Backend`. The `NetworkToken` is implemented
-by a `StandardToken` (ERC20) for now. 
-
-The `NetworkToken` is denominated in units of "network wei". As with Ethereum,
-a network wei is 1/10^18 of a single `NetworkToken`. Using units this small
-makes arithmetic much easier to handle and reduces problem with "token dust"
-(since solidity lacks floating point, it's easy for rounding errors to build up
-and propagate).
 
 #### Market 
 **(version 0.2):** The `Market` is the central contract that governs the behavior of a data
@@ -170,7 +145,7 @@ Burning happens in the scenarios explained below.
 - If an investor class token holder divests from the `Market`, their divested tokens are burned. The origin of the tokens being burned does not matter.
  
 #### Voting
-**(version 0.3):** Major decisions in the `Market` are made by token holder vote.
+**(version 0.3, 0.4):** Major decisions in the `Market` are made by token holder vote.
 These decisions include which new listings should be added to the `Market`,
 which challenged listings should be removed, and what changes should be made to
 the `Market` parameters.
@@ -492,6 +467,38 @@ The number of new `MarketToken` wei that are minted when a listing is listed.
 #### Reparameterization
 
 All market parameters can be changed with a council vote. The process of changing `Market` parameters is referred to as reparameterization.
+
+### Network 
+**(version 0.3):** The `Network` contract is responsible for creaking new
+data markets and will store a list of available data markets.
+
+```
+function create_data_market({address_1:allocation_1,...,address_n:allocation_n}, uint t_council, uint t_util, uint t_submit) external
+```
+
+`Network.create_data_market()`: Constructs and launches a new `Market`. This method is the only public way to create a new data market. There are a number of arguments needed in this constructor.
+Each data market has an associated token with it. `create_data_market()` must receive necessary information to initialize this token. It might make sense to pass in a list of `[address_1: allocation_1,...,address_n:allocation_n]` of initial token allocations to `create_data_market()`. The `MarketToken` is initialized with this initial spread of market token.
+
+```
+function get_list_of__markets() view public returns ([string])
+```
+Returns a list of `Markets` on the network. 
+
+#### Network Token
+**(version 0.2):** The `NetworkToken` is the central token that powers the Computable network. It
+is used by the [MarketFactory](MarketFactory.md) to perform operations and is
+used to pay for queries executed by a `Backend`. The `NetworkToken` is implemented
+by a `StandardToken` (ERC20) for now. 
+
+The `NetworkToken` is denominated in units of "network wei". As with Ethereum,
+a network wei is 1/10^18 of a single `NetworkToken`. Using units this small
+makes arithmetic much easier to handle and reduces problem with "token dust"
+(since solidity lacks floating point, it's easy for rounding errors to build up
+and propagate).
+
+#### Network Governance
+The critical function of `NetworkToken` is to allow for governance of global Computable network.
+
 
 ## Off Chain Systems [v0.2, v0.3]
 
