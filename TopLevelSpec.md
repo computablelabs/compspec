@@ -497,7 +497,11 @@ makes arithmetic much easier to handle and reduces problem with "token dust"
 and propagate).
 
 #### Network Governance
-The critical function of `NetworkToken` is to allow for governance of global Computable network.
+The critical function of `NetworkToken` is to allow for governance of global Computable network. Governance plays a few roles. In particular, holders of `NetworkToken` can challenge particular `Markets` for removal from `Network`.
+
+When is this meaningful? Imagine that a particular `Market` holds data that is universally offensive. For example, a child pornography data market would likely meet this criteria. `NetworkToken` holder can band together to challenge and remove this `Market` from the listing.
+
+Note that this is type of challenge-removal is a form of censorship. As a result, it is a heavy power that should be used judiciously. For this reason, the quorum parameter for the `Network` is purposefully set high (TBD, 75%?). Mildly controversial datasets should not be removable from `Network`, only those that are universally unacceptable.
 
 
 ## Off Chain Systems [v0.2, v0.3]
