@@ -69,8 +69,8 @@ This section provides a high level roadmap of the full protocol with links to mo
         - [Authorized Backends](#authorized-backends) [v0.3]: The data listed in the data market is held off-chain in a `Backend`. A council vote is used to set authorized backend systems for this market.
         - [Paying for Computation](#paying-for-computation) [v0.3]: Each `Market` supports running computational workloads against the data in this market. Workloads are run on a `Backend` tied to the market and may include SQL queries and standard programs capable of executing in a standard Linux environment. Users have to pay for workloads before they may execute them on a `Backend`.
         - [Data utilization](#data-utilization) [v0.3]: The market maintains track of how many times each listing has been requested by different queries.
-        - [Attestation for Compute](#attestation-of-results) [v0.4]:
-        - [Validating Computation](#validating-computation) [v0.4]:
+        - [Attestation for Compute](#attestation-of-results) [v0.4]: Compute performed on data in a data markets is "attested" to on-chain. That is, the results of the compute are hashed and stored on-chain.
+        - [Validating Computation](#validating-computation) [v0.4]: Optionally, compute can be validated. That is, a protocol can be executed which verifies that the compute was performed correctly off-chain.
       - [Market Parameters](#market-parameters) [v0.3]: The `Market` is governed by a set of a parameters dictated within the `Parameterizer`.
         - [Reparameterization](#reparameterization) [v0.3]: The parameters that govern the `Market` can be modified with a council vote.
     - [`Network`](#network) [v0.4]: The top level entry point to the Computable network.The `Network` contract allows for creation of new `Markets` and associated `MarketTokens`. It also contains the network-level governance for the entire Computable ecosystem.
@@ -90,7 +90,7 @@ This section provides a high level roadmap of the full protocol with links to mo
   - [Query Rake](#query-rake): What fraction of the payment goes to each stake holder?
   - [Epsilon Privacy Curve](#epsilon-privacy-curve): A curve that prices queries by the amount of privacy loss they cost to the data market owner.
   - [Untrusted Backend](#untrusted-backend): A `Backend` system which is not trusted by the owners of the data market.
-  - [SNARKs and STARKs](#snarks-and-starks): 
+  - [SNARKs and STARKs](#snarks-and-starks): Validating AI computations using succinct argument proofs.
 - [Case Studies](#case-studies) We consider a few case studies of interesting data markets that can be constructed with the Computable protocol in this section.
   - [Censorship Resistant Data Market](#censorship-resistant-data-markets) The Computable protocol allows for the construction of data markets that are resistant to censorship efforts.
 - [Attacks](#attacks) This section catalogs known attacks on the protocol and known defenses against such attacks.
@@ -540,7 +540,10 @@ powerful events which should not happen frivolously.
 
 #### Attesting to Multi Market Compute
 
-Each `Market` holds attestations to completed computations within that `Market`. However, multi-market computations can't be attested to by any single `Market`. For this reason, multi-market attestations are stored within the top-level `Network`.
+Each `Market` holds attestations to completed computations within that
+`Market`. However, multi-market computations can't be attested to by any single
+`Market`. For this reason, multi-market attestations are stored within the
+top-level `Network`.
 
 
 ## Off Chain Systems [v0.2, v0.3]
@@ -658,6 +661,24 @@ Attestation is the process by which a `Market` records that a particular
 computation was run at a particular time and yielded a particular result. This
 is done by recording the cryptographic hash of the program that was run and the
 cryptographic hash of the yielded result within the `Market` contract.
+
+```
+function store_attestation(bytes32 programHash, bytes32 resultHash) external
+```
+This function can only be called by an authorized `Backend`. Here `programHash`
+is the cryptographic hash of some off-chain program. (For our purposes, a
+program is simply some bytestring that is understood by `Backends`).
+`resultHash` is the cryptographic hash of the result of running the program on
+the given `Backend`.
+
+#### Validating Computation
+Compute jobs are performed off-chain. As a result, the security guarantees that
+on-chain contracts provide do not directly extend to the off-chain workloads
+that users execute on `Backends`. What then prevents a `Backend` from
+performing a computation incorrectly, either due to honest error or malicious
+intent?
+
+For these reasons, the Computable protocol allows for on-chain validation of off-chain compute.
 
 
 #### REST API [v0.3]
@@ -904,6 +925,10 @@ SNARKs/STARKs for one step of learning. Let's call this a "gradient-descent
 step SNARK/STARK". Then a sequence of gradient descent steps can be broken into
 a chain of SNARKs. Using parallelization tricks (cite CODA), this means that a
 sequence of `t` gradient descent steps can be verified in time `O(log t)`.
+
+One possibility is to implement an automatic differentiator program in C. Then
+the state transition circuit would be one step of the automatic differentiator.
+Then gradient descent could be parallelized out.
 
 
 ## Case Studies
