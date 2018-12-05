@@ -140,7 +140,9 @@ wei units throughout prevents rounding error propagation and keeps contracts
 simple.
 
 #### Minting and Burning Mechanics
-**(version 0.2):** `MarketTokens` are dynamically minted and burned as the `Market` evolves. This flexibility is needed to accurately track the evolving value of data in a data market.
+**(version 0.2):** `MarketTokens` are dynamically minted and burned as the
+`Market` evolves. This flexibility is needed to accurately track the evolving
+value of data in a data market.
 
 `MarketTokens` are minted in one of a few scenarios explained below. In each case, the amount minted is set by the `Parameterizer` which holds `Market` parameters.
 - Minting happens when new listings are listed in the market. These listings have to be approved by a council vote. 
@@ -178,19 +180,19 @@ attack surface.
 #### Listings 
 **(versions 0.2,0.3):** A market holds a set of `Listings`. Each listing corresponds to an element of the
 `Market` which is held off-chain in some (possibly multiple) `Backend` systems.
-Newcomers to the market can call `Market.apply()` to apply to have their
+Newcomers to the market can call `Market.list()` to apply to have their
 listing added to the market. A listing consists of an off-chain datapoint (or
 datapoints) and an on-chain listing structure. (We haven't defined "datapoint"
 here yet.) We reproduce the fields of the on-chain listing structure below.
 
 ```
 struct Listing {
+  uint index; // pointer to the location of this listing's hash in the unordered keys array
   bool listed; // a 'listing' if true
   address owner; // owns the listing
-  uint supply; // Number of tokens in the listing (both deposited and minted).
-  uint challenge; // corresponts to a poll id in Voting if present
-  bytes32 dataHash; // Hash of the off-chain data-point this listing corresponds to
-  uint rewards; // Number of Market tokens that have been minted for this listing.
+  uint supply; // Number of tokens in the listing, banked by the market, put there by the owner
+  bytes32 dataHash; // A magical construct which flies across the sky, pooping unicorns which, in turn, poop rainbows.
+  uint rewards; // Number of Market tokens that have been minted + any challenge winnings
 }
 ```
 
@@ -199,7 +201,8 @@ the `Listing` works. The `Listing` is an on-chain record of a chunk of
 off-chain data. The `dataHash` is the hash of the set of off-chain data that
 this listing corresponds to. For our purposes, this off-chain data is simply an
 arbitrary blob (a bytestring of arbitrary length) that is hashed down to a
-single `bytes32` value.
+single `bytes32` value. `index` allows for easy retrieval of the listing hash
+for the `Listing` on-chain.
 
 The `listed` boolean field specifies whether this listing is officially listed
 or not in this given market. The `owner` field is the market participant who
@@ -245,17 +248,18 @@ Ethereum is not yet sufficient to do bulk uploads of datasets otherwise.
 #### Applying
 **(version 0.1):** Applying is the process by which a new listing is added to a data market. To
 apply, a market participant computes the hash of their off-chain data and
-proposes the addition of their data to the market by invoking `Market.apply()`:
+proposes the addition of their data to the market by invoking `Market.list()`:
 
 ```
-function apply(bytes32 listingHash, uint amount, string data) external
+function list(bytes32 listingHash, bytes32 dataHash, uint amount) external returns (bool)
 ```
 
 All applications trigger a vote on the new listing by appropriate market
 stakeholders (either all token-holders or the market council). If a listing
 vote is cleared, it is said to be listed. Note that application is a *minting*
 event whereby new `MarketTokens` are created. More detail on this can be found
-in the section on minting.
+in the section on minting. The `list()` method returns a boolean that is true
+if application is successful.
 
 #### Challenging
 **(version 0.1, 0.3):** Challenging is the process by which a listing in a data market can be
@@ -267,6 +271,10 @@ If the challenge fails, the challenging party is penalized with a loss of stake
 Note that unlike a token curated registry, the council receives no reward for
 voting upon a challenge. Only the victor of the challenge receives a financial
 reward which comes directly from the loser of of the challenge.
+
+```
+function challenge(bytes32 listingHash) external returns (bool)
+```
 
 #### Exiting
 **(version 0.1):** Listing owners can yank their listings from the market. This
@@ -348,19 +356,19 @@ rate dictated by the price-curve.
 Methods associated with the price curve
 
 ```
-function get_current_investment_price() pure returns (uint)
+function getInvestmentPrice() public view returns (uint)
 ```
-`Market.get_current_investment_price()` reports the current
+`Market.getInvestmentPrice()` reports the current
 `NetworkToken`/`MarketToken` conversion rate. Mathematically, the first version
-will be a linear function. That is, `Market.get_current_investment_price() =
-base_conversion_rate + conversion_slope * Market.get_reserve_size()` where
+will be a linear function. That is, `Market.getInvestmentPrice() =
+base_conversion_rate + conversion_slope * Market.getReserveSize()` where
 `base_conversion_rate` and `conversion_slope` are parameters defined by the
 market creator in the `Parameterizer`.
 
 ```
-function get_reserve_size() view returns (uint)
+function getReserveSize() view returns (uint)
 ```
-`Market.get_reserve_size()` returns the size of current market reserve in `NetworkToken` wei
+`Market.getReserveSize()` returns the size of current market reserve in `NetworkToken` wei
 
 
 
@@ -378,12 +386,12 @@ The `Market` tracks computations that are performed on the data that it holds. A
 remove, or authorize `Backend` systems.
 
 ```
-function get_backend_system() public view returns ([string])
+function getBackendSystem() public view returns ([string])
 ```
 Returns list of authorized backend systems for the market
 
 ```
-function propose_backend_addition(string backend, address backend_address) external
+function proposeBackendAddition(string backend, address backend_address) external
 ```
 Proposes the addition of a new authorized `Backend`. This addition must be
 authorized by a vote of the council. The `string backend` field is an external
@@ -391,7 +399,7 @@ URL for the `Backend`. The `address backend_address` is an Ethereum address
 owned by the `Backend` operator.
 
 ```
-function propose_backend_removal(string backend, address backend_address) external
+function proposeBackendRemoval(string backend, address backend_address) external
 ```
 Proposes that the specified `Backend` have its authorization revoked. This
 removal must be authorized by a vote of the council.
@@ -413,22 +421,22 @@ Listing owners set an access cost for their listing (denominated in
 listing default price is set in the `Parameterizer`.
 
 ```
-function set_access_cost(bytes32 listingHash, uint cost) external
+function setAccessCost(bytes32 listingHash, uint cost) external
 ```
 Callable only by the listing owner. Sets the price (in `NetworkToken` wei) to access this listing
 
 ```
-function get_access_costs(bytes32 listingHash) returns (uint)
+function getAccessCosts(bytes32 listingHash) returns (uint)
 ```
 Returns the access cost for a listing.
 
 ```
-function get_backend_cost(string backend) public view returns (uint)
+function getBackendCost(string backend) public view returns (uint)
 ```
 Returns the standard `Backend` cost for compute. In this version, there is only a set fee. A more refined pricing structure is still being actively researched.
 
 ```
-function pay_for_compute() external
+function payForCompute() external
 ```
 Users call this function to pay for one computational workload to be run on a `Backend`. Additional workloads will require additional calls to this function.
   
@@ -485,16 +493,17 @@ All market parameters can be changed with a council vote. The process of changin
 data markets and will store a list of available data markets.
 
 ```
-function create_data_market({address_1:allocation_1,...,address_n:allocation_n}, uint t_council, uint t_util, uint t_submit) external
+function createDataMarket({address_1:allocation_1,...,address_n:allocation_n}, uint t_council, uint t_util, uint t_submit) external
 ```
 
-`Network.create_data_market()`: Constructs and launches a new `Market`. This method is the only public way to create a new data market. There are a number of arguments needed in this constructor.
-Each data market has an associated token with it. `create_data_market()` must receive necessary information to initialize this token. It might make sense to pass in a list of `[address_1: allocation_1,...,address_n:allocation_n]` of initial token allocations to `create_data_market()`. The `MarketToken` is initialized with this initial spread of market token.
+`Network.createDataMarket()`: Constructs and launches a new `Market`. This method is the only public way to create a new data market. There are a number of arguments needed in this constructor.
+Each data market has an associated token with it. `createDataMarket()` must receive necessary information to initialize this token. It might make sense to pass in a list of `[address_1: allocation_1,...,address_n:allocation_n]` of initial token allocations to `createDataMarket()`. The `MarketToken` is initialized with this initial spread of market token.
 
 ```
-function get_list_of__markets() view public returns ([string])
+function getListOfMarkets() view public returns ([string])
 ```
-Returns a list of `Markets` on the network. 
+Returns a list of `Markets` on the network.
+
 
 #### Network Token
 **(version 0.2):** The `NetworkToken` is the central token that powers the Computable network. It
@@ -515,6 +524,17 @@ When is this meaningful? Imagine that a particular `Market` holds data that is u
 
 Note that this is type of challenge-removal is a form of censorship. As a result, it is a heavy power that should be used judiciously. For this reason, the quorum parameter for the `Network` is purposefully set high (TBD, 75%?). Mildly controversial datasets should not be removable from `Network`, only those that are universally unacceptable.
 
+The `Network` contract holds a list of `Market`s. These markets can be added and removed to the network.
+
+```
+function listMarket(bytes32 marketHash) external returns (bool)
+```
+
+Individual `Markets` can be challenged as well.
+
+```
+function challengeMarket(bytes32 marketHash) external returns (bool)
+```
 #### Network Parameters
 **(version 0.4:** The `Network` is governed by a set of parameters controlled by the `NetworkParameterizer`.
 
