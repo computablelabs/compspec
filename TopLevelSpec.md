@@ -69,15 +69,13 @@ This section provides a high level roadmap of the full protocol with links to mo
         - [Authorized Backends](#authorized-backends) [v0.3]: The data listed in the data market is held off-chain in a `Backend`. A council vote is used to set authorized backend systems for this market.
         - [Paying for Computation](#paying-for-computation) [v0.3]: Each `Market` supports running computational workloads against the data in this market. Workloads are run on a `Backend` tied to the market and may include SQL queries and standard programs capable of executing in a standard Linux environment. Users have to pay for workloads before they may execute them on a `Backend`.
         - [Data utilization](#data-utilization) [v0.3]: The market maintains track of how many times each listing has been requested by different queries.
-        - [Attestation for Compute](#attestation-of-results) [v0.4]: Compute performed on data in a data markets is "attested" to on-chain. That is, the results of the compute are hashed and stored on-chain.
-        - [Validating Computation](#validating-computation) [v0.4]: Optionally, compute can be validated. That is, a protocol can be executed which verifies that the compute was performed correctly off-chain.
       - [Market Parameters](#market-parameters) [v0.3]: The `Market` is governed by a set of a parameters dictated within the `Parameterizer`.
         - [Reparameterization](#reparameterization) [v0.3]: The parameters that govern the `Market` can be modified with a council vote.
     - [`Network`](#network) [v0.4]: The top level entry point to the Computable network.The `Network` contract allows for creation of new `Markets` and associated `MarketTokens`. It also contains the network-level governance for the entire Computable ecosystem.
       - [`NetworkToken`](#network-token) [v0.2]: The top level token for the entire network.
       - [Network Governance](#network-governance) [v0.4]: `NetworkToken` holders can vote on governance decisions for the global `Network`.
       - [Network Parameters](#network-parameters) [v0.4]: The parameters that govern `Network` behavior
-      - [Attesting to Multi-Market Compute](#attesting-to-multi-market-compute) [v0.4]
+      - [Validated Computation](#validated-computation) [v0.4] Compute performed within and between `Markets` in the `Network` can be validated at the network level. Results of the computation are hashed and stored on-chain, along with zk-STARK proofs attesting to the correctness of the computation.
   - [Off-chain storage and compute systems](#off-chain-systems) [v0.2, v0.3]
     - [Backend Systems](#backend-specification) [v0.2, v0.3]: A `Backend` is responsible for securely storing data off-chain and allowing authorized users to query this data. Note that a `Backend` may serve multiple markets, and that a `Market` may have multiple backends. The `Backend` is an off-chain system that responds to the API specified in this document, and which understands how to interact with the on-chain Computable contracts.
       - [Authentication](#authentication) [v0.3]: `Backends` should allow users to authenticate with them. 
@@ -558,12 +556,42 @@ favor of a `Network` modification for it to succeed. This parameter is
 intentionally set to a high value (75%) since global `Network` changes are
 powerful events which should not happen frivolously.
 
-#### Attesting to Multi Market Compute
+#### Validated Computation
 
-Each `Market` holds attestations to completed computations within that
-`Market`. However, multi-market computations can't be attested to by any single
-`Market`. For this reason, multi-market attestations are stored within the
-top-level `Network`.
+Compute jobs are performed off-chain. As a result, the security guarantees that
+on-chain contracts provide do not directly extend to the off-chain workloads
+that users execute on `Backends`. What then prevents a `Backend` from
+performing a computation incorrectly, either due to honest error or malicious
+intent?
+
+A powerful feature which the network provides is the ability to validate
+computation performed on or within data `Markets` in the `Network`.
+Validation involves attestation and proofs.
+
+Attestation is the process by which `Network` records that a particular
+computation was run at a particular time and yielded a particular result. This
+is done by recording the cryptographic hash of the program that was run and the
+cryptographic hash of the yielded result.
+
+```
+function storeAttestation(bytes32 programHash, bytes32 resultHash) external
+```
+This function can only be called by an authorized `Backend`. Here `programHash`
+is the cryptographic hash of some off-chain program. (For our purposes, a
+program is simply some bytestring that is understood by `Backends`).
+`resultHash` is the cryptographic hash of the result of running the program on
+the given `Backend`.
+
+Note that attestations and validation for multi-`Market` computations and
+single-`Market` computations are both stored at the `Network` level.
+
+```
+function validateProof(bytes32 proofHash, bytes32 programHash, bytes32 resultHash) external returns (bool)
+```
+
+```
+function challengeProof(bytes32 proofHash) external returns (bool)
+```
 
 
 ## Off Chain Systems [v0.2, v0.3]
@@ -674,31 +702,6 @@ initial implementation efforts).
 function update_listings_accessed(uint num_workloads) external
 ```
 This function can only be called by an authorized `Backend`. At present, only reports the number of queries run on this `Backend`.
-
-#### Attestation for Compute
-
-Attestation is the process by which a `Market` records that a particular
-computation was run at a particular time and yielded a particular result. This
-is done by recording the cryptographic hash of the program that was run and the
-cryptographic hash of the yielded result within the `Market` contract.
-
-```
-function store_attestation(bytes32 programHash, bytes32 resultHash) external
-```
-This function can only be called by an authorized `Backend`. Here `programHash`
-is the cryptographic hash of some off-chain program. (For our purposes, a
-program is simply some bytestring that is understood by `Backends`).
-`resultHash` is the cryptographic hash of the result of running the program on
-the given `Backend`.
-
-#### Validating Computation
-Compute jobs are performed off-chain. As a result, the security guarantees that
-on-chain contracts provide do not directly extend to the off-chain workloads
-that users execute on `Backends`. What then prevents a `Backend` from
-performing a computation incorrectly, either due to honest error or malicious
-intent?
-
-For these reasons, the Computable protocol allows for on-chain validation of off-chain compute.
 
 
 #### REST API [v0.3]
