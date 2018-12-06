@@ -516,13 +516,26 @@ makes arithmetic much easier to handle and reduces problem with "token dust"
 and propagate).
 
 #### Network Governance
-The critical function of `NetworkToken` is to allow for governance of global Computable network. Governance plays a few roles. In particular, holders of `NetworkToken` can challenge particular `Markets` for removal from `Network`.
+The critical function of `NetworkToken` is to allow for governance of global
+Computable network. Governance plays a few roles. Holders of `NetworkToken` can
+challenge particular `Markets` for removal from `Network` and can authorize the
+addition of new `Markets` to the `Network`. In addition, `NetworkToken` holders
+can validate computation performed among and between `Markets` in the
+`Network`.
 
-When is this meaningful? Imagine that a particular `Market` holds data that is universally offensive. For example, a child pornography data market would likely meet this criteria. `NetworkToken` holder can band together to challenge and remove this `Market` from the listing.
+When is this meaningful? Imagine that a particular `Market` holds data that is
+universally offensive. For example, a child pornography data market would
+likely meet this criteria. `NetworkToken` holder can band together to challenge
+and remove this `Market` from the listing.
 
-Note that this is type of challenge-removal is a form of censorship. As a result, it is a heavy power that should be used judiciously. For this reason, the quorum parameter for the `Network` is purposefully set high (TBD, 75%?). Mildly controversial datasets should not be removable from `Network`, only those that are universally unacceptable.
+Note that this is type of challenge-removal is a form of censorship. As a
+result, it is a heavy power that should be used judiciously. For this reason,
+the quorum parameter for the `Network` is purposefully set high by default.
+Mildly controversial datasets should not be removable from `Network`, only
+those that are universally unacceptable.
 
-The `Network` contract holds a list of `Market`s. These markets can be added and removed to the network.
+The `Network` contract holds a list of `Market`s. These markets can be added
+and removed to the network.
 
 ```
 function listMarket(bytes32 marketHash) external returns (bool)
@@ -533,8 +546,21 @@ Individual `Markets` can be challenged as well.
 ```
 function challengeMarket(bytes32 marketHash) external returns (bool)
 ```
+
+#### Network Voting
+
+Governance decisions at the `Network` level are performed by a vote of all
+`NetworkToken` holders. This vote is stake-weighted. Future iterations of the
+Computable protocol will allow for more advanced voting support such as
+delegating of votes to proxy voters or the ability to vote with `NetworkToken`
+that is held in cold storage.
+
 #### Network Parameters
 **(version 0.4:** The `Network` is governed by a set of parameters controlled by the `NetworkParameterizer`.
+```
+uint listingStake
+```
+The stake (in `NetworkToken`) needed to apply to list a `Market` on the `Network`.
 
 ```
 uint challengeStake
@@ -555,6 +581,11 @@ The percent (whole number between 0 and 100) of the council which must vote in
 favor of a `Network` modification for it to succeed. This parameter is
 intentionally set to a high value (75%) since global `Network` changes are
 powerful events which should not happen frivolously.
+
+```
+uint validationFee 
+```
+The fee in `NetworkToken` that must be paid to have a computation validated by `Network`.
 
 #### Validated Computation
 
