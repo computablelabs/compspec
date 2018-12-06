@@ -876,6 +876,19 @@ parameter epsilon that is associated with this given query. Note that this call
 may sometimes fail, when it is not possible to compute epsilon for the query at
 hand.
 
+### Off Chain Proof Validators [v0.4]
+
+The off-chain proof validators are responsible for validating of proofs that
+are performed on the network. These are zk-STARK proofs, so validators will run
+the validation computation for STARKs. At present, STARKs are still too large
+to store on-chain (on the order of megabytes). As a result, STARK proofs must
+be stored and validated off-chain. 
+
+At a future date, it may be possible that systems like Ethereum support
+on-chain validation of zk-STARKs, so the roles of the validator may eventually
+diminish. However, this timeline may be extended, so validators will likely
+play a crucial role in the ecosystem for some time.
+
 
 ## Forwarding Looking Research
 
