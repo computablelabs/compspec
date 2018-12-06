@@ -889,6 +889,16 @@ on-chain validation of zk-STARKs, so the roles of the validator may eventually
 diminish. However, this timeline may be extended, so validators will likely
 play a crucial role in the ecosystem for some time.
 
+#### Proof Storage
+
+Proof validators are responsible for storing all validated proofs. These proofs
+must be retrievable upon request.
+
+#### Proof Validation
+
+The proof validators must be able to run cryptographic software validating
+zk-STARK correctness.
+
 
 ## Forwarding Looking Research
 
