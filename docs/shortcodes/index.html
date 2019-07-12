@@ -14,14 +14,14 @@
     
     Shortcodes
   
- | My New Hugo Site</title>
+ | Computable Spec</title>
 
 
 
-<link rel="stylesheet" href="/book.min.f4161f5e2de53a2e927f51df1611323a2a12cccb2681f23cb6fc3517852e8643.css">
+<link rel="stylesheet" href="../../book.min.f4161f5e2de53a2e927f51df1611323a2a12cccb2681f23cb6fc3517852e8643.css">
 
 
-<link rel="icon" href="/favicon.png" type="image/x-icon">
+<link rel="icon" href="../../favicon.png" type="image/x-icon">
 
 
 <!--
@@ -39,218 +39,37 @@ https://github.com/alex-shpak/hugo-book
     <aside class="book-menu fixed">
       <nav>
 <h2 class="book-brand">
-  <a href="http://example.org/">My New Hugo Site</a>
+  <a href="https://computablelabs.github.io/compspec/">Computable Spec</a>
 </h2>
 
 
 
     
-
   
   
-
-
-
-
-
- 
-  
-    
-
-  <ul>
-    
-      
-
-  <li >
-    
-      
-
-  <a href="/docs/sub-section/" >
-    
-  
-    
-    
-    Sub Section
   
 
-  </a>
+  <style>
+  nav ul a[href$="\2f docs\2fshortcodes\2f "] {
+      color: #0b3a53;
+  }
+  </style>
 
+<ul>
+<li><a href="../../"><strong>Introduction</strong></a></li>
+<li><a href="../../docs/examples/">Examples</a>
 
-    
-
-    
-
-  <ul>
-    
-    
-    <li>
-      
-
-  <a href="/docs/sub-section/ego-numen/" >
-    
-  
-    
-    Ego Numen
-  
-
-  </a>
-
-
-    </li>
-    
-    <li>
-      
-
-  <a href="/docs/sub-section/natusque/" >
-    
-  
-    
-    Natusque
-  
-
-  </a>
-
-
-    </li>
-    
-  </ul>
-
-
-  </li>
-
-
-    
-    
-    <li>
-      
-
-  <a href="/docs/advanced/" >
-    
-  
-    
-    Advanced
-  
-
-  </a>
-
-
-    </li>
-    
-    <li>
-      
-
-  <a href="/docs/client/" >
-    
-  
-    
-    Client
-  
-
-  </a>
-
-
-    </li>
-    
-    <li>
-      
-
-  <a href="/docs/examples/" >
-    
-  
-    
-    Examples
-  
-
-  </a>
-
-
-    </li>
-    
-    <li>
-      
-
-  <a href="/docs/server/" >
-    
-  
-    
-    Server
-  
-
-  </a>
-
-
-    </li>
-    
-    <li>
-      
-
-  <a href="/docs/shortcodes/"  class="active">
-    
-  
-    
-    Shortcodes
-  
-
-  </a>
-
-
-    </li>
-    
-    <li>
-      
-
-  <a href="/docs/with-toc/" >
-    
-  
-    
-    With Toc
-  
-
-  </a>
-
-
-    </li>
-    
-    <li>
-      
-
-  <a href="/docs/without-toc/" >
-    
-  
-    
-    Without Toc
-  
-
-  </a>
-
-
-    </li>
-    
-    <li>
-      
-
-  <a href="/docs/datatrust/" >
-    
-  
-    
-    The Datatrust
-  
-
-  </a>
-
-
-    </li>
-    
-  </ul>
-
-
-  
-
-
-
-
-
-
+<ul>
+<li><a href="../../docs/with-toc/">With Table of Contents</a></li>
+<li><a href="../../docs/without-toc/">Without Table of Contents</a></li>
+<li><a href="../../docs/shortcodes/">Shortcodes</a><br /></li>
+</ul></li>
+<li><strong>More Examples</strong></li>
+<li><a href="../../docs/server/">Server</a></li>
+<li><a href="../../docs/client/">Client</a></li>
+<li><a href="../../docs/advanced/">Advanced</a><br /></li>
+<li><a href="../../posts/"><strong>Blog</strong></a></li>
+</ul>
 
 
 
@@ -259,13 +78,25 @@ https://github.com/alex-shpak/hugo-book
 </nav>
 
 
+  
+<script>
+(function() {
+  var menu = document.querySelector('aside.book-menu nav')
+  addEventListener('beforeunload', function(event) {
+    localStorage.setItem('menu.scrollTop', menu.scrollTop)
+  });
+  menu.scrollTop = localStorage.getItem('menu.scrollTop')
+})()
+</script>
+
+
 
     </aside>
 
     <div class="book-page">
       <header class="align-center justify-between book-header">
   <label for="menu-control">
-    <img src="/svg/menu.svg" alt="Menu" />
+    <img src="../../svg/menu.svg" alt="Menu" />
   </label>
   <strong>
   
@@ -283,13 +114,10 @@ https://github.com/alex-shpak/hugo-book
 <h2 id="expand-shortcode">Expand shortcode</h2>
 
 <h3 id="default">Default</h3>
-
-<pre><code class="language-tpl">{{&lt; expand &gt;}}
-## Markdown content
-Lorem markdownum insigne...
-{{&lt; /expand &gt;}}
-</code></pre>
-
+<div class="highlight"><pre class="chroma"><code class="language-tpl" data-lang="tpl"><span class="cp">{{</span><span class="o">&lt;</span> <span class="na">expand</span> <span class="o">&gt;</span><span class="cp">}}</span><span class="x">
+</span><span class="x">## Markdown content
+</span><span class="x">Lorem markdownum insigne...
+</span><span class="x"></span><span class="cp">{{</span><span class="o">&lt;</span> <span class="o">/</span><span class="na">expand</span> <span class="o">&gt;</span><span class="cp">}}</span></code></pre></div>
 <div class="book-expand">
   <label>
     <div class="book-expand-head flex justify-between">
@@ -307,13 +135,10 @@ Lorem markdownum insigne...
 
 
 <h3 id="with-custom-label">With Custom Label</h3>
-
-<pre><code class="language-tpl">{{&lt; expand &quot;Custom Label&quot; &quot;...&quot; &gt;}}
-## Markdown content
-Lorem markdownum insigne...
-{{&lt; /expand &gt;}}
-</code></pre>
-
+<div class="highlight"><pre class="chroma"><code class="language-tpl" data-lang="tpl"><span class="cp">{{</span><span class="o">&lt;</span> <span class="na">expand</span> <span class="s2">&#34;Custom Label&#34;</span> <span class="s2">&#34;...&#34;</span> <span class="o">&gt;</span><span class="cp">}}</span><span class="x">
+</span><span class="x">## Markdown content
+</span><span class="x">Lorem markdownum insigne...
+</span><span class="x"></span><span class="cp">{{</span><span class="o">&lt;</span> <span class="o">/</span><span class="na">expand</span> <span class="o">&gt;</span><span class="cp">}}</span></code></pre></div>
 <div class="book-expand">
   <label>
     <div class="book-expand-head flex justify-between">
@@ -334,18 +159,15 @@ Miseratus fonte Ditis conubia.
 
 
 <h2 id="buttons">Buttons</h2>
-
-<pre><code class="language-tpl">{{&lt; button relref=&quot;/&quot; [class=&quot;...&quot;] &gt;}}Get Home{{&lt; /button &gt;}}
-{{&lt; button href=&quot;https://github.com/alex-shpak/hugo-book&quot; &gt;}}Contribute{{&lt; /button &gt;}}
-</code></pre>
-
+<div class="highlight"><pre class="chroma"><code class="language-tpl" data-lang="tpl"><span class="cp">{{</span><span class="o">&lt;</span> <span class="na">button</span> <span class="na">relref</span><span class="o">=</span><span class="s2">&#34;/&#34;</span> <span class="o">[</span><span class="na">class</span><span class="o">=</span><span class="s2">&#34;...&#34;</span><span class="o">]</span> <span class="o">&gt;</span><span class="cp">}}</span><span class="x">Get Home</span><span class="cp">{{</span><span class="o">&lt;</span> <span class="o">/</span><span class="na">button</span> <span class="o">&gt;</span><span class="cp">}}</span><span class="x">
+</span><span class="x"></span><span class="cp">{{</span><span class="o">&lt;</span> <span class="na">button</span> <span class="na">href</span><span class="o">=</span><span class="s2">&#34;https://github.com/alex-shpak/hugo-book&#34;</span> <span class="o">&gt;</span><span class="cp">}}</span><span class="x">Contribute</span><span class="cp">{{</span><span class="o">&lt;</span> <span class="o">/</span><span class="na">button</span> <span class="o">&gt;</span><span class="cp">}}</span></code></pre></div>
 <p>
 
 
 
   
 
-<a  href="/"   class="book-btn">
+<a  href="../../"   class="book-btn">
   Get Home
 </a>
 
@@ -362,14 +184,11 @@ Miseratus fonte Ditis conubia.
 </p>
 
 <h2 id="tabs">Tabs</h2>
-
-<pre><code class="language-tpl">{{&lt; tabs &quot;uniqueid&quot; &gt;}}
-{{&lt; tab &quot;MacOS&quot; &gt;}} # MacOS Content {{&lt; /tab &gt;}}
-{{&lt; tab &quot;Linux&quot; &gt;}} # Linux Content {{&lt; /tab &gt;}}
-{{&lt; tab &quot;Windows&quot; &gt;}} # Windows Content {{&lt; /tab &gt;}}
-{{&lt; /tabs &gt;}}
-</code></pre>
-
+<div class="highlight"><pre class="chroma"><code class="language-tpl" data-lang="tpl"><span class="cp">{{</span><span class="o">&lt;</span> <span class="na">tabs</span> <span class="s2">&#34;uniqueid&#34;</span> <span class="o">&gt;</span><span class="cp">}}</span><span class="x">
+</span><span class="x"></span><span class="cp">{{</span><span class="o">&lt;</span> <span class="na">tab</span> <span class="s2">&#34;MacOS&#34;</span> <span class="o">&gt;</span><span class="cp">}}</span><span class="x"> # MacOS Content </span><span class="cp">{{</span><span class="o">&lt;</span> <span class="o">/</span><span class="na">tab</span> <span class="o">&gt;</span><span class="cp">}}</span><span class="x">
+</span><span class="x"></span><span class="cp">{{</span><span class="o">&lt;</span> <span class="na">tab</span> <span class="s2">&#34;Linux&#34;</span> <span class="o">&gt;</span><span class="cp">}}</span><span class="x"> # Linux Content </span><span class="cp">{{</span><span class="o">&lt;</span> <span class="o">/</span><span class="na">tab</span> <span class="o">&gt;</span><span class="cp">}}</span><span class="x">
+</span><span class="x"></span><span class="cp">{{</span><span class="o">&lt;</span> <span class="na">tab</span> <span class="s2">&#34;Windows&#34;</span> <span class="o">&gt;</span><span class="cp">}}</span><span class="x"> # Windows Content </span><span class="cp">{{</span><span class="o">&lt;</span> <span class="o">/</span><span class="na">tab</span> <span class="o">&gt;</span><span class="cp">}}</span><span class="x">
+</span><span class="x"></span><span class="cp">{{</span><span class="o">&lt;</span> <span class="o">/</span><span class="na">tabs</span> <span class="o">&gt;</span><span class="cp">}}</span></code></pre></div>
 
 
 
@@ -428,23 +247,20 @@ Miseratus fonte Ditis conubia.</p>
 
 
 <h2 id="columns">Columns</h2>
-
-<pre><code class="language-html">{{&lt; columns &gt;}} &lt;!-- begin columns block --&gt;
+<div class="highlight"><pre class="chroma"><code class="language-html" data-lang="html">{{<span class="p">&lt;</span> <span class="nt">columns</span> <span class="p">&gt;</span>}} <span class="c">&lt;!-- begin columns block --&gt;</span>
 # Left Content
 Lorem markdownum insigne...
 
-&lt;---&gt; &lt;!-- magic sparator, between columns --&gt;
+<span class="p">&lt;</span><span class="nt">---</span><span class="p">&gt;</span> <span class="c">&lt;!-- magic sparator, between columns --&gt;</span>
 
 # Mid Content
 Lorem markdownum insigne...
 
-&lt;---&gt; &lt;!-- magic sparator, between columns --&gt;
+<span class="p">&lt;</span><span class="nt">---</span><span class="p">&gt;</span> <span class="c">&lt;!-- magic sparator, between columns --&gt;</span>
 
 # Right Content
 Lorem markdownum insigne...
-{{&lt; /columns &gt;}}
-</code></pre>
-
+{{<span class="p">&lt;</span> <span class="p">/</span><span class="nt">columns</span> <span class="p">&gt;</span>}}</code></pre></div>
 <div class="book-columns flex flex-wrap">
   
   <div class="flex-even markdown-inner">
@@ -480,23 +296,22 @@ Miseratus fonte Ditis conubia.
 <div class="book-columns flex flex-wrap">
   
   <div class="flex-even markdown-inner">
-    <pre><code class="language-tpl">{{&lt; mermaid [class=&quot;text-center&quot;]&gt;}}
-sequenceDiagram
-    Alice-&gt;&gt;Bob: Hello Bob, how are you?
-    alt is sick
-        Bob-&gt;&gt;Alice: Not so good :(
-    else is well
-        Bob-&gt;&gt;Alice: Feeling fresh like a daisy
-    end
-    opt Extra response
-        Bob-&gt;&gt;Alice: Thanks for asking
-    end
-{{&lt; /mermaid &gt;}}
-</code></pre>
+    <div class="highlight"><pre class="chroma"><code class="language-tpl" data-lang="tpl"><span class="cp">{{</span><span class="o">&lt;</span> <span class="na">mermaid</span> <span class="o">[</span><span class="na">class</span><span class="o">=</span><span class="s2">&#34;text-center&#34;</span><span class="o">]&gt;</span><span class="cp">}}</span><span class="x">
+</span><span class="x">sequenceDiagram
+</span><span class="x">    Alice-&gt;&gt;Bob: Hello Bob, how are you?
+</span><span class="x">    alt is sick
+</span><span class="x">        Bob-&gt;&gt;Alice: Not so good :(
+</span><span class="x">    else is well
+</span><span class="x">        Bob-&gt;&gt;Alice: Feeling fresh like a daisy
+</span><span class="x">    end
+</span><span class="x">    opt Extra response
+</span><span class="x">        Bob-&gt;&gt;Alice: Thanks for asking
+</span><span class="x">    end
+</span><span class="x"></span><span class="cp">{{</span><span class="o">&lt;</span> <span class="o">/</span><span class="na">mermaid</span> <span class="o">&gt;</span><span class="cp">}}</span></code></pre></div>
   </div>
   
   <div class="flex-even markdown-inner">
-    <script src="/mermaid.min.js"></script>
+    <script src="../../mermaid.min.js"></script>
 
 <p class="mermaid">
   
@@ -517,6 +332,24 @@ sequenceDiagram
 </article>
 
       
+<div class="book-footer justify-between">
+  
+  <div>
+    
+    <a href="https://github.com/computablelabs/compspec/commit/29df2b60cf154566364112d88e4e72ba301549d9" title='Last modified Jul 11, 2019 by Bharath Ramsundar' target="_blank" rel="noopener">
+      <img src="../../svg/calendar.svg" alt="Changed" /> Jul 11, 2019
+    </a>
+  </div>
+  
+  
+  <div>
+    <a href="https://github.com/computablelabs/compspec/edit/master/docs/shortcodes.md" target="_blank" rel="noopener">
+      <img src="../../svg/edit.svg" alt="Edit" /> Edit this page
+    </a>
+  </div>
+  
+</div>
+
 
       
     </div>

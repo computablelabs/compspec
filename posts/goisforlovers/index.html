@@ -14,14 +14,14 @@
     
     (Hu)go Template Primer
   
- | My New Hugo Site</title>
+ | Computable Spec</title>
 
 
 
-<link rel="stylesheet" href="/book.min.f4161f5e2de53a2e927f51df1611323a2a12cccb2681f23cb6fc3517852e8643.css">
+<link rel="stylesheet" href="../../book.min.f4161f5e2de53a2e927f51df1611323a2a12cccb2681f23cb6fc3517852e8643.css">
 
 
-<link rel="icon" href="/favicon.png" type="image/x-icon">
+<link rel="icon" href="../../favicon.png" type="image/x-icon">
 
 
 <!--
@@ -38,218 +38,37 @@ https://github.com/alex-shpak/hugo-book
     <aside class="book-menu fixed">
       <nav>
 <h2 class="book-brand">
-  <a href="http://example.org/">My New Hugo Site</a>
+  <a href="https://computablelabs.github.io/compspec/">Computable Spec</a>
 </h2>
 
 
 
     
-
   
   
-
-
-
-
-
- 
-  
-    
-
-  <ul>
-    
-      
-
-  <li >
-    
-      
-
-  <a href="/docs/sub-section/" >
-    
-  
-    
-    
-    Sub Section
   
 
-  </a>
+  <style>
+  nav ul a[href$="\2fposts\2fgoisforlovers\2f "] {
+      color: #0b3a53;
+  }
+  </style>
 
+<ul>
+<li><a href="../../"><strong>Introduction</strong></a></li>
+<li><a href="../../docs/examples/">Examples</a>
 
-    
-
-    
-
-  <ul>
-    
-    
-    <li>
-      
-
-  <a href="/docs/sub-section/ego-numen/" >
-    
-  
-    
-    Ego Numen
-  
-
-  </a>
-
-
-    </li>
-    
-    <li>
-      
-
-  <a href="/docs/sub-section/natusque/" >
-    
-  
-    
-    Natusque
-  
-
-  </a>
-
-
-    </li>
-    
-  </ul>
-
-
-  </li>
-
-
-    
-    
-    <li>
-      
-
-  <a href="/docs/advanced/" >
-    
-  
-    
-    Advanced
-  
-
-  </a>
-
-
-    </li>
-    
-    <li>
-      
-
-  <a href="/docs/client/" >
-    
-  
-    
-    Client
-  
-
-  </a>
-
-
-    </li>
-    
-    <li>
-      
-
-  <a href="/docs/examples/" >
-    
-  
-    
-    Examples
-  
-
-  </a>
-
-
-    </li>
-    
-    <li>
-      
-
-  <a href="/docs/server/" >
-    
-  
-    
-    Server
-  
-
-  </a>
-
-
-    </li>
-    
-    <li>
-      
-
-  <a href="/docs/shortcodes/" >
-    
-  
-    
-    Shortcodes
-  
-
-  </a>
-
-
-    </li>
-    
-    <li>
-      
-
-  <a href="/docs/with-toc/" >
-    
-  
-    
-    With Toc
-  
-
-  </a>
-
-
-    </li>
-    
-    <li>
-      
-
-  <a href="/docs/without-toc/" >
-    
-  
-    
-    Without Toc
-  
-
-  </a>
-
-
-    </li>
-    
-    <li>
-      
-
-  <a href="/docs/datatrust/" >
-    
-  
-    
-    The Datatrust
-  
-
-  </a>
-
-
-    </li>
-    
-  </ul>
-
-
-  
-
-
-
-
-
-
+<ul>
+<li><a href="../../docs/with-toc/">With Table of Contents</a></li>
+<li><a href="../../docs/without-toc/">Without Table of Contents</a></li>
+<li><a href="../../docs/shortcodes/">Shortcodes</a><br /></li>
+</ul></li>
+<li><strong>More Examples</strong></li>
+<li><a href="../../docs/server/">Server</a></li>
+<li><a href="../../docs/client/">Client</a></li>
+<li><a href="../../docs/advanced/">Advanced</a><br /></li>
+<li><a href="../../posts/"><strong>Blog</strong></a></li>
+</ul>
 
 
 
@@ -258,13 +77,25 @@ https://github.com/alex-shpak/hugo-book
 </nav>
 
 
+  
+<script>
+(function() {
+  var menu = document.querySelector('aside.book-menu nav')
+  addEventListener('beforeunload', function(event) {
+    localStorage.setItem('menu.scrollTop', menu.scrollTop)
+  });
+  menu.scrollTop = localStorage.getItem('menu.scrollTop')
+})()
+</script>
+
+
 
     </aside>
 
     <div class="book-posts">
       <header class="align-center justify-between book-header">
   <label for="menu-control">
-    <img src="/svg/menu.svg" alt="Menu" />
+    <img src="../../svg/menu.svg" alt="Menu" />
   </label>
   <strong>
   
@@ -279,7 +110,7 @@ https://github.com/alex-shpak/hugo-book
 <header class="markdown">
   <h1>(Hu)go Template Primer</h1>
   <h5>
-    <strong>April 2, 2014</strong>
+    <strong>Apr 2, 2014</strong>
   </h5>
 </header>
 <article class="markdown">
@@ -340,7 +171,7 @@ functions.</p>
 <p>Each Go template has a struct (object) made available to it. In hugo each
 template is passed either a page or a node struct depending on which type of
 page you are rendering. More details are available on the
-<a href="/layout/variables">variables</a> page.</p>
+<a href="../../layout/variables">variables</a> page.</p>
 
 <p>A variable is accessed by referencing the variable name.</p>
 
@@ -357,7 +188,7 @@ page you are rendering. More details are available on the
 
 <p>Go template ship with a few functions which provide basic functionality. The Go
 template system also provides a mechanism for applications to extend the
-available functions with their own. <a href="/layout/functions">Hugo template
+available functions with their own. <a href="../../layout/functions">Hugo template
 functions</a> provide some additional functionality we believe
 are useful for building websites. Functions are called by using their name
 followed by the required parameters separated by spaces. Template
@@ -545,7 +376,7 @@ you want to inside of your templates.</p>
 <h2 id="using-content-page-parameters">Using Content (page) Parameters</h2>
 
 <p>In each piece of content you can provide variables to be used by the
-templates. This happens in the <a href="/content/front-matter">front matter</a>.</p>
+templates. This happens in the <a href="../../content/front-matter">front matter</a>.</p>
 
 <p>An example of this is used in this documentation site. Most of the pages
 benefit from having the table of contents provided. Sometimes the TOC just
@@ -580,13 +411,10 @@ notoc: true
 parameters, which are values which will be available to you in chrome.</p>
 
 <p>For instance, you might declare:</p>
-
-<pre><code class="language-yaml">params:
-  CopyrightHTML: &quot;Copyright &amp;#xA9; 2013 John Doe. All Rights Reserved.&quot;
-  TwitterUser: &quot;spf13&quot;
-  SidebarRecentLimit: 5
-</code></pre>
-
+<div class="highlight"><pre class="chroma"><code class="language-yaml" data-lang="yaml">params<span class="p">:</span><span class="w">
+</span><span class="w">  </span>CopyrightHTML<span class="p">:</span><span class="w"> </span><span class="s2">&#34;Copyright &amp;#xA9; 2013 John Doe. All Rights Reserved.&#34;</span><span class="w">
+</span><span class="w">  </span>TwitterUser<span class="p">:</span><span class="w"> </span><span class="s2">&#34;spf13&#34;</span><span class="w">
+</span><span class="w">  </span>SidebarRecentLimit<span class="p">:</span><span class="w"> </span><span class="m">5</span></code></pre></div>
 <p>Within a footer layout, you might then declare a <code>&lt;footer&gt;</code> which is only
 provided if the <code>CopyrightHTML</code> parameter is provided, and if it is given,
 you would declare it to be HTML-safe, so that the HTML entity is not escaped

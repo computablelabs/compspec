@@ -14,14 +14,14 @@
     
     Creating a New Theme
   
- | My New Hugo Site</title>
+ | Computable Spec</title>
 
 
 
-<link rel="stylesheet" href="/book.min.f4161f5e2de53a2e927f51df1611323a2a12cccb2681f23cb6fc3517852e8643.css">
+<link rel="stylesheet" href="../../book.min.f4161f5e2de53a2e927f51df1611323a2a12cccb2681f23cb6fc3517852e8643.css">
 
 
-<link rel="icon" href="/favicon.png" type="image/x-icon">
+<link rel="icon" href="../../favicon.png" type="image/x-icon">
 
 
 <!--
@@ -38,218 +38,37 @@ https://github.com/alex-shpak/hugo-book
     <aside class="book-menu fixed">
       <nav>
 <h2 class="book-brand">
-  <a href="http://example.org/">My New Hugo Site</a>
+  <a href="https://computablelabs.github.io/compspec/">Computable Spec</a>
 </h2>
 
 
 
     
-
   
   
-
-
-
-
-
- 
-  
-    
-
-  <ul>
-    
-      
-
-  <li >
-    
-      
-
-  <a href="/docs/sub-section/" >
-    
-  
-    
-    
-    Sub Section
   
 
-  </a>
+  <style>
+  nav ul a[href$="\2fposts\2f creating-a-new-theme\2f "] {
+      color: #0b3a53;
+  }
+  </style>
 
+<ul>
+<li><a href="../../"><strong>Introduction</strong></a></li>
+<li><a href="../../docs/examples/">Examples</a>
 
-    
-
-    
-
-  <ul>
-    
-    
-    <li>
-      
-
-  <a href="/docs/sub-section/ego-numen/" >
-    
-  
-    
-    Ego Numen
-  
-
-  </a>
-
-
-    </li>
-    
-    <li>
-      
-
-  <a href="/docs/sub-section/natusque/" >
-    
-  
-    
-    Natusque
-  
-
-  </a>
-
-
-    </li>
-    
-  </ul>
-
-
-  </li>
-
-
-    
-    
-    <li>
-      
-
-  <a href="/docs/advanced/" >
-    
-  
-    
-    Advanced
-  
-
-  </a>
-
-
-    </li>
-    
-    <li>
-      
-
-  <a href="/docs/client/" >
-    
-  
-    
-    Client
-  
-
-  </a>
-
-
-    </li>
-    
-    <li>
-      
-
-  <a href="/docs/examples/" >
-    
-  
-    
-    Examples
-  
-
-  </a>
-
-
-    </li>
-    
-    <li>
-      
-
-  <a href="/docs/server/" >
-    
-  
-    
-    Server
-  
-
-  </a>
-
-
-    </li>
-    
-    <li>
-      
-
-  <a href="/docs/shortcodes/" >
-    
-  
-    
-    Shortcodes
-  
-
-  </a>
-
-
-    </li>
-    
-    <li>
-      
-
-  <a href="/docs/with-toc/" >
-    
-  
-    
-    With Toc
-  
-
-  </a>
-
-
-    </li>
-    
-    <li>
-      
-
-  <a href="/docs/without-toc/" >
-    
-  
-    
-    Without Toc
-  
-
-  </a>
-
-
-    </li>
-    
-    <li>
-      
-
-  <a href="/docs/datatrust/" >
-    
-  
-    
-    The Datatrust
-  
-
-  </a>
-
-
-    </li>
-    
-  </ul>
-
-
-  
-
-
-
-
-
-
+<ul>
+<li><a href="../../docs/with-toc/">With Table of Contents</a></li>
+<li><a href="../../docs/without-toc/">Without Table of Contents</a></li>
+<li><a href="../../docs/shortcodes/">Shortcodes</a><br /></li>
+</ul></li>
+<li><strong>More Examples</strong></li>
+<li><a href="../../docs/server/">Server</a></li>
+<li><a href="../../docs/client/">Client</a></li>
+<li><a href="../../docs/advanced/">Advanced</a><br /></li>
+<li><a href="../../posts/"><strong>Blog</strong></a></li>
+</ul>
 
 
 
@@ -258,13 +77,25 @@ https://github.com/alex-shpak/hugo-book
 </nav>
 
 
+  
+<script>
+(function() {
+  var menu = document.querySelector('aside.book-menu nav')
+  addEventListener('beforeunload', function(event) {
+    localStorage.setItem('menu.scrollTop', menu.scrollTop)
+  });
+  menu.scrollTop = localStorage.getItem('menu.scrollTop')
+})()
+</script>
+
+
 
     </aside>
 
     <div class="book-posts">
       <header class="align-center justify-between book-header">
   <label for="menu-control">
-    <img src="/svg/menu.svg" alt="Menu" />
+    <img src="../../svg/menu.svg" alt="Menu" />
   </label>
   <strong>
   
@@ -279,7 +110,7 @@ https://github.com/alex-shpak/hugo-book
 <header class="markdown">
   <h1>Creating a New Theme</h1>
   <h5>
-    <strong>September 28, 2014</strong>
+    <strong>Sep 28, 2014</strong>
   </h5>
 </header>
 <article class="markdown">
