@@ -1,41 +1,30 @@
 # The Computable Protocol
 
-The Computable protocol creates a decentralized data market.  The global
-network is made up of many individual `Market` instances. Each `Market`
-conceptually holds a single dataset and is created and controlled by the owners
-of the dataset. These owners could correspond to existing organizations, or
-could be a decentralized set of interested parties. The coordination and access
-control for these individual `Market` instances is coordinated by a set of
-smart contracts. Each `Market` allows for a set of associated financial
-operations. These operations allow interested parties to invest in a particular
-`Market` or pay for the ability to query the data associated with that
-`Market`. To facilitate these transactions, each `Market` has a unique
-associated `MarketToken`. It is also possible for transactions to involve
-multiple `Market` instances. For these purposes, the Computable network has a
-global `NetworkToken` which mediates cross-`Market` interactions.
+Everything described above is implemented in a set of smart contracts
+which currently live on the Ethereum blockchain. However, it's
+important to note that data itself can't live on smart contracts. For
+one, datasets can be very large (gigabytes, terabytes, petabytes,
+exabytes or more). It would be infeasible to store such large
+collections of data on existing smart contract systems. For this
+reason, data lives "off-chain" in `Backend` systems. A `Backend` is
+software system that is responsible for storing data and coordinating
+with on-chain permissions layers. Note that many possible `Backend`
+implementations are possible by different vendors or groups, so long
+as each implementation responds to the API specified within this
+document. 
 
-Everything described above is implemented in a set of smart contracts which
-currently live on the Ethereum blockchain. However, it's important to note that
-data itself can't live on smart contracts. For one, datasets can be very large
-(gigabytes, terabytes, petabytes, exabytes or more). It would be infeasible to
-store such large collections of data on existing smart contract systems. For
-this reason, data lives "off-chain" in `Backend` systems. A `Backend` is
-software system that is responsible for storing data and coordinating with
-on-chain permissions layers. Note that many possible `Backend` implementations
-are possible by different vendors or groups, so long as each implementation
-responds to the API specified within this document. 
+This document contains both concrete engineering specifications and
+more forward looking research projections. To make the separation
+clear, we've grouped the concrete engineering specifications in one
+section and research projections in another. It's expected that the
+research projections will migrate over time into the concrete engineer
+section, but the precise timeline for this migration isn't yet known.
+Subsections of the concrete portion of the spec are tagged with the
+version(s) in which these features appear.
 
-This document contains both concrete engineering specifications and more
-forward looking research projections. To make the separation clear, we've
-grouped the concrete engineering specifications in one section and research
-projections in another. It's expected that the research projections will
-migrate over time into the concrete engineer section, but the precise timeline
-for this migration isn't yet known. Subsections of the concrete portion of the
-spec are tagged with the version(s) in which these features appear.
-
-This document is a living, versioned specification. As understanding of the
-core aspects of the Computable protocol grows, this document will be updated
-accordingly.
+This document is a living, versioned specification. As understanding
+of the core aspects of the Computable protocol grows, this document
+will be updated accordingly.
 
 ![alt text][protocol_flowchart]
 

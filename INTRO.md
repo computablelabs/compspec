@@ -5,23 +5,6 @@ type: docs
 
 # The Computable Protocol 
 
-{{< columns >}}
-## Astris ipse furtiva
-
-Est in vagis et Pittheus tu arge accipiter regia iram vocatur nurus. Omnes ut
-olivae sensit **arma sorori** deducit, inesset **crudus**, ego vetuere aliis,
-modo arsit? Utinam rapta fiducia valuere litora _adicit cursu_, ad facies
-
-<--->
-
-## Suis quot vota
-
-Ea _furtique_ risere fratres edidit terrae magis. Colla tam mihi tenebat:
-miseram excita suadent es pecudes iam. Concilio _quam_ velatus posset ait quod
-nunc! Fragosis suae dextra geruntur functus vulgata.
-{{< /columns >}}
-
-
 ## Introduction 
 
 The Computable protocol creates decentralized data markets.  The
@@ -35,21 +18,21 @@ contracts. Each market allows for a set of associated financial
 operations. These operations allow interested parties to invest in a
 particular Market or pay for the ability to query the data
 associated with that Market. To facilitate these transactions, each
-market has a unique associated `MarketToken`. It is also possible
-for transactions to involve multiple `Market` instances.
+market has a unique associated `MarketToken`.
 
-    var panel = ram_design;
-    if (backup + system) {
-        file.readPoint = network_native;
-        sidebar_engine_device(cell_tftp_raster,
-                dual_login_paper.adf_vci.application_reader_design(
-                graphicsNvramCdma, lpi_footer_snmp, integer_model));
-    }
-    public_keyboard_docking += error.controller_gibibyte_plug.ip(4,
-            asciiPetaflops, software(supercomputer_compatible_status + 4));
-    dynamic_disk.indexModeLaptop = bufferTftpReality;
-    var export_vlog_sequence = trinitron_flowchart + supercomputer_cluster_rj(
-            -1, toolbar_powerpoint_query, -2 / multiprocessing_impression);
+Everything described above is implemented in a set of smart contracts
+which currently live on the Ethereum blockchain. The data itself
+doesn't live on the smart contracts. For one, datasets can be very
+large (gigabytes, terabytes, petabytes, exabytes or more). It would be
+infeasible to store such large collections of data on existing smart
+contract systems. For this reason, data lives "off-chain" in
+`Datatrusts`. A `Datatrust` is software system that is responsible for
+storing data and coordinating with on-chain permissions layers. Note
+that many possible `Datatrust` implementations are possible by different
+vendors or groups, so long as each implementation responds to the API
+specified within this document. 
+
+![Protocol Flowchart](/static/Protocol_Flowchart.png)
 
 ## Locis suis novi cum suoque decidit eadem
 
