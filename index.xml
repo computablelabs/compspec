@@ -77,6 +77,16 @@ var mnemonicPcmcia = file; if (bookmarkMultiprocessing) { core.intranetDigitize 
     
     <item>
       <title></title>
+      <link>https://computablelabs.github.io/compspec/docs/contracts/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://computablelabs.github.io/compspec/docs/contracts/</guid>
+      <description>All the contracts for the protocol currently deployed are in the computable repo. We are currently only deploying to a private test network, but as we deploy them to public test-nets and, eventually, main-net, we will update the README of this repo with their addresses and any other related information.
+For the more dev-minded amongst you, our contracts are actively developed here. We’ve built a number of developer utilities in there, including a custom testing framework that integrates closely with Geth’s tooling to provide a believable simulator engine.</description>
+    </item>
+    
+    <item>
+      <title></title>
       <link>https://computablelabs.github.io/compspec/docs/examples/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
