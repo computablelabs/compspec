@@ -63,52 +63,23 @@ and may change.
 
 ## Concrete Engineering Specification
 
-This portion of the specification document deals with the part of the protocol
-that is concretely specified out and is on the concrete implementation path for
-the Computable team. Specific subsections are tagged 
+This portion of the specification document deals with the part of the
+protocol that is currently implemented. Specific subsections are
+tagged 
 
 ### On Chain Components
 
-The on-chain components of the protocol control economics and access control.
-If a user wants to gain access to a particular dataset (in a particular data
-market), or if a user wants to invest in a particular data market, they have to
-seek on-chain authorization. If a user wants to pay for queries, this is also
-done off-chain. The advantage of this structure is that payments and
-authorization can be handled securely by secure on-chain contracts.
+The on-chain components of the protocol control economics and access
+control.  If a user wants to gain access to a particular dataset (in a
+particular data market), or if a user wants to invest in a particular
+data market, they have to seek on-chain authorization. If a user wants
+to pay for queries, this is also done off-chain. The advantage of this
+structure is that payments and authorization can be handled securely
+by secure on-chain contracts.
 
-At present, on-chain contracts are implemented as Ethereum Solidity contracts.
-This does mean that the transaction/authorization speed is limited by the
-current transaction speed on Ethereum.
-
-#### Market Factory
-**(version 0.3):** The `MarketFactory` contract is responsible for creaking new
-data markets and will store a list of available data markets.
-
-```
-function create_data_market({address_1:allocation_1,...,address_n:allocation_n}, uint t_council, uint t_util, uint t_submit) external
-```
-
-TODO: The form of the function above may not work in practice due to gas costs. TBD 
-
-`MarketFactory.create_data_market()`: Constructs and launches a new data market. This is the only public way to create a new data market. There are a number of arguments needed in this constructor.
-Each data market has an associated token with it. `create_data_market()` must receive necessary information to initialize this token. It might make sense to pass in a list of `[address_1: allocation_1,...,address_n:allocation_n]` of initial token allocations to `create_data_market()`. The `MarketToken` is initialized with this initial spread of market token.
-
-```
-function get_list_of_data_data_markets() view public returns ([string])
-```
-Returns a list of available data markets.
-
-#### Network Token
-**(version 0.2):** The `NetworkToken` is the central token that powers the Computable network. It
-is used by the [MarketFactory](MarketFactory.md) to perform operations and is
-used to pay for queries executed by a `Backend`. The `NetworkToken` is implemented
-by a `StandardToken` (ERC20) for now. 
-
-The `NetworkToken` is denominated in units of "network wei". As with Ethereum,
-a network wei is 1/10^18 of a single `NetworkToken`. Using units this small
-makes arithmetic much easier to handle and reduces problem with "token dust"
-(since solidity lacks floating point, it's easy for rounding errors to build up
-and propagate).
+At present, on-chain contracts are implemented as Ethereum Solidity
+contracts.  This does mean that the transaction/authorization speed is
+limited by the current transaction speed on Ethereum.
 
 #### Market 
 **(version 0.2):** The `Market` is the central contract that governs the behavior of a data
@@ -187,82 +158,87 @@ struct Listing {
 }
 ```
 
-Let's take a minute to walk through the fields of this struct to explain how
-the `Listing` works. The `Listing` is an on-chain record of a chunk of
-off-chain data. The `dataHash` is the hash of the set of off-chain data that
-this listing corresponds to. For our purposes, this off-chain data is simply an
-arbitrary blob (a bytestring of arbitrary length) that is hashed down to a
-single `bytes32` value.
+Let's take a minute to walk through the fields of this struct to
+explain how the `Listing` works. The `Listing` is an on-chain record
+of a chunk of off-chain data. The `dataHash` is the hash of the set of
+off-chain data that this listing corresponds to. For our purposes,
+this off-chain data is simply an arbitrary blob (a bytestring of
+arbitrary length) that is hashed down to a single `bytes32` value.
 
-The `listed` boolean field specifies whether this listing is officially listed
-or not in this given market. The `owner` field is the market participant who
-owns this listing. If this owner has converted to investor class, ownership of
-the listing will be transferred to the market itself and the `address` in this
-field will be the market address.
+The `listed` boolean field specifies whether this listing is
+officially listed or not in this given market. The `owner` field is
+the market participant who owns this listing. If this owner has
+converted to investor class, ownership of the listing will be
+transferred to the market itself and the `address` in this field will
+be the market address.
 
-The `supply` field is the number of `MarketToken` that the listing proposer is
-willing to stake to see this listing listed in the `Market`. This must exceed
-the `minDeposit` that is demanded by the `Parameterizer` tied to this market.
-The purpose of this stake is to reward challengers who remove useless listings
-from a given market.
+The `supply` field is the number of `MarketToken` that the listing
+proposer is willing to stake to see this listing listed in the
+`Market`. This must exceed the `minDeposit` that is demanded by the
+`Parameterizer` tied to this market.  The purpose of this stake is to
+reward challengers who remove useless listings from a given market.
 
-The `challenge` field tracks if there's an active challenge to this `Listing`
-at present. `rewards` tracks how many new `MarketToken` have been minted for
-this `Listing`. Note that this field is only nonzero for `Listings` which have
-successfully been listed.
+The `challenge` field tracks if there's an active challenge to this
+`Listing` at present. `rewards` tracks how many new `MarketToken` have
+been minted for this `Listing`. Note that this field is only nonzero
+for `Listings` which have successfully been listed.
 
-Let's pause here and say a few words about the has function used to generate
-`dataHash`. It's important that this hash function be a cryptographic hash
-function which is collision resistant. This means that given `dataHash`, it
-isn't feasible to spoof a fake datapoint that has the same hash. This means
-that `dataHash` can be treated as a unique identifier of the datapoint.
+Let's pause here and say a few words about the has function used to
+generate `dataHash`. It's important that this hash function be a
+cryptographic hash function which is collision resistant. This means
+that given `dataHash`, it isn't feasible to spoof a fake datapoint
+that has the same hash. This means that `dataHash` can be treated as a
+unique identifier of the datapoint.
 
-In particular, `dataHash` must be computed with KECCAK-256. This is the same
-hash function that solidity uses on-chain.
+In particular, `dataHash` must be computed with KECCAK-256. This is
+the same hash function that solidity uses on-chain.
 
-![alt text][maker_flow]
-
-[maker_flow]: Maker_Flow.png "Listing flow through data market" 
+![Maker Flow](Maker_Flow.png)
 
 #### What is a datapoint?
-**(version 0.3):** We haven't clearly specified what a "datapoint" is in the
-preceding material.  Part of the challenge is that a "datapoint" will mean
-different things for different markets. A record in an off-chain SQL database
-is very different from an image file for a deep learning `Backend`. For this
-reason, we say that the "datapoint" tied to a listing is simply an arbitrary
-bytestring. This bytestring may correspond to multiple "logical datapoints".
-For example, the bytestring may correspond to 10 SQL rows or to 50 images. This
-batching might be crucial for efficiency, since the transaction rate of
-Ethereum is not yet sufficient to do bulk uploads of datasets otherwise.
+We haven't clearly specified what a "datapoint" is in the preceding
+material.  Part of the challenge is that a "datapoint" will mean
+different things for different markets. A record in an off-chain SQL
+database is very different from an image file for a deep learning
+`Backend`. For this reason, we say that the "datapoint" tied to a
+listing is simply an arbitrary bytestring. This bytestring may
+correspond to multiple "logical datapoints".  For example, the
+bytestring may correspond to 10 SQL rows or to 50 images. This
+batching might be crucial for efficiency, since the transaction rate
+of Ethereum is not yet sufficient to do bulk uploads of datasets
+otherwise.
 
 #### Applying
-**(version 0.1):** Applying is the process by which a new listing is added to a data market. To
-apply, a market participant computes the hash of their off-chain data and
-proposes the addition of their data to the market by invoking `Market.apply()`:
+Applying is the process by which a new listing is added to a data
+market. To apply, a market participant computes the hash of their
+off-chain data and proposes the addition of their data to the market
+by invoking `Market.apply()`:
 
 ```
 function apply(bytes32 listingHash, uint amount, string data) external
 ```
 
-All applications trigger a vote on the new listing by appropriate market
-stakeholders (either all token-holders or the market council). If a listing
-vote is cleared, it is said to be listed. Note that application is a *minting*
-event whereby new `MarketTokens` are created. More detail on this can be found
-in the section on minting.
+All applications trigger a vote on the new listing by appropriate
+market stakeholders (either all token-holders or the market council).
+If a listing vote is cleared, it is said to be listed. Note that
+application is a *minting* event whereby new `MarketTokens` are
+created. More detail on this can be found in the section on minting.
 
 #### Challenging
-**(version 0.1, 0.3):** Challenging is the process by which a listing in a data market can be
-challenged and potentially removed. A challenge triggers a vote. If the
-challenge succeeds, the challenged listing is de-listed from the data market.
-If the challenge fails, the challenging party is penalized with a loss of stake
-(note that posting a challenge requires placing `MarketToken` at stake).
+Challenging is the process by which a listing in a data market can be
+challenged and potentially removed. A challenge triggers a vote. If
+the challenge succeeds, the challenged listing is de-listed from the
+data market.  If the challenge fails, the challenging party is
+penalized with a loss of stake (note that posting a challenge requires
+placing `MarketToken` at stake).
 
-Note that unlike a token curated registry, the council receives no reward for
-voting upon a challenge. Only the victor of the challenge receives a financial
-reward which comes directly from the loser of of the challenge.
+Note that unlike a token curated registry, the council receives no
+reward for voting upon a challenge. Only the victor of the challenge
+receives a financial reward which comes directly from the loser of of
+the challenge.
 
 #### Exiting
-**(version 0.1):** Listing owners can yank their listings from the market. This
+Listing owners can yank their listings from the market. This
 removes the listing from the `Market` and will burn any minted listing reward
 tokens.
 
@@ -270,13 +246,14 @@ tokens.
 function exit(bytes32 listingHash) external
 ```
 
-#### Market Reserve
-**(version 0.2):** The `Market` holds with it an associated "reserve." Think of
-the reserve as holding earnings from the data in the `Market` that belong to
-all the `MarketToken` holders associated with the market. These earnings can
-come from either query payments or from investor purchases of `MarketToken`.
-Investor class `MarketToken` holders are allowed to withdraw earnings from the
-reserve by burning their `MarketToken` holdings.
+#### Reserve
+The `Market` holds with it an associated "reserve." Think of the
+reserve as holding earnings from the data in the `Market` that belong
+to all the `MarketToken` holders associated with the market. These
+earnings can come from either query payments or from investor
+purchases of `MarketToken`.  Investor class `MarketToken` holders are
+allowed to withdraw earnings from the reserve by burning their
+`MarketToken` holdings.
 
 At present, the reserve is denominated in [`NetworkToken`](#network-token).
 
