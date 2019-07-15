@@ -1,18 +1,5 @@
 # The Computable Protocol
 
-Everything described above is implemented in a set of smart contracts
-which currently live on the Ethereum blockchain. However, it's
-important to note that data itself can't live on smart contracts. For
-one, datasets can be very large (gigabytes, terabytes, petabytes,
-exabytes or more). It would be infeasible to store such large
-collections of data on existing smart contract systems. For this
-reason, data lives "off-chain" in `Backend` systems. A `Backend` is
-software system that is responsible for storing data and coordinating
-with on-chain permissions layers. Note that many possible `Backend`
-implementations are possible by different vendors or groups, so long
-as each implementation responds to the API specified within this
-document. 
-
 This document contains both concrete engineering specifications and
 more forward looking research projections. To make the separation
 clear, we've grouped the concrete engineering specifications in one
@@ -26,21 +13,20 @@ This document is a living, versioned specification. As understanding
 of the core aspects of the Computable protocol grows, this document
 will be updated accordingly.
 
-![alt text][protocol_flowchart]
-
-[protocol_flowchart]: Protocol_Flowchart.png "Protocol Flowchart"
-  
 
 ## Top Level Specification
 
-This section provides a high level roadmap of the full protocol with links to more detailed specifications in subsequent sections. Various sections are tagged with the Computable protocol version in which they become available. Specifications for future versions are still in flux and may change.
+This section provides a high level roadmap of the full protocol with
+links to more detailed specifications in subsequent sections. Various
+sections are tagged with the Computable protocol version in which they
+become available. Specifications for future versions are still in flux
+and may change.
 
 - [Concrete Engineering Specification](#concrete-engineering-specification): Features within this portion of the spec are tied to a specific version of the Computable protocol and are on the roadmap for the main network launch.
-  - [On-chain smart contracts](#on-chain-components) [v0.1, v0.2, v0.3]:
-    - [`MarketFactory`](#market-factory) [v0.3]: The top level entry point to create a new market and associated token.
-    - [`NetworkToken`](#network-token) [v0.2]: The top level token for the entire network.
+  - [On-chain smart contracts](#on-chain-components):
+    - [`MarketFactory`](#market-factory): The top level entry point to create a new market and associated token.
     - [`Market`](#market) [v0.2] The top level contract for a given data market.
-      - [`MarketToken`](#market-token) [v0.2]: A mintable and burnable token. Each `Market` has its own `MarketToken`
+    - [`MarketToken`](#market-token) [v0.2]: A mintable and burnable token. Each `Market` has its own `MarketToken`
         - [Minting and Burning Mechanics](#minting-and-burning-mechanics): Market tokens are minted when either new data is added, existing data is queried, or new investment is added to reserve. Market tokens are burned when data is removed or investment is withdrawn.
       - [Voting](#voting) [v0.3]: Critical decisions within a market are performed by vote of the council (significant stake-holders). These include validation of new data, challenges to fraudulent data and changes to market structure. An ownership threshold `T_council` is imposed for franchise. The threshold will be set upon construction.
       - [Listings](#listings): The basic elements of a data market.

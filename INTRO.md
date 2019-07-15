@@ -32,7 +32,7 @@ that many possible `Datatrust` implementations are possible by different
 vendors or groups, so long as each implementation responds to the API
 specified within this document. 
 
-![Protocol Flowchart](/static/Protocol_Flowchart.png)
+![Protocol Flowchart](Protocol_Flowchart.png)
 
 ## Locis suis novi cum suoque decidit eadem
 
