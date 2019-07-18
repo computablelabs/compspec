@@ -109,31 +109,21 @@ Burning happens in the scenarios explained below.
 - If an investor class token holder divests from the `Market`, their divested tokens are burned. The origin of the tokens being burned does not matter.
  
 #### Voting
-Major decisions in the `Market` are made by token holder vote.
-These decisions include which new listings should be added to the `Market`,
-which challenged listings should be removed, and what changes should be made to
-the `Market` parameters.
+Major decisions in the `Market` are made by token holder vote.  These
+decisions include which new listings should be added to the `Market`,
+which challenged listings should be removed, and what changes should
+be made to the `Market` parameters.
 
-All votes are made by the "Council." The council is a subset of the
-token-holders in the `Market` who hold a large fraction of the total number of
-`MarketTokens`.  A threshold `T_council` will be imposed, and only
-`MarketToken` holders who hold more than `T_council` units of `MarketToken`will
-be allowed to vote.  Market participants who hold more than `T_council` units
-of `MarketToken` are referred to as council members. Non-council members will
-not be allowed to vote on market actions in this scheme. Note that since
-`MarketToken` is burned and minted dynamically, the council can and will change
-over time.
-
-The votes here are *not* stake-weighted. All council members have precisely one
-vote. So a council member with `5*T_council` and another council member
-`1.1*T_council` `MarketTokens` have the same voting power. In addition, all
-council votes at present are cast publicly with no lock-commit-reveal scheme.
-This allows for the implementation of a simple voting mechanism with smaller
-attack surface.
+The votes here are *not* stake-weighted. All council members have
+precisely one vote. So a council member with `5*T_council` and another
+council member `1.1*T_council` `MarketTokens` have the same voting
+power. In addition, all council votes at present are cast publicly
+with no lock-commit-reveal scheme.  This allows for the implementation
+of a simple voting mechanism with smaller attack surface.
 
 
 #### Listings 
-**(versions 0.2,0.3):** A market holds a set of `Listings`. Each listing corresponds to an element of the
+A market holds a set of `Listings`. Each listing corresponds to an element of the
 `Market` which is held off-chain in some (possibly multiple) `Backend` systems.
 Newcomers to the market can call `Market.apply()` to apply to have their
 listing added to the market. A listing consists of an off-chain datapoint (or
