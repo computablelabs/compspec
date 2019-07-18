@@ -802,8 +802,6 @@ It is possible to build data markets that are resistant to censorship efforts.
 
 ## Attacks
 
-In this section, we list a number of known attacks on the protocol and talk through defenses against these attacks.
-
 ### Data Flood
 In this attack, malicious actors attempt to flood a `Market` with low
 quality listings. This attack is mitigated by the enforced council

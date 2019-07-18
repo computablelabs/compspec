@@ -6,3 +6,4 @@ headless: true
 - [Contracts]({{< relref "/docs/contracts.md" >}})
 - [Datatrusts]({{< relref "/docs/datatrust.md" >}})
 - [Attacks]({{< relref "/docs/attacks.md" >}})
+- [User Journeys]({{< relref "/docs/userjourney.md" >}})
