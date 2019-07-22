@@ -24,26 +24,22 @@ and may change.
 
 - [Concrete Engineering Specification](#concrete-engineering-specification): Features within this portion of the spec are tied to a specific version of the Computable protocol and are on the roadmap for the main network launch.
   - [On-chain smart contracts](#on-chain-components):
-    - [`MarketFactory`](#market-factory): The top level entry point to create a new market and associated token.
-    - [`Market`](#market) [v0.2] The top level contract for a given data market.
-    - [`MarketToken`](#market-token) [v0.2]: A mintable and burnable token. Each `Market` has its own `MarketToken`
+    - [`MarketToken`](#market-token): A mintable and burnable token. Each `Market` has its own `MarketToken`
         - [Minting and Burning Mechanics](#minting-and-burning-mechanics): Market tokens are minted when either new data is added, existing data is queried, or new investment is added to reserve. Market tokens are burned when data is removed or investment is withdrawn.
-      - [Voting](#voting) [v0.3]: Critical decisions within a market are performed by vote of the council (significant stake-holders). These include validation of new data, challenges to fraudulent data and changes to market structure. An ownership threshold `T_council` is imposed for franchise. The threshold will be set upon construction.
-      - [Listings](#listings): The basic elements of a data market.
-        - [What is a Datapoint?](#what-is-a-datapoint): Each listing corresponds to an off-chain "datapoint." This section defines precisely what a "datapoint" is. Briefly, a "datapoint" is just an arbitrary bytestring.
-        - [Applying](#applying): Applying to add a listing to a data market
-        - [Challenging](#challenging): Challenging an existing listing within a data market
-        - [Exiting](#exiting): Yanking a listing from a data market. 
-      - [Market Reserve](#market-reserve) [v0.2]: The reserve is the "bank account" associated with a given `Market`. 
-      - [Investor and Owner Class](#investor-and-owner-class): All `MarketToken` holders are either investor class or owner class. These two token holder classes have different rights and responsibilities.  
-      - [Algorithmic Price Curve](#algorithmic-price-curve) [v0.2]: Controls the price at which new investors may invest in market. Investor funds are deposited in reserve and new market token is minted accordingly.
-      - [Paying for Computation](#paying-for-computation) [v0.3]: Each `Market` supports running computational workloads against the data in this market. Workloads are run on a `Backend` tied to the market and may include SQL queries and standard programs capable of executing in a standard Linux environment. Users have to pay for workloads before they may execute them on a `Backend`.
-        - [Data utilization](#data-utilization) [v0.3]: The market maintains track of how many times each listing has been requested by different queries.
-      - [Authorized Backends](#authorized-backends) [v0.3]: The data listed in the data market is held off-chain in a `Backend`. A council vote is used to set authorized backend systems for this market.
-      - [Market Parameters](#market-parameters) [v0.3]: The `Market` is governed by a set of a parameters dictated within the `Parameterizer`.
-        - [Reparameterization](#reparameterization) [v0.3]: The parameters that govern the `Market` can be modified with a council vote.
-  - [Off-chain storage and compute systems](#off-chain-systems) [v0.2, v0.3]
-    - [Backend Systems](#backend-specification) [v0.2, v0.3]: A `Backend` is responsible for securely storing data off-chain and allowing authorized users to query this data. Note that a `Backend` may serve multiple markets, and that a `Market` may have multiple backends. The `Backend` is an off-chain system that responds to the API specified in this document, and which understands how to interact with the on-chain Computable contracts.
+		- [Voting](#voting): Critical decisions within a market are performed by vote of the council (significant stake-holders). These include validation of new data, challenges to fraudulent data and changes to market structure. An ownership threshold `T_council` is imposed for franchise. The threshold will be set upon construction.
+		- [Listings](#listings): The basic elements of a data market.
+			- [What is a Datapoint?](#what-is-a-datapoint): Each listing corresponds to an off-chain "datapoint." This section defines precisely what a "datapoint" is. Briefly, a "datapoint" is just an arbitrary bytestring.
+			- [Applying](#applying): Applying to add a listing to a data market
+			- [Challenging](#challenging): Challenging an existing listing within a data market
+			- [Exiting](#exiting): Yanking a listing from a data market. 
+		- [Market Reserve](#market-reserve) [v0.2]: The reserve is the "bank account" associated with a given `Market`. 
+		- [Algorithmic Price Curve](#algorithmic-price-curve) [v0.2]: Controls the price at which new investors may invest in market. Investor funds are deposited in reserve and new market token is minted accordingly.
+		- [Buying Data](#paying-for-computation): Each `Market` supports running computational workloads against the data in this market. Workloads are run on a `Datatrust` tied to the market and may include SQL queries and standard programs capable of executing in a standard Linux environment. Users have to pay for workloads before they may execute them on a `Datatrust`.
+			- [Data utilization](#data-utilization): The market maintains track of how many times each listing has been requested by different queries.
+		- [Datatrusts](#authorized-backends): The data listed in the data market is held off-chain in a `Datatrust`. A council vote is used to set authorized backend systems for this market.
+		- [Market Parameters](#market-parameters): The `Market` is governed by a set of a parameters dictated within the `Parameterizer`.
+        - [Reparameterization](#reparameterization): The parameters that govern the `Market` can be modified with a council vote.
+	- [Datatrust](#datatrust-specification): A `Datatrust` is responsible for securely storing data off-chain and allowing authorized users to query this data. Note that a `Datatrust` may serve multiple markets. The `Datatrust` is an off-chain system that responds to the API specified in this document, and which understands how to interact with the on-chain Computable contracts.
       - [Authentication](#authentication): `Backends` should allow users to authenticate with them. 
       - [Storage](#storage): `Backends` must be able to persist off-chain data securely.
       - [Encryption at Rest](#encryption-at-rest): All stored data must be encrypted.
@@ -56,9 +52,6 @@ and may change.
   - [Untrusted Backend](#untrusted-backend): A `Backend` system which is not trusted by the owners of the data market.
 - [Case Studies](#case-studies) We consider a few case studies of interesting data markets that can be constructed with the Computable protocol in this section.
   - [Censorship Resistant Data Market](#censorship-resistant-data-markets) The Computable protocol allows for the construction of data markets that are resistant to censorship efforts.
-- [Attacks](#attacks) This section catalogs known attacks on the protocol and known defenses against such attacks.
-  - [Data Flood](#data-flood): Attackers attempt to flood market with low-quality listings
-  - [Council DDOS](#council-ddos): Attackers overwhelm the council with a glut of candidates
 
 
 ## Concrete Engineering Specification
@@ -82,9 +75,8 @@ contracts.  This does mean that the transaction/authorization speed is
 limited by the current transaction speed on Ethereum.
 
 #### Market 
-**(version 0.2):** The `Market` is the central contract that governs the behavior of a data
-market. The current `Market` implementation evolved from a token curated registry (TCR) `Registry`
-implementation. Here's a brief overview of the core functionality of the `Market`.
+The `Market` is the central contract that governs the behavior of a
+data market. Here's a brief overview of the core functionality of the `Market`.
 
 - The `Market` has an associated `MarketToken`. This `MarketToken` is created upon construction of the market. This token is minted and burned by various `Market` operations.The [`MarketToken`](#market-token) is itself a mintable and burnable ERC20 token.
 - The `Market` holds a [reserve](#market-reserve) to the Market. This reserve holds `NetworkToken` that is paid in by investors who want to take positions in market and will pay out to people who want to exit market. Investors can purchase `MarketToken` by paying `NetworkToken` into the reserve. They can withdraw `NetworkToken` from the reserve by burning their `MarketToken` holdings.
@@ -93,18 +85,19 @@ implementation. Here's a brief overview of the core functionality of the `Market
 - `MarketToken` holders in `Market` belong to one of two classes, data owner and investor. Only data owners can own listings in the market, and only investors have the right to withdraw from the reserve. A data owner can convert into investor class by giving up ownership of their listings. 
 
 #### Market Token
-**(version 0.2):** `MarketToken` is a mintable and burnable ERC20 token. The
-`MarketToken` is tied to a particular `Market` and is created when the `Market`
-is created. Note the contrast with token curated registries, which don't hold a
-mechanism for minting and burning their associated token.
+`MarketToken` is a mintable and burnable ERC20 token. The
+`MarketToken` is tied to a particular `Market` and is created when the
+`Market` is created. Note the contrast with token curated registries,
+which don't hold a mechanism for minting and burning their associated
+token.
 
-As with the `NetworkToken`, the `MarketToken` is denominated in "market wei".
-As with ETH, a "market wei" denominates 1/10^18 of a `MarketToken`. Using
-wei units throughout prevents rounding error propagation and keeps contracts
-simple.
+As with the `NetworkToken`, the `MarketToken` is denominated in
+"market wei".  As with ETH, a "market wei" denominates 1/10^18 of a
+`MarketToken`. Using wei units throughout prevents rounding error
+propagation and keeps contracts simple.
 
 #### Minting and Burning Mechanics
-**(version 0.2):** `MarketTokens` are dynamically minted and burned as the `Market` evolves. This flexibility is needed to accurately track the evolving value of data in a data market.
+`MarketTokens` are dynamically minted and burned as the `Market` evolves. This flexibility is needed to accurately track the evolving value of data in a data market.
 
 `MarketTokens` are minted in one of a few scenarios explained below. In each case, the amount minted is set by the `Parameterizer` which holds `Market` parameters.
 - Minting happens when new listings are listed in the market. These listings have to be approved by a council vote. 
@@ -116,31 +109,21 @@ Burning happens in the scenarios explained below.
 - If an investor class token holder divests from the `Market`, their divested tokens are burned. The origin of the tokens being burned does not matter.
  
 #### Voting
-**(version 0.3):** Major decisions in the `Market` are made by token holder vote.
-These decisions include which new listings should be added to the `Market`,
-which challenged listings should be removed, and what changes should be made to
-the `Market` parameters.
+Major decisions in the `Market` are made by token holder vote.  These
+decisions include which new listings should be added to the `Market`,
+which challenged listings should be removed, and what changes should
+be made to the `Market` parameters.
 
-All votes are made by the "Council." The council is a subset of the
-token-holders in the `Market` who hold a large fraction of the total number of
-`MarketTokens`.  A threshold `T_council` will be imposed, and only
-`MarketToken` holders who hold more than `T_council` units of `MarketToken`will
-be allowed to vote.  Market participants who hold more than `T_council` units
-of `MarketToken` are referred to as council members. Non-council members will
-not be allowed to vote on market actions in this scheme. Note that since
-`MarketToken` is burned and minted dynamically, the council can and will change
-over time.
-
-The votes here are *not* stake-weighted. All council members have precisely one
-vote. So a council member with `5*T_council` and another council member
-`1.1*T_council` `MarketTokens` have the same voting power. In addition, all
-council votes at present are cast publicly with no lock-commit-reveal scheme.
-This allows for the implementation of a simple voting mechanism with smaller
-attack surface.
+The votes here are *not* stake-weighted. All council members have
+precisely one vote. So a council member with `5*T_council` and another
+council member `1.1*T_council` `MarketTokens` have the same voting
+power. In addition, all council votes at present are cast publicly
+with no lock-commit-reveal scheme.  This allows for the implementation
+of a simple voting mechanism with smaller attack surface.
 
 
 #### Listings 
-**(versions 0.2,0.3):** A market holds a set of `Listings`. Each listing corresponds to an element of the
+A market holds a set of `Listings`. Each listing corresponds to an element of the
 `Market` which is held off-chain in some (possibly multiple) `Backend` systems.
 Newcomers to the market can call `Market.apply()` to apply to have their
 listing added to the market. A listing consists of an off-chain datapoint (or
@@ -818,8 +801,6 @@ It is possible to build data markets that are resistant to censorship efforts.
 [censorship_resistant_data_markets]: Censorship_Resistant_Data_Market.png "Censorship Resistant Data Markets"
 
 ## Attacks
-
-In this section, we list a number of known attacks on the protocol and talk through defenses against these attacks.
 
 ### Data Flood
 In this attack, malicious actors attempt to flood a `Market` with low
