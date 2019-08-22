@@ -4,6 +4,7 @@ headless: true
 
 - [**Introduction**]({{< relref "/" >}})
 - [Contracts]({{< relref "/docs/contracts.md" >}})
+- [Market Token]({{< relref "/docs/markettoken.md" >}})
 - [Listings]({{< relref "/docs/listings.md" >}})
 - [Reserve]({{< relref "/docs/reserve.md" >}})
 - [Datatrusts]({{< relref "/docs/datatrust.md" >}})

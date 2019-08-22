@@ -36,26 +36,11 @@ payments and authorization can be handled securely by
 secure on-chain contracts.
 
 #### Market 
-The `Market` is the central contract that governs the behavior of a
-data market. Here's a brief overview of the core functionality of the `Market`.
 
 - The `Market` has an associated `MarketToken`. This `MarketToken` is created upon construction of the market. This token is minted and burned by various `Market` operations.The [`MarketToken`](#market-token) is itself a mintable and burnable ERC20 token.
-- The `Market` holds a [reserve](#market-reserve) to the Market. This reserve holds `NetworkToken` that is paid in by investors who want to take positions in market and will pay out to people who want to exit market. Investors can purchase `MarketToken` by paying `NetworkToken` into the reserve. They can withdraw `NetworkToken` from the reserve by burning their `MarketToken` holdings.
+
 - The `Market` has an "algorithmic price curve" that provides an automatic conversion rate from `NetworkToken` to `MarketToken`. The price curve is used by `Market.invest()` to determine the current conversion rate. The current conversion rate depends on the current size of the reserve.
-- The `Market` supports a payment layer for computational workloads against the underlying data market. Payments must be made via `Market` before any `Backends` will accept queries.
 - `MarketToken` holders in `Market` belong to one of two classes, data owner and investor. Only data owners can own listings in the market, and only investors have the right to withdraw from the reserve. A data owner can convert into investor class by giving up ownership of their listings. 
-
-#### Market Token
-`MarketToken` is a mintable and burnable ERC20 token. The
-`MarketToken` is tied to a particular `Market` and is created when the
-`Market` is created. Note the contrast with token curated registries,
-which don't hold a mechanism for minting and burning their associated
-token.
-
-As with the `NetworkToken`, the `MarketToken` is denominated in
-"market wei".  As with ETH, a "market wei" denominates 1/10^18 of a
-`MarketToken`. Using wei units throughout prevents rounding error
-propagation and keeps contracts simple.
 
 #### Minting and Burning Mechanics
 `MarketTokens` are dynamically minted and burned as the `Market` evolves. This flexibility is needed to accurately track the evolving value of data in a data market.
