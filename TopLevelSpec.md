@@ -1,26 +1,9 @@
 # The Computable Protocol
 
-This document contains both concrete engineering specifications and
-more forward looking research projections. To make the separation
-clear, we've grouped the concrete engineering specifications in one
-section and research projections in another. It's expected that the
-research projections will migrate over time into the concrete engineer
-section, but the precise timeline for this migration isn't yet known.
-Subsections of the concrete portion of the spec are tagged with the
-version(s) in which these features appear.
-
-This document is a living, versioned specification. As understanding
-of the core aspects of the Computable protocol grows, this document
-will be updated accordingly.
 
 
 ## Top Level Specification
 
-This section provides a high level roadmap of the full protocol with
-links to more detailed specifications in subsequent sections. Various
-sections are tagged with the Computable protocol version in which they
-become available. Specifications for future versions are still in flux
-and may change.
 
 - [Concrete Engineering Specification](#concrete-engineering-specification): Features within this portion of the spec are tied to a specific version of the Computable protocol and are on the roadmap for the main network launch.
   - [On-chain smart contracts](#on-chain-components):
