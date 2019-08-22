@@ -4,10 +4,7 @@
 
 ## Top Level Specification
 
-
-- [Concrete Engineering Specification](#concrete-engineering-specification): Features within this portion of the spec are tied to a specific version of the Computable protocol and are on the roadmap for the main network launch.
   - [On-chain smart contracts](#on-chain-components):
-    - [`MarketToken`](#market-token): A mintable and burnable token. Each `Market` has its own `MarketToken`
         - [Minting and Burning Mechanics](#minting-and-burning-mechanics): Market tokens are minted when either new data is added, existing data is queried, or new investment is added to reserve. Market tokens are burned when data is removed or investment is withdrawn.
 		- [Voting](#voting): Critical decisions within a market are performed by vote of the council (significant stake-holders). These include validation of new data, challenges to fraudulent data and changes to market structure. An ownership threshold `T_council` is imposed for franchise. The threshold will be set upon construction.
 		- [Listings](#listings): The basic elements of a data market.
@@ -423,11 +420,13 @@ All market parameters can be changed with a council vote. The process of changin
 
 [epsilon_price_curve]: epsilon_privacy_curve.png "Epsilon Price Curve"
 
-The Epsilon price-curve is the tool used to price for the privacy lost
-in a given query. Here, epsilon is a technical parameter, adapted from
-the differential privacy literature, which is a measure of the
-information loss tied to a particular query. Each query has an
-associated epsilon. Here are some possible APIs for this feature.
+The Epsilon price-curve is the tool used to price for
+the privacy lost in a given query. Here, epsilon is a
+technical parameter, adapted from the differential
+privacy literature, which is a measure of the
+information loss tied to a particular query. Each query
+has an associated epsilon. Here are some possible APIs
+for this feature.
 
 - `Market.get_current_privacy_price(user)` returns the current price for purchasing additional privacy budget from the epsilon price curve. This depends on the current privacy epsilon used by the provided user.
 - `Backend::GET_EPSILON(QUERY_FILE)`: A call to the `Backend` via REST to get the epsilon privacy loss for running specified query.
@@ -439,26 +438,10 @@ associated epsilon. Here are some possible APIs for this feature.
 
 [query_flow]: QueryFlow.png "Query Flow"
 
-### Untrusted Backend
-
-An untrusted `Backend` is never allowed to view unencrypted data
-belonging to the data market. This means that all computation
-performed within an untrusted backend must either use cryptographic
-techniques such as garbled circuits or homomorphic computation, or
-must use trusted hardware enclaves like Intel SGX.  We are actively
-researching the design of untrusted `Backend` systems, but currently
-lack the clarity to place them on the engineering roadmap.
-
 ![alt text][multi_market_join]
 
 [multi_market_join]: Multi_Market_Join.png "Multi Market Join"
 
-
-## Case Studies
-
-Thus far, we've discussed the Computable protocol in the abstract. In
-this section, we walk through a few case studies of different types of
-data markets that can be constructed using the Computable protocol.
 
 ### Censorship Resistant Data Markets
 
@@ -467,12 +450,4 @@ It is possible to build data markets that are resistant to censorship efforts.
 ![alt text][censorship_resistant_data_markets]
 
 [censorship_resistant_data_markets]: Censorship_Resistant_Data_Market.png "Censorship Resistant Data Markets"
-
-## Attacks
-
-### Data Flood
-### Council DDOS
-Malicious attackers flood the council with a glut of low quality candidate listings.
-
-TODO: Why are we safe against this attack?
 

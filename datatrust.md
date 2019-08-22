@@ -179,57 +179,35 @@ table, we can use a standard SQL lookup command to
 retrieve the correct bytestring associated with
 `dataHash`.
 
-#### GET_EPSILON
-The call to `Backend::GET_EPSILON(query)` computes the differential
-privacy parameter epsilon that is associated with this given query.
-Note that this call may sometimes fail, when it is not possible to
-compute epsilon for the query at hand.
-
 
 ## Forwarding Looking Research
 
-Features in this section are being actively researched by the
-Computable team, but at present are not on the roadmap for a
-particular Computable release. This is expected to change as
-development matures, and it is expected that all work in this section
-will eventually migrate up into the concrete specifications part of
+Features in this section are being actively researched
+by the Computable team, but at present are not on the
+roadmap for a particular Computable release. This is
+expected to change as development matures, and it is
+expected that all work in this section will eventually
+migrate up into the concrete specifications part of
 this document.
 
 ### Fine Grained Data Utilization
 
-Tracking fine-grained data usage is necessary for fair distribution of
-user rewards. It's expected that some listings in a `Market` will be
-significantly more valuable than others. These listings should receive
-greater rewards than less valuable listings. To first approximation,
-we can track data usage by keeping track of which listings a
-particular computation touches on the `Backend` side. The `Backend`
-could then report these records to the on-chain contracts, which would
+Tracking fine-grained data usage is necessary for fair
+distribution of user rewards. It's expected that some
+listings in a `Market` will be significantly more
+valuable than others. These listings should receive
+greater rewards than less valuable listings. To first
+approximation, we can track data usage by keeping track
+of which listings a particular computation touches on
+the `Backend` side. The `Backend` could then report
+these records to the on-chain contracts, which would
 then update the usage records.
 
-This gets tricky for more complex workloads for example. A deep
-learning model will train on all data, but some listings will
-contribute more to the value of the model than others. Robustly
-attributing importance to particular data points over others is still
-an open question in machine learning with only a few research
+This gets tricky for more complex workloads for
+example. A deep learning model will train on all data,
+but some listings will contribute more to the value of
+the model than others. Robustly attributing importance
+to particular data points over others is still an open
+question in machine learning with only a few research
 prototypes out there.
-
-### Pricing for Backend Payments
-
-How should a `Backend` set its required payment for a computational workload?
-
-### Query Rake 
-
-For query payments that come in, a portion of the query payment (the
-"rake") is paid into the reserve, a portion is paid to listing owners,
-and a portion is paid to the `Backend`. It isn't yet clear how this
-payment should be split up amongst these three participants. Economic
-modeling will have to be done to understand the consequences of this
-split.
-
-Very simple (likely wrong) split:
-
-- The owner of a listing is paid the access cost they set with `Market.set_access_cost(listing)`
-- The `Backend` system is paid the compute cost they set with `Market.set_query_compute_cost(query)`
-- The reserve is paid the privacy cost `Market.get_privacy_cost(query)`
-
 
