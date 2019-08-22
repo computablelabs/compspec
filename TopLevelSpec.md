@@ -5,18 +5,6 @@
 ## Top Level Specification
 
   - [On-chain smart contracts](#on-chain-components):
-        - [Minting and Burning Mechanics](#minting-and-burning-mechanics): Market tokens are minted when either new data is added, existing data is queried, or new investment is added to reserve. Market tokens are burned when data is removed or investment is withdrawn.
-		- [Voting](#voting): Critical decisions within a market are performed by vote of the council (significant stake-holders). These include validation of new data, challenges to fraudulent data and changes to market structure. An ownership threshold `T_council` is imposed for franchise. The threshold will be set upon construction.
-		- [Listings](#listings): The basic elements of a data market.
-			- [What is a Datapoint?](#what-is-a-datapoint): Each listing corresponds to an off-chain "datapoint." This section defines precisely what a "datapoint" is. Briefly, a "datapoint" is just an arbitrary bytestring.
-			- [Applying](#applying): Applying to add a listing to a data market
-			- [Challenging](#challenging): Challenging an existing listing within a data market
-			- [Exiting](#exiting): Yanking a listing from a data market. 
-		- [Market Reserve](#market-reserve) [v0.2]: The reserve is the "bank account" associated with a given `Market`. 
-		- [Algorithmic Price Curve](#algorithmic-price-curve) [v0.2]: Controls the price at which new investors may invest in market. Investor funds are deposited in reserve and new market token is minted accordingly.
-		- [Buying Data](#paying-for-computation): Each `Market` supports running computational workloads against the data in this market. Workloads are run on a `Datatrust` tied to the market and may include SQL queries and standard programs capable of executing in a standard Linux environment. Users have to pay for workloads before they may execute them on a `Datatrust`.
-			- [Data utilization](#data-utilization): The market maintains track of how many times each listing has been requested by different queries.
-		- [Datatrusts](#authorized-backends): The data listed in the data market is held off-chain in a `Datatrust`. A council vote is used to set authorized backend systems for this market.
 		- [Market Parameters](#market-parameters): The `Market` is governed by a set of a parameters dictated within the `Parameterizer`.
         - [Reparameterization](#reparameterization): The parameters that govern the `Market` can be modified with a council vote.
 	- [Datatrust](#datatrust-specification): A `Datatrust` is responsible for securely storing data off-chain and allowing authorized users to query this data. Note that a `Datatrust` may serve multiple markets. The `Datatrust` is an off-chain system that responds to the API specified in this document, and which understands how to interact with the on-chain Computable contracts.
@@ -34,25 +22,18 @@
   - [Censorship Resistant Data Market](#censorship-resistant-data-markets) The Computable protocol allows for the construction of data markets that are resistant to censorship efforts.
 
 
-## Concrete Engineering Specification
-
-This portion of the specification document deals with the part of the
-protocol that is currently implemented. Specific subsections are
-tagged 
 
 ### On Chain Components
 
-The on-chain components of the protocol control economics and access
-control.  If a user wants to gain access to a particular dataset (in a
-particular data market), or if a user wants to invest in a particular
-data market, they have to seek on-chain authorization. If a user wants
-to pay for queries, this is also done off-chain. The advantage of this
-structure is that payments and authorization can be handled securely
-by secure on-chain contracts.
-
-At present, on-chain contracts are implemented as Ethereum Solidity
-contracts.  This does mean that the transaction/authorization speed is
-limited by the current transaction speed on Ethereum.
+The on-chain components of the protocol control
+economics and access control.  If a user wants to gain
+access to a particular dataset (in a particular data
+market), or if a user wants to invest in a particular
+data market, they have to seek on-chain authorization.
+If a user wants to pay for queries, this is also done
+off-chain. The advantage of this structure is that
+payments and authorization can be handled securely by
+secure on-chain contracts.
 
 #### Market 
 The `Market` is the central contract that governs the behavior of a

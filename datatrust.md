@@ -9,6 +9,10 @@ The off-chain portion of the Computable protocol, the
 Datatrust, is responsible for storing, querying and
 delivering upon data. 
 
+		- [Buying Data](#paying-for-computation): Each `Market` supports running computational workloads against the data in this market. Workloads are run on a `Datatrust` tied to the market and may include SQL queries and standard programs capable of executing in a standard Linux environment. Users have to pay for workloads before they may execute them on a `Datatrust`.
+			- [Data utilization](#data-utilization): The market maintains track of how many times each listing has been requested by different queries.
+		- [Datatrusts](#authorized-backends): The data listed in the data market is held off-chain in a `Datatrust`. A council vote is used to set authorized backend systems for this market.
+
 ### Datatrust Specification
 A Datatrust is a system that is responsible for storing
 data off-chain. As a first approximation, think of a
