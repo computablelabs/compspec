@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+
+
+
+
+
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>
+  
+    
+    Listings
+  
+ | Computable Spec</title>
+
+
+
+<link rel="stylesheet" href="../../book.min.f4161f5e2de53a2e927f51df1611323a2a12cccb2681f23cb6fc3517852e8643.css">
+
+
+<link rel="icon" href="../../favicon.png" type="image/x-icon">
+
+
+<!--
+Made with Book Theme
+https://github.com/alex-shpak/hugo-book
+-->
+
+  
+</head>
+
+<body>
+  <input type="checkbox" style="display: none" id="menu-control" />
+  <main class="flex container">
+
+    <aside class="book-menu fixed">
+      <nav>
+<h2 class="book-brand">
+  <a href="https://computablelabs.github.io/compspec/">Computable Spec</a>
+</h2>
+
+
+
+    
+  
+  
+  
+
+  <style>
+  nav ul a[href$="\2f docs\2flistings\2f "] {
+      color: #0b3a53;
+  }
+  </style>
+
+<ul>
+<li><a href="../../"><strong>Introduction</strong></a></li>
+<li><a href="../../docs/contracts/">Contracts</a></li>
+<li><a href="../../docs/markettoken/">Market Token</a></li>
+<li><a href="../../docs/voting/">Voting</a></li>
+<li><a href="../../docs/listings/">Listings</a></li>
+<li><a href="../../docs/reserve/">Reserve</a></li>
+<li><a href="../../docs/datatrust/">Datatrusts</a></li>
+<li><a href="../../docs/parameters/">Market Parameters</a></li>
+<li><a href="../../docs/attacks/">Attacks</a></li>
+<li><a href="../../docs/userjourney/">User Journeys</a></li>
+</ul>
+
+
+
+
+
+</nav>
+
+
+  
+<script>
+(function() {
+  var menu = document.querySelector('aside.book-menu nav')
+  addEventListener('beforeunload', function(event) {
+    localStorage.setItem('menu.scrollTop', menu.scrollTop)
+  });
+  menu.scrollTop = localStorage.getItem('menu.scrollTop')
+})()
+</script>
+
+
+
+    </aside>
+
+    <div class="book-page">
+      <header class="align-center justify-between book-header">
+  <label for="menu-control">
+    <img src="../../svg/menu.svg" alt="Menu" />
+  </label>
+  <strong>
+  
+    
+    Listings
+  
+</strong>
+</header>
+
+      
+<article class="markdown">
+
+<h1 id="listings">Listings</h1>
+
+<p>This section introduces the core concept of a
+&ldquo;listing,&rdquo; which is central to the protocol.</p>
+
+<pre><code>    - [Listings](#listings): The basic elements of a data market.
+        - [What is a Datapoint?](#what-is-a-datapoint): Each listing corresponds to an off-chain &quot;datapoint.&quot; This section defines precisely what a &quot;datapoint&quot; is. Briefly, a &quot;datapoint&quot; is just an arbitrary bytestring.
+        - [Applying](#applying): Applying to add a listing to a data market
+        - [Challenging](#challenging): Challenging an existing listing within a data market
+        - [Exiting](#exiting): Yanking a listing from a data market. 
+</code></pre>
+
+<p>A market holds a set of <code>Listings</code>. Each listing
+corresponds to an element of the <code>Market</code> which is held
+off-chain in some (possibly multiple) <code>Backend</code>
+systems.  Newcomers to the market can call
+<code>Market.apply()</code> to apply to have their listing added
+to the market. A listing consists of an off-chain
+datapoint (or datapoints) and an on-chain listing
+structure. (We haven&rsquo;t defined &ldquo;datapoint&rdquo; here yet.)
+We reproduce the fields of the on-chain listing
+structure below.</p>
+
+<pre><code>struct Listing {
+  bool listed; // a 'listing' if true
+  address owner; // owns the listing
+  uint supply; // Number of tokens in the listing (both deposited and minted).
+  uint challenge; // corresponts to a poll id in Voting if present
+  bytes32 dataHash; // Hash of the off-chain data-point this listing corresponds to
+  uint rewards; // Number of Market tokens that have been minted for this listing.
+}
+</code></pre>
+
+<p>Let&rsquo;s take a minute to walk through the fields of this
+struct to explain how the <code>Listing</code> works. The
+<code>Listing</code> is an on-chain record of a chunk of off-chain
+data. The <code>dataHash</code> is the hash of the set of
+off-chain data that this listing corresponds to. For
+our purposes, this off-chain data is simply an
+arbitrary blob (a bytestring of arbitrary length) that
+is hashed down to a single <code>bytes32</code> value.</p>
+
+<p>The <code>listed</code> boolean field specifies whether this
+listing is officially listed or not in this given
+market. The <code>owner</code> field is the market participant who
+owns this listing. If this owner has converted to
+investor class, ownership of the listing will be
+transferred to the market itself and the <code>address</code> in
+this field will be the market address.</p>
+
+<p>The <code>supply</code> field is the number of <code>MarketToken</code> that
+the listing proposer is willing to stake to see this
+listing listed in the <code>Market</code>. This must exceed the
+<code>minDeposit</code> that is demanded by the <code>Parameterizer</code>
+tied to this market.  The purpose of this stake is to
+reward challengers who remove useless listings from a
+given market.</p>
+
+<p>The <code>challenge</code> field tracks if there&rsquo;s an active
+challenge to this <code>Listing</code> at present. <code>rewards</code>
+tracks how many new <code>MarketToken</code> have been minted for
+this <code>Listing</code>. Note that this field is only nonzero
+for <code>Listings</code> which have successfully been listed.</p>
+
+<h4 id="what-is-a-datapoint">What is a datapoint?</h4>
+
+<p>We haven&rsquo;t clearly specified what a &ldquo;datapoint&rdquo; is in
+the preceding material.  Part of the challenge is that
+a &ldquo;datapoint&rdquo; will mean different things for different
+markets. A record in an off-chain SQL database is very
+different from an image file for a deep learning
+<code>Backend</code>. For this reason, we say that the &ldquo;datapoint&rdquo;
+tied to a listing is simply an arbitrary bytestring.
+This bytestring may correspond to multiple &ldquo;logical
+datapoints&rdquo;.  For example, the bytestring may
+correspond to 10 SQL rows or to 50 images. This
+batching might be crucial for efficiency, since the
+transaction rate of Ethereum is not yet sufficient to
+do bulk uploads of datasets otherwise.</p>
+
+<h4 id="applying">Applying</h4>
+
+<p>Applying is the process by which a new listing is added to a data
+market. To apply, a market participant computes the hash of their
+off-chain data and proposes the addition of their data to the market
+by invoking <code>Market.apply()</code>:</p>
+
+<pre><code>function apply(bytes32 listingHash, uint amount, string data) external
+</code></pre>
+
+<p>All applications trigger a vote on the new listing by
+appropriate market stakeholders (either all
+token-holders or the market council).  If a listing
+vote is cleared, it is said to be listed. Note that
+application is a <em>minting</em> event whereby new
+<code>MarketTokens</code> are created. More detail on this can be
+found in the section on minting.</p>
+
+<h4 id="challenging">Challenging</h4>
+
+<p>Challenging is the process by which a listing in a data
+market can be challenged and potentially removed. A
+challenge triggers a vote. If the challenge succeeds,
+the challenged listing is de-listed from the data
+market.  If the challenge fails, the challenging party
+is penalized with a loss of stake (note that posting a
+challenge requires placing <code>MarketToken</code> at stake).</p>
+
+<p>Note that unlike a token curated registry, the council
+receives no reward for voting upon a challenge. Only
+the victor of the challenge receives a financial reward
+which comes directly from the loser of of the
+challenge.</p>
+</article>
+
+      
+<div class="book-footer justify-between">
+  
+  <div>
+    
+    <a href="https://github.com/computablelabs/compspec/commit/e74a1ab68a380e1682cca35ff064443a013075f5" title='Last modified Aug 22, 2019 by Bharath Ramsundar' target="_blank" rel="noopener">
+      <img src="../../svg/calendar.svg" alt="Changed" /> Aug 22, 2019
+    </a>
+  </div>
+  
+  
+  <div>
+    <a href="https://github.com/computablelabs/compspec/edit/master/docs/listings.md" target="_blank" rel="noopener">
+      <img src="../../svg/edit.svg" alt="Edit" /> Edit this page
+    </a>
+  </div>
+  
+</div>
+
+
+      
+    </div>
+
+    
+  
+
+  <aside class="book-toc level-6 fixed">
+    <nav id="TableOfContents">
+<ul>
+<li><a href="#listings">Listings</a>
+<ul>
+<li>
+<ul>
+<li>
+<ul>
+<li><a href="#what-is-a-datapoint">What is a datapoint?</a></li>
+<li><a href="#applying">Applying</a></li>
+<li><a href="#challenging">Challenging</a></li>
+</ul></li>
+</ul></li>
+</ul></li>
+</ul>
+</nav>
+  </aside>
+
+
+
+  </main>
+  
+  
+  
+</body>
+
+</html>

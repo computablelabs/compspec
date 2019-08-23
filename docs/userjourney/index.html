@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+
+
+
+
+
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>
+  
+    
+    Userjourney
+  
+ | Computable Spec</title>
+
+
+
+<link rel="stylesheet" href="../../book.min.f4161f5e2de53a2e927f51df1611323a2a12cccb2681f23cb6fc3517852e8643.css">
+
+
+<link rel="icon" href="../../favicon.png" type="image/x-icon">
+
+
+<!--
+Made with Book Theme
+https://github.com/alex-shpak/hugo-book
+-->
+
+  
+</head>
+
+<body>
+  <input type="checkbox" style="display: none" id="menu-control" />
+  <main class="flex container">
+
+    <aside class="book-menu fixed">
+      <nav>
+<h2 class="book-brand">
+  <a href="https://computablelabs.github.io/compspec/">Computable Spec</a>
+</h2>
+
+
+
+    
+  
+  
+  
+
+  <style>
+  nav ul a[href$="\2f docs\2fuserjourney\2f "] {
+      color: #0b3a53;
+  }
+  </style>
+
+<ul>
+<li><a href="../../"><strong>Introduction</strong></a></li>
+<li><a href="../../docs/contracts/">Contracts</a></li>
+<li><a href="../../docs/markettoken/">Market Token</a></li>
+<li><a href="../../docs/voting/">Voting</a></li>
+<li><a href="../../docs/listings/">Listings</a></li>
+<li><a href="../../docs/reserve/">Reserve</a></li>
+<li><a href="../../docs/datatrust/">Datatrusts</a></li>
+<li><a href="../../docs/parameters/">Market Parameters</a></li>
+<li><a href="../../docs/attacks/">Attacks</a></li>
+<li><a href="../../docs/userjourney/">User Journeys</a></li>
+</ul>
+
+
+
+
+
+</nav>
+
+
+  
+<script>
+(function() {
+  var menu = document.querySelector('aside.book-menu nav')
+  addEventListener('beforeunload', function(event) {
+    localStorage.setItem('menu.scrollTop', menu.scrollTop)
+  });
+  menu.scrollTop = localStorage.getItem('menu.scrollTop')
+})()
+</script>
+
+
+
+    </aside>
+
+    <div class="book-page">
+      <header class="align-center justify-between book-header">
+  <label for="menu-control">
+    <img src="../../svg/menu.svg" alt="Menu" />
+  </label>
+  <strong>
+  
+    
+    Userjourney
+  
+</strong>
+</header>
+
+      
+<article class="markdown"><p>The scope of this doc is to list the user-signed contract method calls required to fulfill various user actions. These are important to know because they constrain what the user interface must do in a couple of ways:</p>
+
+<p>First, user-originated contract method calls must be signed by the user’s private key, which means the user must confirm signing through a Metamask dialog. It’s not possible (nor should we) make this invisible to the user.</p>
+
+<p>Second, contract method calls are asynchronous and may take an indefinite amount of time since they only complete when 1 (or really several) blocks are mined.</p>
+
+<p>Actions and contract method calls made by Datatrust are mentioned here, but the exact sequence of client, protocol, and Datatrust actions is beyond scope of this doc.</p>
+
+<p>Apply for a Listing
+Listing.list
+Apply for a listing. Voting happens by other parties. Data is sent to Datatrust and which calls setDataHash. Assume listing passes. Someone calls Listing.resolveApplication and listing is ready to be used.</p>
+
+<p>After resolution, the applicant may claim the listing reward (see Withdraw Support from a Market).</p>
+
+<p>Support a Market
+EtherToken.deposit
+Wrap ETH into an ERC20 compatible token so that contracts can manipulate it.</p>
+
+<p>EtherToken.approve
+Call with deployed Reserve contract address to give that contract permission to change.</p>
+
+<p>Reserve.support
+Convert EtherToken to MarketToken at price from bonding curve.</p>
+
+<p>Withdraw Support from a Market
+Assume user has MarketToken. Note this flow applies regardless of how MarketToken was acquired. User may have supported the market with Eth or acquired by creating a listing.</p>
+
+<p>Listing.withdrawFromListing
+Call only if user has MarketTokens acquired through initial listing or listing access. Transfers MarketTokens to MarketToken contract so that it is available for withdraw.</p>
+
+<p>Reserve.withdraw
+Convert MarketToken to EtherToken at price from bonding curve.</p>
+
+<p>EtherToken.withdraw
+Convert EtherToken to plain Eth.</p>
+
+<p>Vote on a Listing Candidate or Listing Challenge
+Assume user has enough MarketToken to stake a vote, and there is a listing to vote on. TODO: is this same process for other votes like electing a DataTrust?</p>
+
+<p>Voting.vote
+Supply ‘yeah’ or ‘nay’ vote as an argument. The user’s stake will be tied up during the voting period.</p>
+
+<p>Voting.unstake
+After the voting period is over, get the stake back.</p>
+
+<p>Challenge Listing
+Assume challenger has enough MarketToken to stake the challenge.</p>
+
+<p>Listing.challenge
+Start the challenge. Stakeholders then vote. Someone must call Listing.resolveChallenge after the voting period.</p>
+
+<p>Voting.unstake
+If the challenge succeeds, the challenger calls this method to get stake back. If the challenge failed, the listing owner calls this method to take the challenger’s stake.</p>
+
+<p>Buy Access to a Listing
+EtherToken.deposit
+Wrap ETH into an ERC20 compatible token so that contracts can manipulate it.</p>
+
+<p>EtherToken.approve
+Call with deployed Datatrust contract address to give that contract permission to change.</p>
+
+<p>Datatrust.requestDelivery
+“Deposit” funds to pay for access to listings at the market’s rate per byte.</p>
+
+<p>User then tells Datatrust which listing to access. Datatrust calls Datatrust.listingAccessed, which deducts from the number of bytes user has paid for. Datatrust delivers listing data to client and calls Datatrust.delivered to collect its fee.</p>
+
+<p>TODO, Other Governance Actions like reparameterize, elect DataTrust, etc</p>
+</article>
+
+      
+<div class="book-footer justify-between">
+  
+  <div>
+    
+    <a href="https://github.com/computablelabs/compspec/commit/d2570507cd2463dbebde8c76007e74f299679147" title='Last modified Jul 18, 2019 by Bharath Ramsundar' target="_blank" rel="noopener">
+      <img src="../../svg/calendar.svg" alt="Changed" /> Jul 18, 2019
+    </a>
+  </div>
+  
+  
+  <div>
+    <a href="https://github.com/computablelabs/compspec/edit/master/docs/userjourney.md" target="_blank" rel="noopener">
+      <img src="../../svg/edit.svg" alt="Edit" /> Edit this page
+    </a>
+  </div>
+  
+</div>
+
+
+      
+    </div>
+
+    
+  
+
+
+
+  </main>
+  
+  
+  
+</body>
+
+</html>

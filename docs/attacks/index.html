@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+
+
+
+
+
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>
+  
+    
+    Attacks
+  
+ | Computable Spec</title>
+
+
+
+<link rel="stylesheet" href="../../book.min.f4161f5e2de53a2e927f51df1611323a2a12cccb2681f23cb6fc3517852e8643.css">
+
+
+<link rel="icon" href="../../favicon.png" type="image/x-icon">
+
+
+<!--
+Made with Book Theme
+https://github.com/alex-shpak/hugo-book
+-->
+
+  
+</head>
+
+<body>
+  <input type="checkbox" style="display: none" id="menu-control" />
+  <main class="flex container">
+
+    <aside class="book-menu fixed">
+      <nav>
+<h2 class="book-brand">
+  <a href="https://computablelabs.github.io/compspec/">Computable Spec</a>
+</h2>
+
+
+
+    
+  
+  
+  
+
+  <style>
+  nav ul a[href$="\2f docs\2f attacks\2f "] {
+      color: #0b3a53;
+  }
+  </style>
+
+<ul>
+<li><a href="../../"><strong>Introduction</strong></a></li>
+<li><a href="../../docs/contracts/">Contracts</a></li>
+<li><a href="../../docs/markettoken/">Market Token</a></li>
+<li><a href="../../docs/voting/">Voting</a></li>
+<li><a href="../../docs/listings/">Listings</a></li>
+<li><a href="../../docs/reserve/">Reserve</a></li>
+<li><a href="../../docs/datatrust/">Datatrusts</a></li>
+<li><a href="../../docs/parameters/">Market Parameters</a></li>
+<li><a href="../../docs/attacks/">Attacks</a></li>
+<li><a href="../../docs/userjourney/">User Journeys</a></li>
+</ul>
+
+
+
+
+
+</nav>
+
+
+  
+<script>
+(function() {
+  var menu = document.querySelector('aside.book-menu nav')
+  addEventListener('beforeunload', function(event) {
+    localStorage.setItem('menu.scrollTop', menu.scrollTop)
+  });
+  menu.scrollTop = localStorage.getItem('menu.scrollTop')
+})()
+</script>
+
+
+
+    </aside>
+
+    <div class="book-page">
+      <header class="align-center justify-between book-header">
+  <label for="menu-control">
+    <img src="../../svg/menu.svg" alt="Menu" />
+  </label>
+  <strong>
+  
+    
+    Attacks
+  
+</strong>
+</header>
+
+      
+<article class="markdown">
+
+<h1 id="attacks">Attacks</h1>
+
+<p>This section catalogs known attacks on the protocol and
+known defenses against such attacks.</p>
+
+<h2 id="front-running-attacks">Front Running Attacks</h2>
+
+<p>In the current version of the protocol, it is possible
+for a determined adversary to front-run a number of
+protocol interactions. For example, if a listing with a
+given <code>listingHash</code> is proposed but not yet confirmed
+as a transaction, the adversary could create an
+alternative transaction with the same <code>listingHash</code> to
+attempt to block the original listing.</p>
+
+<h2 id="data-flooding-attack">Data Flooding Attack</h2>
+
+<p>Attackers attempt to flood market with low-quality
+listings This attack is mitigated by the enforced
+council vote needed for listings to be listed.</p>
+
+<h2 id="council-ddos">Council DDoS</h2>
+
+<p>Attackers overwhelm the council with a glut of candidates</p>
+
+<h2 id="datatrust-fraud">Datatrust Fraud</h2>
+
+<p>This attack happens when a datatrust commits fraud and doesn&rsquo;t serve
+its purpose correctly.</p>
+</article>
+
+      
+<div class="book-footer justify-between">
+  
+  <div>
+    
+    <a href="https://github.com/computablelabs/compspec/commit/d6f441ec4031c32f072e9650dab824199382c892" title='Last modified Aug 22, 2019 by Bharath Ramsundar' target="_blank" rel="noopener">
+      <img src="../../svg/calendar.svg" alt="Changed" /> Aug 22, 2019
+    </a>
+  </div>
+  
+  
+  <div>
+    <a href="https://github.com/computablelabs/compspec/edit/master/docs/attacks.md" target="_blank" rel="noopener">
+      <img src="../../svg/edit.svg" alt="Edit" /> Edit this page
+    </a>
+  </div>
+  
+</div>
+
+
+      
+    </div>
+
+    
+  
+
+  <aside class="book-toc level-6 fixed">
+    <nav id="TableOfContents">
+<ul>
+<li><a href="#attacks">Attacks</a>
+<ul>
+<li><a href="#front-running-attacks">Front Running Attacks</a></li>
+<li><a href="#data-flooding-attack">Data Flooding Attack</a></li>
+<li><a href="#council-ddos">Council DDoS</a></li>
+<li><a href="#datatrust-fraud">Datatrust Fraud</a></li>
+</ul></li>
+</ul>
+</nav>
+  </aside>
+
+
+
+  </main>
+  
+  
+  
+</body>
+
+</html>

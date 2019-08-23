@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+
+
+
+
+
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>
+  
+    
+    Markettoken
+  
+ | Computable Spec</title>
+
+
+
+<link rel="stylesheet" href="../../book.min.f4161f5e2de53a2e927f51df1611323a2a12cccb2681f23cb6fc3517852e8643.css">
+
+
+<link rel="icon" href="../../favicon.png" type="image/x-icon">
+
+
+<!--
+Made with Book Theme
+https://github.com/alex-shpak/hugo-book
+-->
+
+  
+</head>
+
+<body>
+  <input type="checkbox" style="display: none" id="menu-control" />
+  <main class="flex container">
+
+    <aside class="book-menu fixed">
+      <nav>
+<h2 class="book-brand">
+  <a href="https://computablelabs.github.io/compspec/">Computable Spec</a>
+</h2>
+
+
+
+    
+  
+  
+  
+
+  <style>
+  nav ul a[href$="\2f docs\2fmarkettoken\2f "] {
+      color: #0b3a53;
+  }
+  </style>
+
+<ul>
+<li><a href="../../"><strong>Introduction</strong></a></li>
+<li><a href="../../docs/contracts/">Contracts</a></li>
+<li><a href="../../docs/markettoken/">Market Token</a></li>
+<li><a href="../../docs/voting/">Voting</a></li>
+<li><a href="../../docs/listings/">Listings</a></li>
+<li><a href="../../docs/reserve/">Reserve</a></li>
+<li><a href="../../docs/datatrust/">Datatrusts</a></li>
+<li><a href="../../docs/parameters/">Market Parameters</a></li>
+<li><a href="../../docs/attacks/">Attacks</a></li>
+<li><a href="../../docs/userjourney/">User Journeys</a></li>
+</ul>
+
+
+
+
+
+</nav>
+
+
+  
+<script>
+(function() {
+  var menu = document.querySelector('aside.book-menu nav')
+  addEventListener('beforeunload', function(event) {
+    localStorage.setItem('menu.scrollTop', menu.scrollTop)
+  });
+  menu.scrollTop = localStorage.getItem('menu.scrollTop')
+})()
+</script>
+
+
+
+    </aside>
+
+    <div class="book-page">
+      <header class="align-center justify-between book-header">
+  <label for="menu-control">
+    <img src="../../svg/menu.svg" alt="Menu" />
+  </label>
+  <strong>
+  
+    
+    Markettoken
+  
+</strong>
+</header>
+
+      
+<article class="markdown">
+
+<h1 id="market-token">Market Token</h1>
+
+<p><code>MarketToken</code> is a mintable and burnable ERC20 token.
+The <code>MarketToken</code> is tied to a particular <code>Market</code> and
+is created when the <code>Market</code> is created. Note the
+contrast with token curated registries, which don&rsquo;t
+hold a mechanism for minting and burning their
+associated token.</p>
+
+<p>The <code>MarketToken</code> is denominated in &ldquo;market wei&rdquo;.  As
+with ETH, a &ldquo;market wei&rdquo; denominates <sup>1</sup>&frasl;<sub>10</sub>^18 of a
+<code>MarketToken</code>. Using wei units throughout prevents
+rounding error propagation and keeps contracts simple.</p>
+
+<p><code>MarketTokens</code> are dynamically minted and burned as the
+market evolves. This flexibility is needed to
+accurately track the evolving value of data in a data
+market.</p>
+
+<p><code>MarketTokens</code> are minted in one of a few scenarios explained below. In each case, the amount minted is set by the <code>Parameterizer</code> which holds <code>Market</code> parameters.</p>
+
+<ul>
+<li>Minting happens when new listings are listed in the
+market. These listings have to be approved by a
+council vote.</li>
+<li>Minting happens when a patron supports the market by
+making a payment into its reserve in <code>NetworkToken</code>.
+The algorithmic price curve controls the exchange rate
+which governs the number of <code>Markettoken</code> consequently
+minted.</li>
+<li>Minting happens when a datatrust reports that a
+listing has been queried. The minted tokens are
+awarded to the listing owner.</li>
+</ul>
+</article>
+
+      
+<div class="book-footer justify-between">
+  
+  <div>
+    
+    <a href="https://github.com/computablelabs/compspec/commit/e74a1ab68a380e1682cca35ff064443a013075f5" title='Last modified Aug 22, 2019 by Bharath Ramsundar' target="_blank" rel="noopener">
+      <img src="../../svg/calendar.svg" alt="Changed" /> Aug 22, 2019
+    </a>
+  </div>
+  
+  
+  <div>
+    <a href="https://github.com/computablelabs/compspec/edit/master/docs/markettoken.md" target="_blank" rel="noopener">
+      <img src="../../svg/edit.svg" alt="Edit" /> Edit this page
+    </a>
+  </div>
+  
+</div>
+
+
+      
+    </div>
+
+    
+  
+
+  <aside class="book-toc level-6 fixed">
+    <nav id="TableOfContents">
+<ul>
+<li><a href="#market-token">Market Token</a></li>
+</ul>
+</nav>
+  </aside>
+
+
+
+  </main>
+  
+  
+  
+</body>
+
+</html>

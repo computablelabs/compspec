@@ -7,7 +7,7 @@
 <html lang="en">
 
 <head>
-	<meta name="generator" content="Hugo 0.55.6" />
+	<meta name="generator" content="Hugo 0.57.2" />
   <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>
@@ -62,7 +62,14 @@ https://github.com/alex-shpak/hugo-book
 <ul>
 <li><a href="./"><strong>Introduction</strong></a></li>
 <li><a href="./docs/contracts/">Contracts</a></li>
+<li><a href="./docs/markettoken/">Market Token</a></li>
+<li><a href="./docs/voting/">Voting</a></li>
+<li><a href="./docs/listings/">Listings</a></li>
+<li><a href="./docs/reserve/">Reserve</a></li>
 <li><a href="./docs/datatrust/">Datatrusts</a></li>
+<li><a href="./docs/parameters/">Market Parameters</a></li>
+<li><a href="./docs/attacks/">Attacks</a></li>
+<li><a href="./docs/userjourney/">User Journeys</a></li>
 </ul>
 
 
@@ -106,72 +113,43 @@ https://github.com/alex-shpak/hugo-book
 
 <h2 id="introduction">Introduction</h2>
 
-<p>The Computable protocol creates decentralized data markets.  The
-global network is made up of many individual markets. Each
-market conceptually holds a single collection of data and is created and
-controlled by the owners of this data. These owners could correspond
-to existing organizations, or could be a decentralized set of
-interested parties. The coordination and access control for these
-individual market instances is coordinated by a set of smart
-contracts. Each market allows for a set of associated financial
-operations. These operations allow interested parties to invest in a
-particular Market or pay for the ability to query the data
-associated with that Market. To facilitate these transactions, each
-market has a unique associated <code>MarketToken</code>.</p>
+<p>The Computable protocol creates decentralized data
+markets.  The global network is made up of many
+individual markets. Each market conceptually holds a
+single collection of data and is created and controlled
+by the owners of this data. These owners could
+correspond to existing organizations, or could be a
+decentralized set of interested parties. The
+coordination and access control for these individual
+market instances is coordinated by a set of smart
+contracts. Each market allows for a set of associated
+financial operations. These operations allow interested
+parties to invest in a particular Market or pay for the
+ability to query the data associated with that Market.
+To facilitate these transactions, each market has a
+unique associated <code>MarketToken</code>.</p>
 
-<p>Everything described above is implemented in a set of smart contracts
-which currently live on the Ethereum blockchain. The data itself
-doesn&rsquo;t live on the smart contracts. For one, datasets can be very
-large (gigabytes, terabytes, petabytes, exabytes or more). It would be
-infeasible to store such large collections of data on existing smart
-contract systems. For this reason, data lives &ldquo;off-chain&rdquo; in
-<code>Datatrusts</code>. A <code>Datatrust</code> is software system that is responsible for
-storing data and coordinating with on-chain permissions layers. Note
-that many possible <code>Datatrust</code> implementations are possible by different
-vendors or groups, so long as each implementation responds to the API
-specified within this document.</p>
+<p>Everything described above is implemented in a set of
+smart contracts which currently live on the Ethereum
+blockchain. The data itself doesn&rsquo;t live on the smart
+contracts. For one, datasets can be very large
+(gigabytes, terabytes, petabytes, exabytes or more). It
+would be infeasible to store such large collections of
+data on existing smart contract systems. For this
+reason, data lives &ldquo;off-chain&rdquo; in <code>Datatrusts</code>. A
+<code>Datatrust</code> is software system that is responsible for
+storing data and coordinating with on-chain permissions
+layers. Note that many possible <code>Datatrust</code>
+implementations are possible by different vendors or
+groups, so long as each implementation responds to the
+API specified within this document.</p>
+
+<p>This document is a living, versioned specification. As
+understanding of the core aspects of the Computable
+protocol grows, this document will be updated
+accordingly.</p>
 
 <p><img src="Protocol_Flowchart.png" alt="Protocol Flowchart" /></p>
-
-<h2 id="locis-suis-novi-cum-suoque-decidit-eadem">Locis suis novi cum suoque decidit eadem</h2>
-
-<p>Idmoniae ripis, at aves, ali missa adest, ut <em>et autem</em>, et ab? Venit spes
-versus finis sermonibus patefecit murum nec est sine oculis. <em>Ille</em> inmota
-macies domoque caelestia cadit tantummodo scelus procul, corde!</p>
-
-<ol>
-<li>Dolentem capi parte rostro alvum habentem pudor</li>
-<li>Fulgentia sanguine paret</li>
-<li>E punior consurgit lentus</li>
-<li>Vox hasta eras micantes</li>
-</ol>
-
-<h2 id="facibus-pharetrae-indetonsusque-indulsit-sic-incurrite-foliis">Facibus pharetrae indetonsusque indulsit sic incurrite foliis</h2>
-
-<p>Nefandam et prisci palmas! Blandita cutis flectitur montis macies, te <em>nati</em>
-Latiis; turbaque inferias. Virginis tibi peracta avidusque facies caper nec, e
-at ademptae, mira.</p>
-
-<pre><code>direct *= font(inputScareware(sliHome), crossplatform.byte(
-        ppl_encryption.excel_e_rte(integratedModelModifier), timeVirtual,
-        floating_speakers.media_printer(us, yahoo, primaryPhp)));
-friendly_metal_flatbed(cd, isoPrimaryStorage(reader), dmaMirrored);
-if (parse_flash_cron.metalGif(1, adServiceDevice, utility)) {
-    adf -= operation_cdma_samba;
-    imapGif.switch += torrent;
-} else {
-    pmu.disk_captcha = digital_ppp_pci + recursionTransistor(5, dram);
-    ajax_service += grayscalePythonLock;
-    google_scroll_capacity = ftp + engine_dslam_sidebar / tape - 1;
-}
-drive_rw = zipTftp;
-var suffix = software_router_extension.dimm_ddr(-5,
-        kernel_digital_minisite);
-</code></pre>
-
-<p>Vocavit toto; alas <strong>mitis</strong> maestus in liquidarum ab legi finitimosque dominam
-tibi subitus; Orionis vertitur nota. Currere alti etiam seroque cernitis
-innumeris miraturus amplectique collo sustinet quemque! Litora ante turba?</p>
 </article>
 
       
@@ -179,8 +157,8 @@ innumeris miraturus amplectique collo sustinet quemque! Litora ante turba?</p>
   
   <div>
     
-    <a href="https://github.com/computablelabs/compspec/commit/29df2b60cf154566364112d88e4e72ba301549d9" title='Last modified Jul 11, 2019 by Bharath Ramsundar' target="_blank" rel="noopener">
-      <img src="./svg/calendar.svg" alt="Changed" /> Jul 11, 2019
+    <a href="https://github.com/computablelabs/compspec/commit/517b9af02ed12885abc0cd92e1c767c334309f9e" title='Last modified Aug 22, 2019 by Bharath Ramsundar' target="_blank" rel="noopener">
+      <img src="./svg/calendar.svg" alt="Changed" /> Aug 22, 2019
     </a>
   </div>
   
@@ -206,8 +184,6 @@ innumeris miraturus amplectique collo sustinet quemque! Litora ante turba?</p>
 <li><a href="#the-computable-protocol">The Computable Protocol</a>
 <ul>
 <li><a href="#introduction">Introduction</a></li>
-<li><a href="#locis-suis-novi-cum-suoque-decidit-eadem">Locis suis novi cum suoque decidit eadem</a></li>
-<li><a href="#facibus-pharetrae-indetonsusque-indulsit-sic-incurrite-foliis">Facibus pharetrae indetonsusque indulsit sic incurrite foliis</a></li>
 </ul></li>
 </ul>
 </nav>

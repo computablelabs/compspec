@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+
+
+
+
+
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>
+  
+    
+    Parameters
+  
+ | Computable Spec</title>
+
+
+
+<link rel="stylesheet" href="../../book.min.f4161f5e2de53a2e927f51df1611323a2a12cccb2681f23cb6fc3517852e8643.css">
+
+
+<link rel="icon" href="../../favicon.png" type="image/x-icon">
+
+
+<!--
+Made with Book Theme
+https://github.com/alex-shpak/hugo-book
+-->
+
+  
+</head>
+
+<body>
+  <input type="checkbox" style="display: none" id="menu-control" />
+  <main class="flex container">
+
+    <aside class="book-menu fixed">
+      <nav>
+<h2 class="book-brand">
+  <a href="https://computablelabs.github.io/compspec/">Computable Spec</a>
+</h2>
+
+
+
+    
+  
+  
+  
+
+  <style>
+  nav ul a[href$="\2f docs\2fparameters\2f "] {
+      color: #0b3a53;
+  }
+  </style>
+
+<ul>
+<li><a href="../../"><strong>Introduction</strong></a></li>
+<li><a href="../../docs/contracts/">Contracts</a></li>
+<li><a href="../../docs/markettoken/">Market Token</a></li>
+<li><a href="../../docs/voting/">Voting</a></li>
+<li><a href="../../docs/listings/">Listings</a></li>
+<li><a href="../../docs/reserve/">Reserve</a></li>
+<li><a href="../../docs/datatrust/">Datatrusts</a></li>
+<li><a href="../../docs/parameters/">Market Parameters</a></li>
+<li><a href="../../docs/attacks/">Attacks</a></li>
+<li><a href="../../docs/userjourney/">User Journeys</a></li>
+</ul>
+
+
+
+
+
+</nav>
+
+
+  
+<script>
+(function() {
+  var menu = document.querySelector('aside.book-menu nav')
+  addEventListener('beforeunload', function(event) {
+    localStorage.setItem('menu.scrollTop', menu.scrollTop)
+  });
+  menu.scrollTop = localStorage.getItem('menu.scrollTop')
+})()
+</script>
+
+
+
+    </aside>
+
+    <div class="book-page">
+      <header class="align-center justify-between book-header">
+  <label for="menu-control">
+    <img src="../../svg/menu.svg" alt="Menu" />
+  </label>
+  <strong>
+  
+    
+    Parameters
+  
+</strong>
+</header>
+
+      
+<article class="markdown">
+
+<h1 id="market-parameters">Market Parameters</h1>
+
+<p>The <code>Market</code> is governed by a set of parameters controlled by the <code>Parameterizer</code>.</p>
+
+<pre><code>uint challengeStake
+</code></pre>
+
+<p>The stake (in <code>MarketToken</code>) needed to issue a challenge to a listing.</p>
+
+<pre><code>uint voteBy
+</code></pre>
+
+<p>The time (in seconds) that a poll should remain open. This controls the length
+of the voting window in which council members can vote upon an <code>Market</code>
+listing, challenge, or reparameterization.</p>
+
+<pre><code>uint quorum
+</code></pre>
+
+<p>The percent (whole number between 0 and 100) of the council which must vote in
+favor of a <code>Market</code> modification for it to succeed.</p>
+
+<pre><code>uint dispensation
+</code></pre>
+
+<p>A percentage (whole number between 0 and 100) that is the fraction of <code>challengeStake</code> that the winner of a challenge receives.</p>
+
+<pre><code>uint conversionRate
+</code></pre>
+
+<p>The constant in the algorithmic price curve</p>
+
+<pre><code>uint conversionSlope
+</code></pre>
+
+<p>The slope in the algorithmic price curve.</p>
+
+<pre><code>uint listReward
+</code></pre>
+
+<p>The number of new <code>MarketToken</code> wei that are minted when a listing is listed.</p>
+
+<h4 id="reparameterization">Reparameterization</h4>
+
+<p>All market parameters can be changed with a council vote. The process of changing <code>Market</code> parameters is referred to as reparameterization.</p>
+</article>
+
+      
+<div class="book-footer justify-between">
+  
+  <div>
+    
+    <a href="https://github.com/computablelabs/compspec/commit/e74a1ab68a380e1682cca35ff064443a013075f5" title='Last modified Aug 22, 2019 by Bharath Ramsundar' target="_blank" rel="noopener">
+      <img src="../../svg/calendar.svg" alt="Changed" /> Aug 22, 2019
+    </a>
+  </div>
+  
+  
+  <div>
+    <a href="https://github.com/computablelabs/compspec/edit/master/docs/parameters.md" target="_blank" rel="noopener">
+      <img src="../../svg/edit.svg" alt="Edit" /> Edit this page
+    </a>
+  </div>
+  
+</div>
+
+
+      
+    </div>
+
+    
+  
+
+  <aside class="book-toc level-6 fixed">
+    <nav id="TableOfContents">
+<ul>
+<li><a href="#market-parameters">Market Parameters</a>
+<ul>
+<li>
+<ul>
+<li>
+<ul>
+<li><a href="#reparameterization">Reparameterization</a></li>
+</ul></li>
+</ul></li>
+</ul></li>
+</ul>
+</nav>
+  </aside>
+
+
+
+  </main>
+  
+  
+  
+</body>
+
+</html>

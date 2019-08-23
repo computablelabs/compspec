@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+
+
+
+
+
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>
+  
+    
+    Reserve
+  
+ | Computable Spec</title>
+
+
+
+<link rel="stylesheet" href="../../book.min.f4161f5e2de53a2e927f51df1611323a2a12cccb2681f23cb6fc3517852e8643.css">
+
+
+<link rel="icon" href="../../favicon.png" type="image/x-icon">
+
+
+<!--
+Made with Book Theme
+https://github.com/alex-shpak/hugo-book
+-->
+
+  
+</head>
+
+<body>
+  <input type="checkbox" style="display: none" id="menu-control" />
+  <main class="flex container">
+
+    <aside class="book-menu fixed">
+      <nav>
+<h2 class="book-brand">
+  <a href="https://computablelabs.github.io/compspec/">Computable Spec</a>
+</h2>
+
+
+
+    
+  
+  
+  
+
+  <style>
+  nav ul a[href$="\2f docs\2freserve\2f "] {
+      color: #0b3a53;
+  }
+  </style>
+
+<ul>
+<li><a href="../../"><strong>Introduction</strong></a></li>
+<li><a href="../../docs/contracts/">Contracts</a></li>
+<li><a href="../../docs/markettoken/">Market Token</a></li>
+<li><a href="../../docs/voting/">Voting</a></li>
+<li><a href="../../docs/listings/">Listings</a></li>
+<li><a href="../../docs/reserve/">Reserve</a></li>
+<li><a href="../../docs/datatrust/">Datatrusts</a></li>
+<li><a href="../../docs/parameters/">Market Parameters</a></li>
+<li><a href="../../docs/attacks/">Attacks</a></li>
+<li><a href="../../docs/userjourney/">User Journeys</a></li>
+</ul>
+
+
+
+
+
+</nav>
+
+
+  
+<script>
+(function() {
+  var menu = document.querySelector('aside.book-menu nav')
+  addEventListener('beforeunload', function(event) {
+    localStorage.setItem('menu.scrollTop', menu.scrollTop)
+  });
+  menu.scrollTop = localStorage.getItem('menu.scrollTop')
+})()
+</script>
+
+
+
+    </aside>
+
+    <div class="book-page">
+      <header class="align-center justify-between book-header">
+  <label for="menu-control">
+    <img src="../../svg/menu.svg" alt="Menu" />
+  </label>
+  <strong>
+  
+    
+    Reserve
+  
+</strong>
+</header>
+
+      
+<article class="markdown">
+
+<h1 id="reserve">Reserve</h1>
+
+<p>This section introduces the basics of the reserve for
+each market.</p>
+
+<pre><code>    - [Market Reserve](#market-reserve) [v0.2]: The reserve is the &quot;bank account&quot; associated with a given `Market`. 
+    - [Algorithmic Price Curve](#algorithmic-price-curve) [v0.2]: Controls the price at which new investors may invest in market. Investor funds are deposited in reserve and new market token is minted accordingly.
+</code></pre>
+
+<h4 id="reserve-1">Reserve</h4>
+
+<p>The <code>Market</code> holds with it an associated &ldquo;reserve.&rdquo; Think of the
+reserve as holding earnings from the data in the <code>Market</code> that belong
+to all the <code>MarketToken</code> holders associated with the market. These
+earnings can come from either query payments or from investor
+purchases of <code>MarketToken</code>.  Investor class <code>MarketToken</code> holders are
+allowed to withdraw earnings from the reserve by burning their
+<code>MarketToken</code> holdings.</p>
+
+<p>At present, the reserve is denominated in <a href="#network-token"><code>NetworkToken</code></a>.</p>
+
+<h4 id="support-and-withdraw">Support and Withdraw</h4>
+
+<pre><code>function invest(uint offered) external returns (uint)
+</code></pre>
+
+<p><code>Market.invest()</code> consults the <a href="#algorithmic-price-curve">algorithmic price
+curve</a> to obtain the exchange rate This
+method can only be called from an address which is not already a
+listing owner. If the call succeeds, it will add a new investor class
+member (if not already added).  Note that <code>offered</code> is in units of
+<code>NetworkToken</code> wei.  The returned value will be in terms of
+<code>MarketToken</code> wei. <code>offered</code> will be added to the <code>Market</code> reserve and
+the returned <code>MarketToken</code> will be newly minted.</p>
+
+<pre><code>function divest() external returns (uint)
+</code></pre>
+
+<p><code>Market.divest()</code> will check if the caller is investor class. If so,
+it will burn all the <code>MarketTokens</code> associated with this investor and
+will withdraw the investor&rsquo;s share of the reserve (the percent of
+reserve withdrawn equals the percent of investor class <code>MarketToken</code>
+this investor owns).</p>
+
+<p>More precisely, the fractional ownership this investor has is
+<code>num_tokens/total_num_investor_tokens</code>. For example, if <code>num_tokens=5</code>
+and <code>total_num_investor_tokens=100</code>, this would be 5% fractional
+ownership. Then <code>num_tokens</code> market tokens are burned. Then the
+fractional part of the reserve belonging to this investor is
+transferred to the investor. For example, in the case above, 5% of the
+reserve would be transferred to the investor&rsquo;s address.</p>
+
+<h4 id="algorithmic-price-curve">Algorithmic Price Curve</h4>
+
+<p>The price curve dictates the conversion rate between <code>NetworkToken</code>
+and <code>MarketToken</code> for new investors. Investors purchase new
+<code>MarketToken</code> at the rate dictated by the price-curve.</p>
+
+<p><img src="Algorithmic_Price_Curve.png" alt="The Algorithmic Price Curve" /></p>
+
+<pre><code>function get_current_investment_price() pure returns (uint)
+</code></pre>
+
+<p><code>Market.get_current_investment_price()</code> reports the current
+<code>NetworkToken</code>/<code>MarketToken</code> conversion rate. Mathematically, the
+first version will be a linear function. That is,
+<code>Market.get_current_investment_price() = base_conversion_rate +
+conversion_slope * Market.get_reserve_size()</code> where
+<code>base_conversion_rate</code> and <code>conversion_slope</code> are parameters defined
+by the market creator in the <code>Parameterizer</code>.</p>
+
+<pre><code>function get_reserve_size() view returns (uint)
+</code></pre>
+
+<p><code>Market.get_reserve_size()</code> returns the size of current market reserve in <code>NetworkToken</code> wei</p>
+</article>
+
+      
+<div class="book-footer justify-between">
+  
+  <div>
+    
+    <a href="https://github.com/computablelabs/compspec/commit/e74a1ab68a380e1682cca35ff064443a013075f5" title='Last modified Aug 22, 2019 by Bharath Ramsundar' target="_blank" rel="noopener">
+      <img src="../../svg/calendar.svg" alt="Changed" /> Aug 22, 2019
+    </a>
+  </div>
+  
+  
+  <div>
+    <a href="https://github.com/computablelabs/compspec/edit/master/docs/reserve.md" target="_blank" rel="noopener">
+      <img src="../../svg/edit.svg" alt="Edit" /> Edit this page
+    </a>
+  </div>
+  
+</div>
+
+
+      
+    </div>
+
+    
+  
+
+  <aside class="book-toc level-6 fixed">
+    <nav id="TableOfContents">
+<ul>
+<li><a href="#reserve">Reserve</a>
+<ul>
+<li>
+<ul>
+<li>
+<ul>
+<li><a href="#reserve-1">Reserve</a></li>
+<li><a href="#support-and-withdraw">Support and Withdraw</a></li>
+<li><a href="#algorithmic-price-curve">Algorithmic Price Curve</a></li>
+</ul></li>
+</ul></li>
+</ul></li>
+</ul>
+</nav>
+  </aside>
+
+
+
+  </main>
+  
+  
+  
+</body>
+
+</html>

@@ -12,6 +12,16 @@
     
     <item>
       <title></title>
+      <link>https://computablelabs.github.io/compspec/docs/attacks/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://computablelabs.github.io/compspec/docs/attacks/</guid>
+      <description>Attacks This section catalogs known attacks on the protocol and known defenses against such attacks.
+Front Running Attacks In the current version of the protocol, it is possible for a determined adversary to front-run a number of protocol interactions. For example, if a listing with a given listingHash is proposed but not yet confirmed as a transaction, the adversary could create an alternative transaction with the same listingHash to attempt to block the original listing.</description>
+    </item>
+    
+    <item>
+      <title></title>
       <link>https://computablelabs.github.io/compspec/docs/advanced/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
@@ -28,16 +38,6 @@
       <guid>https://computablelabs.github.io/compspec/docs/client/</guid>
       <description>Ista qua aera Tetigisse hac duc omnipotens urbis per sapiente Lorem markdownum insigne. Olympo signis Delphis! Retexi Nereius nova develat stringit, frustra Saturnius uteroque inter! Oculis non ritibus Telethusa protulit, sed sed aere valvis inhaesuro Pallas animam: qui quid, ignes. Miseratus fonte Ditis conubia.
 var mnemonicPcmcia = file; if (bookmarkMultiprocessing) { core.intranetDigitize = menu(vdslWordart(enterprise, dviRealityTeraflops)); } else { portal_socket.jsp_shareware_digital = multicasting(component_uml); memory.ppc_title_hit(lunWebFormat + fontSmartphoneView, tween * default_hard, 5 + laptopMethod); wddm_tablet_null.</description>
-    </item>
-    
-    <item>
-      <title></title>
-      <link>https://computablelabs.github.io/compspec/docs/contracts/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>https://computablelabs.github.io/compspec/docs/contracts/</guid>
-      <description>All the contracts for the protocol currently deployed are in the computable repo. We are currently only deploying to a private test network, but as we deploy them to public test-nets and, eventually, main-net, we will update the README of this repo with their addresses and any other related information.
-For the more dev-minded amongst you, our contracts are actively developed here. We’ve built a number of developer utilities in there, including a custom testing framework that integrates closely with Geth’s tooling to provide a believable simulator engine.</description>
     </item>
     
     <item>
@@ -100,12 +100,84 @@ Quam iugulum regia simulacra, plus meruit humo pecorumque haesit, ab discedunt d
     </item>
     
     <item>
+      <title></title>
+      <link>https://computablelabs.github.io/compspec/docs/contracts/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://computablelabs.github.io/compspec/docs/contracts/</guid>
+      <description>For the more dev-minded amongst you, our contracts are actively developed here. We’ve built a number of developer utilities in there, including a custom testing framework that integrates closely with Geth’s tooling to provide a believable simulator engine. If you’ve ever wondered how to compile, deploy and test your Vyper smart contracts with an alternative to popular Javascript frameworks, this is how we do it.
+The “data market” itself is split across a series of 7 core contracts.</description>
+    </item>
+    
+    <item>
+      <title></title>
+      <link>https://computablelabs.github.io/compspec/docs/listings/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://computablelabs.github.io/compspec/docs/listings/</guid>
+      <description>Listings This section introduces the core concept of a &amp;ldquo;listing,&amp;rdquo; which is central to the protocol.
+ - [Listings](#listings): The basic elements of a data market. - [What is a Datapoint?](#what-is-a-datapoint): Each listing corresponds to an off-chain &amp;quot;datapoint.&amp;quot; This section defines precisely what a &amp;quot;datapoint&amp;quot; is. Briefly, a &amp;quot;datapoint&amp;quot; is just an arbitrary bytestring. - [Applying](#applying): Applying to add a listing to a data market - [Challenging](#challenging): Challenging an existing listing within a data market - [Exiting](#exiting): Yanking a listing from a data market.</description>
+    </item>
+    
+    <item>
+      <title></title>
+      <link>https://computablelabs.github.io/compspec/docs/markettoken/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://computablelabs.github.io/compspec/docs/markettoken/</guid>
+      <description>Market Token MarketToken is a mintable and burnable ERC20 token. The MarketToken is tied to a particular Market and is created when the Market is created. Note the contrast with token curated registries, which don&amp;rsquo;t hold a mechanism for minting and burning their associated token.
+The MarketToken is denominated in &amp;ldquo;market wei&amp;rdquo;. As with ETH, a &amp;ldquo;market wei&amp;rdquo; denominates 1&amp;frasl;10^18 of a MarketToken. Using wei units throughout prevents rounding error propagation and keeps contracts simple.</description>
+    </item>
+    
+    <item>
+      <title></title>
+      <link>https://computablelabs.github.io/compspec/docs/parameters/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://computablelabs.github.io/compspec/docs/parameters/</guid>
+      <description>Market Parameters The Market is governed by a set of parameters controlled by the Parameterizer.
+uint challengeStake  The stake (in MarketToken) needed to issue a challenge to a listing.
+uint voteBy  The time (in seconds) that a poll should remain open. This controls the length of the voting window in which council members can vote upon an Market listing, challenge, or reparameterization.
+uint quorum  The percent (whole number between 0 and 100) of the council which must vote in favor of a Market modification for it to succeed.</description>
+    </item>
+    
+    <item>
+      <title></title>
+      <link>https://computablelabs.github.io/compspec/docs/reserve/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://computablelabs.github.io/compspec/docs/reserve/</guid>
+      <description>Reserve This section introduces the basics of the reserve for each market.
+ - [Market Reserve](#market-reserve) [v0.2]: The reserve is the &amp;quot;bank account&amp;quot; associated with a given `Market`. - [Algorithmic Price Curve](#algorithmic-price-curve) [v0.2]: Controls the price at which new investors may invest in market. Investor funds are deposited in reserve and new market token is minted accordingly.  Reserve The Market holds with it an associated &amp;ldquo;reserve.&amp;rdquo; Think of the reserve as holding earnings from the data in the Market that belong to all the MarketToken holders associated with the market.</description>
+    </item>
+    
+    <item>
+      <title></title>
+      <link>https://computablelabs.github.io/compspec/docs/userjourney/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://computablelabs.github.io/compspec/docs/userjourney/</guid>
+      <description>The scope of this doc is to list the user-signed contract method calls required to fulfill various user actions. These are important to know because they constrain what the user interface must do in a couple of ways:
+First, user-originated contract method calls must be signed by the user’s private key, which means the user must confirm signing through a Metamask dialog. It’s not possible (nor should we) make this invisible to the user.</description>
+    </item>
+    
+    <item>
+      <title></title>
+      <link>https://computablelabs.github.io/compspec/docs/voting/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://computablelabs.github.io/compspec/docs/voting/</guid>
+      <description>Voting Major decisions in the Market are made by token holder vote. These decisions include which new listings should be added to the Market, which challenged listings should be removed, and what changes should be made to the Market parameters.</description>
+    </item>
+    
+    <item>
       <title>The Datatrust</title>
       <link>https://computablelabs.github.io/compspec/docs/datatrust/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>https://computablelabs.github.io/compspec/docs/datatrust/</guid>
-      <description>The Datatrust The datatrust</description>
+      <description>The Datatrust The off-chain portion of the Computable protocol, the Datatrust, is responsible for storing, querying and delivering upon data.
+ - [Buying Data](#paying-for-computation): Each `Market` supports running computational workloads against the data in this market. Workloads are run on a `Datatrust` tied to the market and may include SQL queries and standard programs capable of executing in a standard Linux environment. Users have to pay for workloads before they may execute them on a `Datatrust`.</description>
     </item>
     
   </channel>
