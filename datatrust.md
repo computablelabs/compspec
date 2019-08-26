@@ -3,6 +3,29 @@ title: The Datatrust
 type: docs
 ---
 
+#### Datatrusts 
+Each data market will maintain a list of authorized
+`Backend` systems.  A full vote of the council (#28)
+will be needed to add, remove, or authorize `Backend`
+systems.
+
+
+```
+function propose_backend_addition(string backend, address backend_address) external
+```
+Proposes the addition of a new authorized `Backend`.
+This addition must be authorized by a vote of the
+council. The `string backend` field is an external URL
+for the `Backend`. The `address backend_address` is an
+Ethereum address owned by the `Backend` operator.
+
+```
+function propose_backend_removal(string backend, address backend_address) external
+```
+Proposes that the specified `Backend` have its authorization revoked.
+This removal must be authorized by a vote of the council.
+
+
 ## The Datatrust
 
 The off-chain portion of the Computable protocol, the

@@ -18,7 +18,19 @@ limit on the size of a smart contract on the EVM. There
 are more reasons, but most are simply based around the
 proper design of good software. We can save those
 discussions however for elsewhere in the dev forums.
-Moving on: The contracts are interlinked in the
+
+The on-chain components of the protocol control
+economics and access control.  If a user wants to gain
+access to a particular dataset (in a particular data
+market), or if a user wants to invest in a particular
+data market, they have to seek on-chain authorization.
+If a user wants to pay for queries, this is also done
+off-chain. The advantage of this structure is that
+payments and authorization can be handled securely by
+secure on-chain contracts.
+
+
+The contracts are interlinked in the
 following fashion
 
 ![Contract Diagram](contracts.png)

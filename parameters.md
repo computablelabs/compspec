@@ -1,5 +1,9 @@
 # Market Parameters
 
+- [On-chain smart contracts](#on-chain-components):
+  - [Market Parameters](#market-parameters): The `Market` is governed by a set of a parameters dictated within the `Parameterizer`.
+      - [Reparameterization](#reparameterization): The parameters that govern the `Market` can be modified with a council vote.
+
 The `Market` is governed by a set of parameters controlled by the `Parameterizer`.
 
 ```
