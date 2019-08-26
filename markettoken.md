@@ -30,3 +30,8 @@ market.
 - Minting happens when a datatrust reports that a
   listing has been queried. The minted tokens are
   awarded to the listing owner.
+
+Burning happens in the scenarios explained below.
+- If a listing is removed from the `Market`, its associated tokens are burned. This happens when the listing owner removes the listing or when a successful challenge forces removal of the listing.
+- If an investor class token holder divests from the `Market`, their divested tokens are burned. The origin of the tokens being burned does not matter.
+

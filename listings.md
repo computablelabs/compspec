@@ -111,3 +111,25 @@ the victor of the challenge receives a financial reward
 which comes directly from the loser of of the
 challenge.
 
+#### Paying for Access
+Users may wish to run queries against the data in the
+`Market` or may wish to construct machine learning
+models on this data. In order for them to be authorized
+for such computation, they must first make a payment
+via the `Market` contract.
+
+Listing owners set an access cost for their listing
+(denominated in `NetworkToken` wei). For listings which
+are owned by the market itself,  the listing default
+price is set in the `Parameterizer`.
+
+```
+function set_access_cost(bytes32 listingHash, uint cost) external
+```
+Callable only by the listing owner. Sets the price (in `NetworkToken` wei) to access this listing
+
+```
+function get_access_costs(bytes32 listingHash) returns (uint)
+```
+Returns the access cost for a listing.
+
