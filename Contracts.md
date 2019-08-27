@@ -1,11 +1,18 @@
-For the more dev-minded amongst you, our contracts are
-actively developed here. We’ve built a number of
-developer utilities in there, including a custom
-testing framework that integrates closely with Geth’s
-tooling to provide a believable simulator engine. If
-you’ve ever wondered how to compile, deploy and test
-your Vyper smart contracts with an alternative to
-popular Javascript frameworks, this is how we do it.
+In this section, we'll review the smart contracts that
+form the core of the Computable protocol. The clean
+version of the contracts lives in the
+[Computable](https://github.com/computablelabs/computable)
+repo. These are the stable versions of the contracts
+and are only updated for major releases. The developer
+version lives in the
+[Goest](https://github.com/computablelabs/goest) repo.
+We’ve built a number of developer utilities in there,
+including a custom testing framework that integrates
+closely with Geth’s tooling to provide a believable
+simulator engine. If you’ve ever wondered how to
+compile, deploy and test your Vyper smart contracts
+with an alternative to popular Javascript frameworks,
+this is how we do it.
 
 The “data market” itself is split across a series of 7
 core contracts.  You might ask why we didn’t just
@@ -13,11 +20,11 @@ create one monolith contract that implements the data
 market. Well, monoliths don’t scale. As complexity
 grows it would be harder and harder to devise
 abstractions and permissions controls. More importantly
-however, and this you may not know, there is a ~24 kb
+however (and this you may not know) there is a ~24 kb
 limit on the size of a smart contract on the EVM. There
 are more reasons, but most are simply based around the
 proper design of good software. We can save those
-discussions however for elsewhere in the dev forums.
+discussions however for elsewhere in the [dev forums](https://forum.computable.io/c/developers).
 
 The on-chain components of the protocol control
 economics and access control.  If a user wants to gain
@@ -30,8 +37,7 @@ payments and authorization can be handled securely by
 secure on-chain contracts.
 
 
-The contracts are interlinked in the
-following fashion
+The contracts are interlinked in the following fashion
 
 ![Contract Diagram](contracts.png)
 
@@ -42,30 +48,30 @@ contracts are numbered such that contract i is not
 dependent on contract j for j > i. We’ll discuss the
 contracts in order:
 
-- EtherToken: This contract is a form of wrapped Ether.
+- `EtherToken`: This contract is a form of wrapped Ether.
   It wraps ETH into an ERC20 interface that makes it
   easy to work with. The first step for working with the
   data market protocol is to transfer some ETH into
   EtherToken.
-- MarketToken: This contract is an ERC20 that tracks
+- `MarketToken`: This contract is an ERC20 that tracks
   ownership in the current data market.
-- Voting: This contract governs voting in the data
+- `Voting`: This contract governs voting in the data
   market. Recall that votes control a number of
   critical operations in the protocol, such as the
   decision of whether to admit a new listing to the
   market, and whether to change the core parameters that
   govern the market.
-- Parameterizer: This contract governs the set of
+- `Parameterizer`: This contract governs the set of
   parameters which control the market’s behaviors.
-- Reserve: This contract governs the data market’s
+- `Reserve`: This contract governs the data market’s
   reserve. In particular, this contract exposes the
   “algorithmic price curve” which governs how patrons can
   support and withdraw from the market.
-- Datatrust: This contract governs the interaction of
+- `Datatrust`: This contract governs the interaction of
   the datatrust with the core market. In particular,
   the “delivery flow” which controls how data is
   purchased is handled by this contract.
-- Listing: This contract governs the addition of new
+- `Listing`: This contract governs the addition of new
   chunks of data (“listings”) into the data market.
 
 You might notice that some of the contracts have other
@@ -73,10 +79,10 @@ contract names specified in small red font underneath.
 These contracts have “privilege” in the current
 contract. Contracts with privilege have the ability to
 call certain special methods in the current contract.
-For example, Listing and Reserve have privilege with
-the MarketToken contract. Precisely, this means that
+For example, `Listing` and `Reserve` have privilege with
+the `MarketToken` contract. Precisely, this means that
 these contracts have the ability to mint and burn
-MarketToken. This privilege structure is needed to
+`MarketToken`. This privilege structure is needed to
 implement the algorithmic buy/sell curve for patrons.
 As you’re reading through the contracts, you might find
 it useful to keep this privilege structure in your head
