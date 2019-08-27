@@ -8,7 +8,7 @@ type: docs
 ## Introduction 
 
 The Computable protocol creates decentralized data
-markets.  The global Computable network is made up of
+markets. The global Computable network is made up of
 many individual markets. Each market conceptually holds
 a single collection of data and is created and
 controlled by the owners of this data. These owners
@@ -42,9 +42,31 @@ possible by different vendors or groups, so long as
 each implementation responds to the API specified
 within this specification. 
 
-This document is a living, versioned specification. As
+Users can interact with the raw smart contracts through
+downstream API libraries which allow for programmatic
+access to smart contract state. Taken together, the
+trio of smart contracts, datatrust, and user facing
+front-end provide for a type of "operating system"
+which allows a decentralized, distributed community of
+individuals to manage and grow a dataset.
+Decentralized control of data is the heart of the
+Computable protocol.
+
+![Protocol Flowchart](market_transactions.png)
+
+This website is an introduction to the core Computable
+protocol and downstream libraries. It is designed to be
+read end-to-end, book style, and will provide you with
+a working understanding of the full protocol and the
+libraries that enable interaction with it. This
+document is a living, versioned specification. As
 understanding of the core aspects of the Computable
 protocol grows, this document will be updated
 accordingly.
 
-![Protocol Flowchart](market_transactions.png)
+
+By the time you finish reading this book, you should be
+prepared to launch your own data market and get started
+on gathering new and interesting datasets. Welcome
+onboard to the Computable community! It's going to be a
+ride.
