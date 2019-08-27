@@ -18,12 +18,17 @@ Attackers attempt to flood market with low-quality
 listings This attack is mitigated by the enforced
 council vote needed for listings to be listed.
 
-
 ## Council DDoS 
 
 Attackers overwhelm the council with a glut of candidates
 
 ## Datatrust Fraud 
 
-This attack happens when a datatrust commits fraud and doesn't serve
-its purpose correctly.
+This attack happens when a datatrust commits fraud and
+doesn't serve its purpose correctly. At present, this
+is a known failure mode of the current version of the
+protocol.  However, this topic is being actively
+researched on the
+[forums](https://forum.computable.io/). Future versions
+of the Computable protocol should lower the trust
+requirements for the datatrust.
