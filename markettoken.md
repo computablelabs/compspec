@@ -19,19 +19,25 @@ market.
 
 `MarketTokens` are minted in one of a few scenarios explained below. In each case, the amount minted is set by the `Parameterizer` which holds `Market` parameters.
 
-- Minting happens when new listings are listed in the
-  market. These listings have to be approved by a
-  council vote. 
+## Minting 
+Minting happens when new listings are listed in the
+market. These listings have to be approved by a
+stakeholder vote. 
+
 - Minting happens when a patron supports the market by
-  making a payment into its reserve in `NetworkToken`.
+  making a payment into its reserve in `EtherToken`.
   The algorithmic price curve controls the exchange rate
-  which governs the number of `Markettoken` consequently
+  which governs the number of `MarketToken` consequently
   minted.
 - Minting happens when a datatrust reports that a
   listing has been queried. The minted tokens are
   awarded to the listing owner.
 
+## Burning
+
 Burning happens in the scenarios explained below.
-- If a listing is removed from the `Market`, its associated tokens are burned. This happens when the listing owner removes the listing or when a successful challenge forces removal of the listing.
-- If an investor class token holder divests from the `Market`, their divested tokens are burned. The origin of the tokens being burned does not matter.
+
+- If a token holder divests from the data market, their
+divested tokens are burned. The origin of the tokens
+being burned does not matter.
 
