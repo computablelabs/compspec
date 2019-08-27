@@ -46,3 +46,21 @@ def listingAccessed(listing: bytes32, delivery: bytes32, amount: uint256):
 This function can only be called by an authorized
 Datatrust. These reported access numbers are used to
 mint utilization rewards for makers.
+
+## Proposing a new datatrust.
+
+An interested party can propose itself as a new
+datatrust by calling `Datatrust.register()`
+
+```
+@public
+def register(url: string[128]):
+  """
+  @notice Allow a backend to register as a candidate
+  @param url The location of this backend
+  """
+```
+
+Calling this method triggers a vote. If the vote
+passes, then this this party becomes the new datatrust
+for the system.
