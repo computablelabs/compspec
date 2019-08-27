@@ -1,79 +1,82 @@
 # Listings
+A data market holds a set of "listings". Each listing
+corresponds to a chunk of data contributed by a single maker and managed within the data market. The listing is physicaally stored  
+off-chain in the datatrust for this market. 
 
-This section introduces the core concept of a
-"listing," which is central to the protocol.
-
-		- [Listings](#listings): The basic elements of a data market.
-			- [What is a Datapoint?](#what-is-a-datapoint): Each listing corresponds to an off-chain "datapoint." This section defines precisely what a "datapoint" is. Briefly, a "datapoint" is just an arbitrary bytestring.
-			- [Applying](#applying): Applying to add a listing to a data market
-			- [Challenging](#challenging): Challenging an existing listing within a data market
-			- [Exiting](#exiting): Yanking a listing from a data market. 
-
-A market holds a set of `Listings`. Each listing
-corresponds to an element of the `Market` which is held
-off-chain in some (possibly multiple) `Backend`
-systems.  Newcomers to the market can call
-`Market.apply()` to apply to have their listing added
-to the market. A listing consists of an off-chain
-datapoint (or datapoints) and an on-chain listing
-structure. (We haven't defined "datapoint" here yet.)
 We reproduce the fields of the on-chain listing
-structure below.
+structure (in `Listing.vy`) below.
 
 ```
-struct Listing {
-  bool listed; // a 'listing' if true
-  address owner; // owns the listing
-  uint supply; // Number of tokens in the listing (both deposited and minted).
-  uint challenge; // corresponts to a poll id in Voting if present
-  bytes32 dataHash; // Hash of the off-chain data-point this listing corresponds to
-  uint rewards; // Number of Market tokens that have been minted for this listing.
-}
+struct Listing:
+  owner: address
+  supply: wei_value
 ```
 
 Let's take a minute to walk through the fields of this
 struct to explain how the `Listing` works. The
 `Listing` is an on-chain record of a chunk of off-chain
-data. The `dataHash` is the hash of the set of
-off-chain data that this listing corresponds to. For
-our purposes, this off-chain data is simply an
-arbitrary blob (a bytestring of arbitrary length) that
-is hashed down to a single `bytes32` value.
+data. Note that a listing has a very simple on-chain
+footprint. It simply records the owner of the listing,
+keyed by their Ethereum address, along with the
+`supply` tied to the listing. The `supply` is a amount
+of funds tied to this particular listing (TODO: clarify
+this relationship).
 
-The `listed` boolean field specifies whether this
-listing is officially listed or not in this given
-market. The `owner` field is the market participant who
-owns this listing. If this owner has converted to
-investor class, ownership of the listing will be
-transferred to the market itself and the `address` in
-this field will be the market address.
+You might wonder how two listings are differentiated
+from each other if there's no unique identifier in the
+struct. The answer to this is that the listings are
+stored in a `map` that keys from the `listingHash` for
+this listing to the actual struct.
 
-The `supply` field is the number of `MarketToken` that
-the listing proposer is willing to stake to see this
-listing listed in the `Market`. This must exceed the
-`minDeposit` that is demanded by the `Parameterizer`
-tied to this market.  The purpose of this stake is to
-reward challengers who remove useless listings from a
-given market.
+```
+listings: map(bytes32, Listing)
+```
 
-The `challenge` field tracks if there's an active
-challenge to this `Listing` at present. `rewards`
-tracks how many new `MarketToken` have been minted for
-this `Listing`. Note that this field is only nonzero
-for `Listings` which have successfully been listed.
+There is a last piece of data tied to each listing, the
+`dataHash`. This is stored in the `Datatrust.vy`
+contract.
 
- 
-#### What is a datapoint?
-We haven't clearly specified what a "datapoint" is in
-the preceding material.  Part of the challenge is that
-a "datapoint" will mean different things for different
-markets. A record in an off-chain SQL database is very
-different from an image file for a deep learning
-`Backend`. For this reason, we say that the "datapoint"
-tied to a listing is simply an arbitrary bytestring.
-This bytestring may correspond to multiple "logical
-datapoints".  For example, the bytestring may
-correspond to 10 SQL rows or to 50 images. This
+```
+data_hashes: map(bytes32, bytes32) # listing_hash -> data_hash
+```
+
+Once the datatrust has received the actual off-chain
+listing data from the maker, it stores the `data_hash`
+(conceptually the hash of the raw data for the listing,
+but could be something else) within this map.
+
+			- [What is a Datapoint?](#what-is-a-datapoint): Each listing corresponds to an off-chain "datapoint." This section defines precisely what a "datapoint" is. Briefly, a "datapoint" is just an arbitrary bytestring.
+			- [Applying](#applying): Applying to add a listing to a data market
+			- [Challenging](#challenging): Challenging an existing listing within a data market
+			- [Exiting](#exiting): Yanking a listing from a data market. 
+
+
+You might wonder how we can use these fields to tell whether a listing has been formally accepted (and is no longer a candidate). For this, we can use the convenient fact that Vyper defaults fields to 0 if not set:
+
+```
+@public
+@constant
+def isListed(hash: bytes32) -> bool:
+  """
+  @notice Return a boolean representing whether a Listing has been listed
+  """
+  return self.listings[hash].owner != ZERO_ADDRESS
+```
+
+Reading through this, if the listing's owner is not
+`ZERO_ADDRESS`, then the listing has been accepted.
+
+#### What is the off-chain part of a listing?
+We haven't clearly specified what a listing is
+precisely in the preceding material.  Part of the
+challenge is that a "listing" will mean different
+things for different markets. A record in an off-chain
+SQL database is very different from an image file for a
+deep learning application. For this reason, we say that
+the off-chain part of a a listing is simply an
+arbitrary bytestring.  This bytestring may correspond
+to multiple "datapoints".  For example, the bytestring
+may correspond to 10 SQL rows or to 50 images. This
 batching might be crucial for efficiency, since the
 transaction rate of Ethereum is not yet sufficient to
 do bulk uploads of datasets otherwise.
