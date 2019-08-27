@@ -15,8 +15,12 @@ rm -rf .git/worktrees/public/
 echo "Checking out gh-pages branch into public"
 git worktree add -B gh-pages public origin/gh-pages
 
+## Edit steps
 echo "Removing existing files"
-rm -rf public/*
+#rm -rf public/*
+cd public
+git rm -r *
+cd ..
 
 #echo "Generating PDF"
 #name=$(./build-pdf.sh)
