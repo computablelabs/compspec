@@ -108,117 +108,181 @@ https://github.com/alex-shpak/hugo-book
 
 <h1 id="listings">Listings</h1>
 
-<p>This section introduces the core concept of a
-&ldquo;listing,&rdquo; which is central to the protocol.</p>
+<p>A data market holds a set of &ldquo;listings&rdquo;. Each listing
+corresponds to a chunk of data contributed by a single maker and managed within the data market. The listing is physicaally stored<br />
+off-chain in the datatrust for this market.</p>
 
-<pre><code>    - [Listings](#listings): The basic elements of a data market.
-        - [What is a Datapoint?](#what-is-a-datapoint): Each listing corresponds to an off-chain &quot;datapoint.&quot; This section defines precisely what a &quot;datapoint&quot; is. Briefly, a &quot;datapoint&quot; is just an arbitrary bytestring.
-        - [Applying](#applying): Applying to add a listing to a data market
-        - [Challenging](#challenging): Challenging an existing listing within a data market
-        - [Exiting](#exiting): Yanking a listing from a data market. 
-</code></pre>
+<p>We reproduce the fields of the on-chain listing
+structure (in <code>Listing.vy</code>) below.</p>
 
-<p>A market holds a set of <code>Listings</code>. Each listing
-corresponds to an element of the <code>Market</code> which is held
-off-chain in some (possibly multiple) <code>Backend</code>
-systems.  Newcomers to the market can call
-<code>Market.apply()</code> to apply to have their listing added
-to the market. A listing consists of an off-chain
-datapoint (or datapoints) and an on-chain listing
-structure. (We haven&rsquo;t defined &ldquo;datapoint&rdquo; here yet.)
-We reproduce the fields of the on-chain listing
-structure below.</p>
-
-<pre><code>struct Listing {
-  bool listed; // a 'listing' if true
-  address owner; // owns the listing
-  uint supply; // Number of tokens in the listing (both deposited and minted).
-  uint challenge; // corresponts to a poll id in Voting if present
-  bytes32 dataHash; // Hash of the off-chain data-point this listing corresponds to
-  uint rewards; // Number of Market tokens that have been minted for this listing.
-}
+<pre><code>struct Listing:
+  owner: address
+  supply: wei_value
 </code></pre>
 
 <p>Let&rsquo;s take a minute to walk through the fields of this
 struct to explain how the <code>Listing</code> works. The
 <code>Listing</code> is an on-chain record of a chunk of off-chain
-data. The <code>dataHash</code> is the hash of the set of
-off-chain data that this listing corresponds to. For
-our purposes, this off-chain data is simply an
-arbitrary blob (a bytestring of arbitrary length) that
-is hashed down to a single <code>bytes32</code> value.</p>
+data. Note that a listing has a very simple on-chain
+footprint. It simply records the owner of the listing,
+keyed by their Ethereum address, along with the
+<code>supply</code> tied to the listing. The <code>supply</code> is a amount
+of funds tied to this particular listing (TODO: clarify
+this relationship).</p>
 
-<p>The <code>listed</code> boolean field specifies whether this
-listing is officially listed or not in this given
-market. The <code>owner</code> field is the market participant who
-owns this listing. If this owner has converted to
-investor class, ownership of the listing will be
-transferred to the market itself and the <code>address</code> in
-this field will be the market address.</p>
+<p>You might wonder how two listings are differentiated
+from each other if there&rsquo;s no unique identifier in the
+struct. The answer to this is that the listings are
+stored in a <code>map</code> that keys from the <code>listingHash</code> for
+this listing to the actual struct.</p>
 
-<p>The <code>supply</code> field is the number of <code>MarketToken</code> that
-the listing proposer is willing to stake to see this
-listing listed in the <code>Market</code>. This must exceed the
-<code>minDeposit</code> that is demanded by the <code>Parameterizer</code>
-tied to this market.  The purpose of this stake is to
-reward challengers who remove useless listings from a
-given market.</p>
+<pre><code>listings: map(bytes32, Listing)
+</code></pre>
 
-<p>The <code>challenge</code> field tracks if there&rsquo;s an active
-challenge to this <code>Listing</code> at present. <code>rewards</code>
-tracks how many new <code>MarketToken</code> have been minted for
-this <code>Listing</code>. Note that this field is only nonzero
-for <code>Listings</code> which have successfully been listed.</p>
+<p>There is a last piece of data tied to each listing, the
+<code>dataHash</code>. This is stored in the <code>Datatrust.vy</code>
+contract.</p>
 
-<h4 id="what-is-a-datapoint">What is a datapoint?</h4>
+<pre><code>data_hashes: map(bytes32, bytes32) # listing_hash -&gt; data_hash
+</code></pre>
 
-<p>We haven&rsquo;t clearly specified what a &ldquo;datapoint&rdquo; is in
-the preceding material.  Part of the challenge is that
-a &ldquo;datapoint&rdquo; will mean different things for different
-markets. A record in an off-chain SQL database is very
-different from an image file for a deep learning
-<code>Backend</code>. For this reason, we say that the &ldquo;datapoint&rdquo;
-tied to a listing is simply an arbitrary bytestring.
-This bytestring may correspond to multiple &ldquo;logical
-datapoints&rdquo;.  For example, the bytestring may
-correspond to 10 SQL rows or to 50 images. This
+<p>Once the datatrust has received the actual off-chain
+listing data from the maker, it stores the <code>data_hash</code>
+(conceptually the hash of the raw data for the listing,
+but could be something else) within this map.</p>
+
+<p>You might wonder how we can use these fields to tell whether a listing has been formally accepted (and is no longer a candidate). For this, we can use the convenient fact that Vyper defaults fields to 0 if not set:</p>
+
+<pre><code>@public
+@constant
+def isListed(hash: bytes32) -&gt; bool:
+  &quot;&quot;&quot;
+  @notice Return a boolean representing whether a Listing has been listed
+  &quot;&quot;&quot;
+  return self.listings[hash].owner != ZERO_ADDRESS
+</code></pre>
+
+<p>Reading through this, if the listing&rsquo;s owner is not
+<code>ZERO_ADDRESS</code>, then the listing has been accepted.</p>
+
+<h4 id="what-is-the-off-chain-part-of-a-listing">What is the off-chain part of a listing?</h4>
+
+<p>We haven&rsquo;t clearly specified what a listing is
+precisely in the preceding material.  Part of the
+challenge is that a &ldquo;listing&rdquo; will mean different
+things for different markets. A record in an off-chain
+SQL database is very different from an image file for a
+deep learning application. For this reason, we say that
+the off-chain part of a a listing is simply an
+arbitrary bytestring.  This bytestring may correspond
+to multiple &ldquo;datapoints&rdquo;.  For example, the bytestring
+may correspond to 10 SQL rows or to 50 images. This
 batching might be crucial for efficiency, since the
 transaction rate of Ethereum is not yet sufficient to
 do bulk uploads of datasets otherwise.</p>
 
 <h4 id="applying">Applying</h4>
 
-<p>Applying is the process by which a new listing is added to a data
-market. To apply, a market participant computes the hash of their
-off-chain data and proposes the addition of their data to the market
-by invoking <code>Market.apply()</code>:</p>
+<p>Applying is the process by which a new listing is added
+to a data market. To apply, a maker
+calls the following method on-chain:</p>
 
-<pre><code>function apply(bytes32 listingHash, uint amount, string data) external
-</code></pre>
+<p>``
+@public
+def list(hash: bytes32):
+  &ldquo;&rdquo;&rdquo;
+  @notice Allows a maker to propose a new listing to a Market, creating a candidate for voting
+  @dev Listing cannot already exist, in any active form. Owner not set here as it&rsquo;s an application
+  @param An Ethereum hash (keccack256) serving as a unique identifier for this Listing when hashed
+  &ldquo;&rdquo;&rdquo;
+  assert not self.voting.isCandidate(hash) # not an applicant
+  assert self.listings[hash].owner == ZERO_ADDRESS # not already listed
+  self.voting.addCandidate(hash, APPLICATION, msg.sender, self.parameterizer.getStake(), self.parameterizer.getVoteBy())
+  log.Applied(hash, msg.sender)</p>
 
-<p>All applications trigger a vote on the new listing by
-appropriate market stakeholders (either all
-token-holders or the market council).  If a listing
-vote is cleared, it is said to be listed. Note that
-application is a <em>minting</em> event whereby new
-<code>MarketTokens</code> are created. More detail on this can be
-found in the section on minting.</p>
+<pre><code>
+This function does a few basic sanity checks, then puts
+this candidate listing up for a vote. If the vote clears,s the candidacy is resolved and the candidate is listed and its `owner` field is set.
 
-<h4 id="challenging">Challenging</h4>
-
-<p>Challenging is the process by which a listing in a data
+#### Challenging
+Challenging is the process by which a listing in a data
 market can be challenged and potentially removed. A
 challenge triggers a vote. If the challenge succeeds,
 the challenged listing is de-listed from the data
 market.  If the challenge fails, the challenging party
 is penalized with a loss of stake (note that posting a
-challenge requires placing <code>MarketToken</code> at stake).</p>
+challenge requires placing `MarketToken` at stake).
 
-<p>Note that unlike a token curated registry, the council
+</code></pre>
+
+<p>@public
+def challenge(hash: bytes32):
+  &ldquo;&rdquo;&rdquo;
+  @notice Challenge a current listing, creating a candidate for voting if it should remain
+  @dev Must actually be listed, and not already challenged.
+  @param hash The identifier for the listing being challenged
+  &ldquo;&rdquo;&rdquo;
+  assert self.listings[hash].owner != ZERO_ADDRESS
+  assert not self.voting.isCandidate(hash) # assure not already challenged
+  self.voting.addCandidate(hash, CHALLENGE, msg.sender, self.parameterizer.getStake(), self.parameterizer.getVoteBy())
+  log.Challenged(hash, msg.sender)</p>
+
+<pre><code>
+Note that unlike a token curated registry, the council
 receives no reward for voting upon a challenge. Only
 the victor of the challenge receives a financial reward
 which comes directly from the loser of of the
-challenge.</p>
+challenge.
+
+### Exiting
+The owner of a listing can remove it from the market at any time by calling the following method:
+
+</code></pre>
+
+<p>@public
+def exit(hash: bytes32):
+  &ldquo;&rdquo;&rdquo;
+  @notice Allows the owner of a Listing to remove it from the market
+  @dev Returns all Listing Supply to the owner. Burns all minted/rewarded funds associated with the Listing.
+  Must actually be listed, and must not be involved in a Challenge
+  @param hash Listing identifier
+  &ldquo;&rdquo;&rdquo;
+  assert self.listings[hash].owner == msg.sender
+  assert not self.voting.isCandidate(hash)
+  self.removeListing(hash)</p>
+
+<pre><code>
+There are no controls or barriers on removing listings.
+The listing owner maintains full control over their
+listing in a data market.
+
+### Purchasing access to a listing 
+Users may wish to purchase access to a listing. They may do so by calling the `requestDelivery` method in `Datatrust.vy`:
+
+</code></pre>
+
+<p>@public
+def requestDelivery(hash: bytes32, amount: uint256):
+  &ldquo;&rdquo;&rdquo;
+  @notice Allow a user to purchase an amount of data to be delivered to them
+  @param hash This is a keccack hash recieved by a client that uniquely identifies a request. NOTE care should be taken
+  by the client to insure this is unique.
+  @param hash A unique hash generated by the client used to identify the delivery
+  @param amount The number of bytes the user is paying for.
+  &ldquo;&rdquo;&rdquo;
+  assert self.deliveries[hash].owner == ZERO_ADDRESS # not already a request
+  total: wei_value = self.parameterizer.getCostPerByte() * amount
+  res_fee: wei_value = (total * self.parameterizer.getReservePayment()) / 100
+  self.ether_token.transferFrom(msg.sender, self, total) # take the total payment
+  self.ether_token.transfer(self.reserve_address, res_fee) # transfer res_pct to reserve
+  self.bytes_purchased[msg.sender] += amount # all purchases by this user. deducted from via listing access
+  self.deliveries[hash].owner = msg.sender
+  self.deliveries[hash].bytes_requested = amount
+```</p>
+
+<p>There&rsquo;s a number of things going on here, but the basic
+idea is that the purchaser has to pay up-front. (TODO:
+Add more about the delivery flow)</p>
 </article>
 
       
@@ -226,7 +290,7 @@ challenge.</p>
   
   <div>
     
-    <a href="https://github.com/computablelabs/compspec/commit/e74a1ab68a380e1682cca35ff064443a013075f5" title='Last modified Aug 22, 2019 by Bharath Ramsundar' target="_blank" rel="noopener">
+    <a href="https://github.com/computablelabs/compspec/commit/25700744bb32fcf9b41e5bb686ef13fbaef7e77e" title='Last modified Aug 22, 2019 by Bharath Ramsundar' target="_blank" rel="noopener">
       <img src="../../svg/calendar.svg" alt="Changed" /> Aug 22, 2019
     </a>
   </div>
@@ -256,9 +320,8 @@ challenge.</p>
 <ul>
 <li>
 <ul>
-<li><a href="#what-is-a-datapoint">What is a datapoint?</a></li>
+<li><a href="#what-is-the-off-chain-part-of-a-listing">What is the off-chain part of a listing?</a></li>
 <li><a href="#applying">Applying</a></li>
-<li><a href="#challenging">Challenging</a></li>
 </ul></li>
 </ul></li>
 </ul></li>

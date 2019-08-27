@@ -127,18 +127,31 @@ market.</p>
 
 <p><code>MarketTokens</code> are minted in one of a few scenarios explained below. In each case, the amount minted is set by the <code>Parameterizer</code> which holds <code>Market</code> parameters.</p>
 
-<ul>
-<li>Minting happens when new listings are listed in the
+<h2 id="minting">Minting</h2>
+
+<p>Minting happens when new listings are listed in the
 market. These listings have to be approved by a
-council vote.</li>
+stakeholder vote.</p>
+
+<ul>
 <li>Minting happens when a patron supports the market by
-making a payment into its reserve in <code>NetworkToken</code>.
+making a payment into its reserve in <code>EtherToken</code>.
 The algorithmic price curve controls the exchange rate
-which governs the number of <code>Markettoken</code> consequently
+which governs the number of <code>MarketToken</code> consequently
 minted.</li>
 <li>Minting happens when a datatrust reports that a
 listing has been queried. The minted tokens are
 awarded to the listing owner.</li>
+</ul>
+
+<h2 id="burning">Burning</h2>
+
+<p>Burning happens in the scenarios explained below.</p>
+
+<ul>
+<li>If a token holder divests from the data market, their
+divested tokens are burned. The origin of the tokens
+being burned does not matter.</li>
 </ul>
 </article>
 
@@ -147,7 +160,7 @@ awarded to the listing owner.</li>
   
   <div>
     
-    <a href="https://github.com/computablelabs/compspec/commit/e74a1ab68a380e1682cca35ff064443a013075f5" title='Last modified Aug 22, 2019 by Bharath Ramsundar' target="_blank" rel="noopener">
+    <a href="https://github.com/computablelabs/compspec/commit/d18051be65b4c39fedd6536431ba4867b1a570d7" title='Last modified Aug 22, 2019 by Bharath Ramsundar' target="_blank" rel="noopener">
       <img src="../../svg/calendar.svg" alt="Changed" /> Aug 22, 2019
     </a>
   </div>
@@ -171,7 +184,11 @@ awarded to the listing owner.</li>
   <aside class="book-toc level-6 fixed">
     <nav id="TableOfContents">
 <ul>
-<li><a href="#market-token">Market Token</a></li>
+<li><a href="#market-token">Market Token</a>
+<ul>
+<li><a href="#minting">Minting</a></li>
+<li><a href="#burning">Burning</a></li>
+</ul></li>
 </ul>
 </nav>
   </aside>

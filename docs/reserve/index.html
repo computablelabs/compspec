@@ -108,79 +108,109 @@ https://github.com/alex-shpak/hugo-book
 
 <h1 id="reserve">Reserve</h1>
 
+<p>The <code>Reserve</code> is the &ldquo;bank account&rdquo; tied to each data
+market. It holds the funds tied to that data market and
+serves as incentive for makers to contribute the market.</p>
+
+<p>Think of the reserve as holding earnings from the data
+in the data market that belong to all the <code>MarketToken</code>
+holders associated with the market. These earnings can
+come from either data purchase payments or from patron
+support for <code>MarketToken</code>. <code>MarketToken</code> holders are
+allowed to withdraw earnings from the reserve by
+burning their <code>MarketToken</code> holdings.</p>
+
 <p>This section introduces the basics of the reserve for
-each market.</p>
+each market. In addition, it introduces the &ldquo;algorithmic price curve,&rdquo; the market making mechanism which allows stakeholders to buy or sell <code>MarketToken</code> at all time.</p>
 
-<pre><code>    - [Market Reserve](#market-reserve) [v0.2]: The reserve is the &quot;bank account&quot; associated with a given `Market`. 
-    - [Algorithmic Price Curve](#algorithmic-price-curve) [v0.2]: Controls the price at which new investors may invest in market. Investor funds are deposited in reserve and new market token is minted accordingly.
+<p>At present, the reserve is denominated in <code>EtherToken</code>.</p>
+
+<h2 id="support-and-withdraw">Support and Withdraw</h2>
+
+<pre><code>@public
+def support(offer: wei_value):
+  &quot;&quot;&quot;
+  @notice Allow the purchase MarketToken with EtherToken priced according to the &quot;buy-curve&quot;
+  @param offer An amount of Ether Token in Wei
+  &quot;&quot;&quot;
+  price: wei_value = self.getSupportPrice()
+  assert offer &gt;= price # you cannot buy less than one billionth of a market token
+  self.ether_token.transferFrom(msg.sender, self, offer)
+  minted: uint256 = (offer / price) * 1000000000 # NOTE the ONE_GWEI multiplier here as well
+  self.market_token.mint(minted) # TODO maybe implement `mintFor()`
+  self.market_token.transfer(msg.sender, minted)
+  log.Supported(msg.sender, offer, minted)
 </code></pre>
 
-<h4 id="reserve-1">Reserve</h4>
+<p><code>Reserve.support()</code> consults the algorithmic price
+curve to obtain the exchange rate.  Note that <code>offer</code>
+is in units of <code>EtherToken</code> wei.  The returned value
+will be in terms of <code>MarketToken</code> wei. <code>offer</code> will be
+added to the data market reserve and the returned
+<code>MarketToken</code> will be newly minted.</p>
 
-<p>The <code>Market</code> holds with it an associated &ldquo;reserve.&rdquo; Think of the
-reserve as holding earnings from the data in the <code>Market</code> that belong
-to all the <code>MarketToken</code> holders associated with the market. These
-earnings can come from either query payments or from investor
-purchases of <code>MarketToken</code>.  Investor class <code>MarketToken</code> holders are
-allowed to withdraw earnings from the reserve by burning their
-<code>MarketToken</code> holdings.</p>
-
-<p>At present, the reserve is denominated in <a href="#network-token"><code>NetworkToken</code></a>.</p>
-
-<h4 id="support-and-withdraw">Support and Withdraw</h4>
-
-<pre><code>function invest(uint offered) external returns (uint)
+<pre><code>@public
+def withdraw():
+  &quot;&quot;&quot;
+  @notice Allows a supporter to exit the market. Burning any market token owned and
+  withdrawing their share of the reserve.
+  @dev Supporter, if owning a challenge, may want to wait until that is over (in case they win)
+  &quot;&quot;&quot;
+  withdrawn: wei_value = self.getWithdrawalProceeds(msg.sender)
+  assert withdrawn &gt; 0
+  # before any transfer, burn their market tokens...
+  self.market_token.burnAll(msg.sender)
+  self.ether_token.transfer(msg.sender, withdrawn)
+  log.Withdrawn(msg.sender, withdrawn)
 </code></pre>
 
-<p><code>Market.invest()</code> consults the <a href="#algorithmic-price-curve">algorithmic price
-curve</a> to obtain the exchange rate This
-method can only be called from an address which is not already a
-listing owner. If the call succeeds, it will add a new investor class
-member (if not already added).  Note that <code>offered</code> is in units of
-<code>NetworkToken</code> wei.  The returned value will be in terms of
-<code>MarketToken</code> wei. <code>offered</code> will be added to the <code>Market</code> reserve and
-the returned <code>MarketToken</code> will be newly minted.</p>
+<p><code>Reserve.withdraw()</code> will burn all the <code>MarketTokens</code>
+associated with this stakeholder and will withdraw
+their share of the reserve (the percent of reserve
+withdrawn equals the percent of <code>MarketToken</code> this
+stakeholder owns).</p>
 
-<pre><code>function divest() external returns (uint)
-</code></pre>
-
-<p><code>Market.divest()</code> will check if the caller is investor class. If so,
-it will burn all the <code>MarketTokens</code> associated with this investor and
-will withdraw the investor&rsquo;s share of the reserve (the percent of
-reserve withdrawn equals the percent of investor class <code>MarketToken</code>
-this investor owns).</p>
-
-<p>More precisely, the fractional ownership this investor has is
-<code>num_tokens/total_num_investor_tokens</code>. For example, if <code>num_tokens=5</code>
-and <code>total_num_investor_tokens=100</code>, this would be 5% fractional
-ownership. Then <code>num_tokens</code> market tokens are burned. Then the
-fractional part of the reserve belonging to this investor is
-transferred to the investor. For example, in the case above, 5% of the
-reserve would be transferred to the investor&rsquo;s address.</p>
+<p>More precisely, the fractional ownership this
+stakeholder has is <code>num_tokens/total_num_tokens</code>. For
+example, if <code>num_tokens=5</code> and <code>total_num_tokens=100</code>,
+this would be 5% fractional ownership. Then
+<code>num_tokens</code> market tokens are burned. Then the
+fractional part of the reserve belonging to this
+stakeholder is transferred to them. For example, in the
+case above, 5% of the reserve would be transferred to
+the stakeholder&rsquo;s address.</p>
 
 <h4 id="algorithmic-price-curve">Algorithmic Price Curve</h4>
 
-<p>The price curve dictates the conversion rate between <code>NetworkToken</code>
-and <code>MarketToken</code> for new investors. Investors purchase new
-<code>MarketToken</code> at the rate dictated by the price-curve.</p>
+<p>The price curve dictates the conversion rate between
+<code>EtherToken</code> and <code>MarketToken</code> for new patrons. Patrons
+purchase new <code>MarketToken</code> at the rate dictated by the
+price-curve.</p>
 
-<p><img src="Algorithmic_Price_Curve.png" alt="The Algorithmic Price Curve" /></p>
-
-<pre><code>function get_current_investment_price() pure returns (uint)
+<pre><code>@public
+@constant
+def getSupportPrice() -&gt; wei_value:
+  &quot;&quot;&quot;
+  @notice Return the amount of Ether token (in wei) needed to purchase one billionth of a Market token
+  &quot;&quot;&quot;
+  price_floor: wei_value = self.parameterizer.getPriceFloor()
+  spread: uint256 = self.parameterizer.getSpread()
+  reserve: wei_value = self.ether_token.balanceOf(self)
+  total: wei_value = self.market_token.totalSupply()
+  if total &lt; 1000000000000000000: # that is, is total supply less than one token in wei
+    return price_floor + ((spread * reserve * 1000000000) / (100 * 1000000000000000000))
+  else:
+    return price_floor + ((spread * reserve * 1000000000) / (100 * total)) # NOTE the multiplier ONE_GWEI
 </code></pre>
 
-<p><code>Market.get_current_investment_price()</code> reports the current
-<code>NetworkToken</code>/<code>MarketToken</code> conversion rate. Mathematically, the
-first version will be a linear function. That is,
-<code>Market.get_current_investment_price() = base_conversion_rate +
-conversion_slope * Market.get_reserve_size()</code> where
-<code>base_conversion_rate</code> and <code>conversion_slope</code> are parameters defined
-by the market creator in the <code>Parameterizer</code>.</p>
-
-<pre><code>function get_reserve_size() view returns (uint)
-</code></pre>
-
-<p><code>Market.get_reserve_size()</code> returns the size of current market reserve in <code>NetworkToken</code> wei</p>
+<p><code>Reserve.getSupportPrice()</code> reports the current
+<code>EtherToken</code>/<code>MarketToken</code> conversion rate.
+Mathematically, the idea is that the <code>support()</code> price
+will be slighly higher than the <code>withdraw()</code> price.
+Precisely, if <code>spread</code> is 110, then there will roughly
+be a 10% overhead. This ratio isn&rsquo;t quite precise due
+to the need to handle edge conditions on the price
+curve.</p>
 </article>
 
       
@@ -188,7 +218,7 @@ by the market creator in the <code>Parameterizer</code>.</p>
   
   <div>
     
-    <a href="https://github.com/computablelabs/compspec/commit/e74a1ab68a380e1682cca35ff064443a013075f5" title='Last modified Aug 22, 2019 by Bharath Ramsundar' target="_blank" rel="noopener">
+    <a href="https://github.com/computablelabs/compspec/commit/25700744bb32fcf9b41e5bb686ef13fbaef7e77e" title='Last modified Aug 22, 2019 by Bharath Ramsundar' target="_blank" rel="noopener">
       <img src="../../svg/calendar.svg" alt="Changed" /> Aug 22, 2019
     </a>
   </div>
@@ -214,12 +244,10 @@ by the market creator in the <code>Parameterizer</code>.</p>
 <ul>
 <li><a href="#reserve">Reserve</a>
 <ul>
-<li>
+<li><a href="#support-and-withdraw">Support and Withdraw</a>
 <ul>
 <li>
 <ul>
-<li><a href="#reserve-1">Reserve</a></li>
-<li><a href="#support-and-withdraw">Support and Withdraw</a></li>
 <li><a href="#algorithmic-price-curve">Algorithmic Price Curve</a></li>
 </ul></li>
 </ul></li>

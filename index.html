@@ -1,5 +1,5 @@
 <!DOCTYPE html>
- 
+
 
 
 
@@ -7,7 +7,7 @@
 <html lang="en">
 
 <head>
-	<meta name="generator" content="Hugo 0.57.2" />
+	<meta name="generator" content="Hugo 0.55.6" />
   <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>
@@ -114,42 +114,46 @@ https://github.com/alex-shpak/hugo-book
 <h2 id="introduction">Introduction</h2>
 
 <p>The Computable protocol creates decentralized data
-markets.  The global network is made up of many
-individual markets. Each market conceptually holds a
-single collection of data and is created and controlled
-by the owners of this data. These owners could
-correspond to existing organizations, or could be a
-decentralized set of interested parties. The
+markets.  The global Computable network is made up of
+many individual markets. Each market conceptually holds
+a single collection of data and is created and
+controlled by the owners of this data. These owners
+could correspond to existing organizations, or could be
+a decentralized set of interested parties. The
 coordination and access control for these individual
-market instances is coordinated by a set of smart
-contracts. Each market allows for a set of associated
-financial operations. These operations allow interested
-parties to invest in a particular Market or pay for the
-ability to query the data associated with that Market.
+market instances is coordinated by a set of <a href="https://en.wikipedia.org/wiki/Smart_contract">smart
+contracts</a>.
+Each market allows for a set of associated financial
+operations. These operations allow interested &ldquo;patrons&rdquo;
+to support a particular Market with funds, &ldquo;makers&rdquo; to
+contribute data in return for partial ownership in the
+market, and &ldquo;buyers&rdquo; to purchase data from the Market.
 To facilitate these transactions, each market has a
 unique associated <code>MarketToken</code>.</p>
 
 <p>Everything described above is implemented in a set of
-smart contracts which currently live on the Ethereum
+smart contracts which currently live on the
+<a href="https://en.wikipedia.org/wiki/Ethereum">Ethereum</a>
 blockchain. The data itself doesn&rsquo;t live on the smart
-contracts. For one, datasets can be very large
-(gigabytes, terabytes, petabytes, exabytes or more). It
-would be infeasible to store such large collections of
-data on existing smart contract systems. For this
-reason, data lives &ldquo;off-chain&rdquo; in <code>Datatrusts</code>. A
-<code>Datatrust</code> is software system that is responsible for
-storing data and coordinating with on-chain permissions
-layers. Note that many possible <code>Datatrust</code>
-implementations are possible by different vendors or
-groups, so long as each implementation responds to the
-API specified within this document.</p>
+contracts. Datasets can be very large (gigabytes,
+terabytes, petabytes, exabytes or more) and smart
+contract systems have limited &ldquo;on-chain&rdquo; storage.
+Consequently, it would be infeasible to store such
+large collections of data on Ethereum. For this reason,
+data lives &ldquo;off-chain&rdquo; in <code>Datatrusts</code>. A <code>Datatrust</code>
+is a software system that is responsible for storing
+data and coordinating with on-chain permissions layers.
+Note that many possible <code>Datatrust</code> implementations are
+possible by different vendors or groups, so long as
+each implementation responds to the API specified
+within this specification.</p>
 
 <p>This document is a living, versioned specification. As
 understanding of the core aspects of the Computable
 protocol grows, this document will be updated
 accordingly.</p>
 
-<p><img src="Protocol_Flowchart.png" alt="Protocol Flowchart" /></p>
+<p><img src="market_transactions.png" alt="Protocol Flowchart" /></p>
 </article>
 
       
@@ -157,8 +161,8 @@ accordingly.</p>
   
   <div>
     
-    <a href="https://github.com/computablelabs/compspec/commit/517b9af02ed12885abc0cd92e1c767c334309f9e" title='Last modified Aug 22, 2019 by Bharath Ramsundar' target="_blank" rel="noopener">
-      <img src="./svg/calendar.svg" alt="Changed" /> Aug 22, 2019
+    <a href="https://github.com/computablelabs/compspec/commit/29df2b60cf154566364112d88e4e72ba301549d9" title='Last modified Jul 11, 2019 by Bharath Ramsundar' target="_blank" rel="noopener">
+      <img src="./svg/calendar.svg" alt="Changed" /> Jul 11, 2019
     </a>
   </div>
   

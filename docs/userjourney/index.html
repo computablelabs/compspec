@@ -104,71 +104,116 @@ https://github.com/alex-shpak/hugo-book
 </header>
 
       
-<article class="markdown"><p>The scope of this doc is to list the user-signed contract method calls required to fulfill various user actions. These are important to know because they constrain what the user interface must do in a couple of ways:</p>
+<article class="markdown">
 
-<p>First, user-originated contract method calls must be signed by the user’s private key, which means the user must confirm signing through a Metamask dialog. It’s not possible (nor should we) make this invisible to the user.</p>
+<p>The scope of this page is to list the user-signed
+contract method calls required to fulfill various user
+actions.</p>
+
+<p>First, user-originated contract method calls must be
+signed by the user’s private key, which means the user
+probably confirms signing through a Metamask dialog.</p>
 
 <p>Second, contract method calls are asynchronous and may take an indefinite amount of time since they only complete when 1 (or really several) blocks are mined.</p>
 
-<p>Actions and contract method calls made by Datatrust are mentioned here, but the exact sequence of client, protocol, and Datatrust actions is beyond scope of this doc.</p>
+<p>Actions and contract method calls made by Datatrust are
+mentioned here, but the exact sequence of client,
+protocol, and Datatrust actions is beyond scope of this
+doc.</p>
 
-<p>Apply for a Listing
-Listing.list
-Apply for a listing. Voting happens by other parties. Data is sent to Datatrust and which calls setDataHash. Assume listing passes. Someone calls Listing.resolveApplication and listing is ready to be used.</p>
+<h2 id="apply-for-a-listing">Apply for a Listing</h2>
+
+<ul>
+<li><code>Listing.list</code>: Apply for a listing. Voting happens
+by other parties. Data is sent to Datatrust and which
+calls setDataHash. Assume listing passes. Someone calls
+Listing.resolveApplication and listing is ready to be
+used.</li>
+</ul>
 
 <p>After resolution, the applicant may claim the listing reward (see Withdraw Support from a Market).</p>
 
-<p>Support a Market
-EtherToken.deposit
-Wrap ETH into an ERC20 compatible token so that contracts can manipulate it.</p>
+<h2 id="support-a-market">Support a Market</h2>
 
-<p>EtherToken.approve
-Call with deployed Reserve contract address to give that contract permission to change.</p>
+<ul>
+<li><p><code>EtherToken.deposit</code>: Wrap ETH into an ERC20 compatible token so that contracts can manipulate it.</p></li>
 
-<p>Reserve.support
-Convert EtherToken to MarketToken at price from bonding curve.</p>
+<li><p><code>EtherToken.approve</code>: Call with deployed Reserve
+contract address to give that contract permission to
+change.</p></li>
 
-<p>Withdraw Support from a Market
-Assume user has MarketToken. Note this flow applies regardless of how MarketToken was acquired. User may have supported the market with Eth or acquired by creating a listing.</p>
+<li><p><code>Reserve.support</code>: Convert <code>EtherToken</code> to
+<code>MarketToken</code> at price from bonding curve.</p></li>
+</ul>
 
-<p>Listing.withdrawFromListing
-Call only if user has MarketTokens acquired through initial listing or listing access. Transfers MarketTokens to MarketToken contract so that it is available for withdraw.</p>
+<h2 id="withdraw-support-from-a-market">Withdraw Support from a Market</h2>
 
-<p>Reserve.withdraw
-Convert MarketToken to EtherToken at price from bonding curve.</p>
+<p>Assume user has <code>MarketToken</code>. Note this flow applies
+regardless of how <code>MarketToken</code> was acquired. User may
+have supported the market with Eth or acquired by
+creating a listing.</p>
 
-<p>EtherToken.withdraw
-Convert EtherToken to plain Eth.</p>
+<ul>
+<li><p><code>Listing.withdrawFromListing</code>: Call only if user has
+MarketTokens acquired through initial listing or
+listing access. Transfers MarketTokens to MarketToken
+contract so that it is available for withdraw.</p></li>
 
-<p>Vote on a Listing Candidate or Listing Challenge
-Assume user has enough MarketToken to stake a vote, and there is a listing to vote on. TODO: is this same process for other votes like electing a DataTrust?</p>
+<li><p><code>Reserve.withdraw</code>: Convert MarketToken to EtherToken
+at price from bonding curve.</p></li>
 
-<p>Voting.vote
-Supply ‘yeah’ or ‘nay’ vote as an argument. The user’s stake will be tied up during the voting period.</p>
+<li><p><code>EtherToken.withdraw</code>: Convert EtherToken to plain
+Eth.</p></li>
+</ul>
 
-<p>Voting.unstake
-After the voting period is over, get the stake back.</p>
+<h2 id="vote-on-a-listing-candidate-or-listing-challenge">Vote on a Listing Candidate or Listing Challenge</h2>
 
-<p>Challenge Listing
-Assume challenger has enough MarketToken to stake the challenge.</p>
+<p>Assume user has enough MarketToken to stake a vote, and there is a listing to vote on. TODO: is this same process for other votes like electing a DataTrust?</p>
 
-<p>Listing.challenge
-Start the challenge. Stakeholders then vote. Someone must call Listing.resolveChallenge after the voting period.</p>
+<ul>
+<li><p><code>Voting.vote</code>: Supply ‘yeah’ or ‘nay’ vote as an
+argument. The user’s stake will be tied up during the
+voting period.</p></li>
 
-<p>Voting.unstake
-If the challenge succeeds, the challenger calls this method to get stake back. If the challenge failed, the listing owner calls this method to take the challenger’s stake.</p>
+<li><p><code>Voting.unstake</code>: After the voting period is over,
+get the stake back.</p></li>
+</ul>
 
-<p>Buy Access to a Listing
-EtherToken.deposit
-Wrap ETH into an ERC20 compatible token so that contracts can manipulate it.</p>
+<h2 id="challenge-listing">Challenge Listing</h2>
 
-<p>EtherToken.approve
-Call with deployed Datatrust contract address to give that contract permission to change.</p>
+<p>Assume challenger has enough <code>MarketToken</code> to stake the
+challenge.</p>
 
-<p>Datatrust.requestDelivery
-“Deposit” funds to pay for access to listings at the market’s rate per byte.</p>
+<ul>
+<li><p><code>Listing.challenge</code>: Start the challenge.
+Stakeholders then vote. Someone must call
+Listing.resolveChallenge after the voting period.</p></li>
 
-<p>User then tells Datatrust which listing to access. Datatrust calls Datatrust.listingAccessed, which deducts from the number of bytes user has paid for. Datatrust delivers listing data to client and calls Datatrust.delivered to collect its fee.</p>
+<li><p><code>Voting.unstake</code>: If the challenge succeeds, the
+challenger calls this method to get stake back. If the
+challenge failed, the listing owner calls this method
+to take the challenger’s stake.</p></li>
+</ul>
+
+<h2 id="buy-access-to-a-listing">Buy Access to a Listing</h2>
+
+<ul>
+<li><p><code>EtherToken.deposit</code>: Wrap ETH into an ERC20
+compatible token so that contracts can manipulate it.</p></li>
+
+<li><p><code>EtherToken.approve</code>: Call with deployed Datatrust
+contract address to give that contract permission to
+change.</p></li>
+
+<li><p><code>Datatrust.requestDelivery</code>: “Deposit” funds to pay
+for access to listings at the market’s rate per byte.</p></li>
+</ul>
+
+<p>User then tells Datatrust which listing to access.
+Datatrust calls <code>Datatrust.listingAccessed</code>, which
+deducts from the number of bytes user has paid for.
+Datatrust delivers listing data to client and calls
+<code>Datatrust.delivered</code> to collect its fee.</p>
 
 <p>TODO, Other Governance Actions like reparameterize, elect DataTrust, etc</p>
 </article>
@@ -198,6 +243,22 @@ Call with deployed Datatrust contract address to give that contract permission t
 
     
   
+
+  <aside class="book-toc level-6 fixed">
+    <nav id="TableOfContents">
+<ul>
+<li>
+<ul>
+<li><a href="#apply-for-a-listing">Apply for a Listing</a></li>
+<li><a href="#support-a-market">Support a Market</a></li>
+<li><a href="#withdraw-support-from-a-market">Withdraw Support from a Market</a></li>
+<li><a href="#vote-on-a-listing-candidate-or-listing-challenge">Vote on a Listing Candidate or Listing Challenge</a></li>
+<li><a href="#challenge-listing">Challenge Listing</a></li>
+<li><a href="#buy-access-to-a-listing">Buy Access to a Listing</a></li>
+</ul></li>
+</ul>
+</nav>
+  </aside>
 
 
 
