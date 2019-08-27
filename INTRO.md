@@ -35,9 +35,9 @@ contract systems have limited "on-chain" storage.
 Consequently, it would be infeasible to store such
 large collections of data on Ethereum. For this reason,
 data lives "off-chain" in `Datatrusts`. A `Datatrust`
-is software system that is responsible for storing data
-and coordinating with on-chain permissions layers. Note
-that many possible `Datatrust` implementations are
+is a software system that is responsible for storing
+data and coordinating with on-chain permissions layers.
+Note that many possible `Datatrust` implementations are
 possible by different vendors or groups, so long as
 each implementation responds to the API specified
 within this specification. 
