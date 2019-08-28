@@ -174,3 +174,5 @@ def requestDelivery(hash: bytes32, amount: uint256):
 There's a number of things going on here, but the basic
 idea is that the purchaser has to pay up-front. (TODO:
 Add more about the delivery flow) 
+
+[Next Chapter](../reserve/index.html)
