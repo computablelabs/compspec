@@ -67,6 +67,16 @@ Front Running Attacks In the current version of the protocol, it is possible for
     
     <item>
       <title></title>
+      <link>https://computablelabs.github.io/compspec/docs/continuing/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://computablelabs.github.io/compspec/docs/continuing/</guid>
+      <description>Continuing Your Journey Congrats on making it through the entire Computable book! You&amp;rsquo;ve come out on the other side ready to enter the Computable ecosystem and start building your own Computable data markets, libraries, and companies.
+You might be now wondering how you can continue learning. As you&amp;rsquo;ve probably already realized, there&amp;rsquo;s a vast amount of material required to understand Computable from the bottom up. The system touches upon economics, systems software, blockchains, cryptography and more.</description>
+    </item>
+    
+    <item>
+      <title></title>
       <link>https://computablelabs.github.io/compspec/docs/contracts/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
@@ -104,7 +114,7 @@ struct Listing: owner: address supply: wei_value  Let&amp;rsquo;s take a minute 
       
       <guid>https://computablelabs.github.io/compspec/docs/markettoken/</guid>
       <description>Market Token MarketToken is a mintable and burnable ERC20 token. The MarketToken is tied to a particular Market and is created when the Market is created. Note the contrast with token curated registries, which don&amp;rsquo;t hold a mechanism for minting and burning their associated token.
-The MarketToken is denominated in &amp;ldquo;market wei&amp;rdquo;. As with ETH, a &amp;ldquo;market wei&amp;rdquo; denominates 1&amp;frasl;10^18 of a MarketToken. Using wei units throughout prevents rounding error propagation and keeps contracts simple.</description>
+The MarketToken is denominated in &amp;ldquo;market wei&amp;rdquo;. As with ETH, a &amp;ldquo;market wei&amp;rdquo; denominates 1/(10^18) of a MarketToken. Using wei units throughout prevents rounding error propagation and keeps contracts simple.</description>
     </item>
     
     <item>
@@ -164,7 +174,8 @@ Second, contract method calls are asynchronous and may take an indefinite amount
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>https://computablelabs.github.io/compspec/docs/voting/</guid>
-      <description>Voting Major decisions in the Market are made by token holder vote. These decisions include which new listings should be added to the Market, which challenged listings should be removed, and what changes should be made to the Market parameters.</description>
+      <description>Voting Major decisions in the data market are made by token holder vote. These decisions include which new listing candidates should be confirmed as listings, which challenged listings should be removed, what changes should be made to the Parameterizer parameters, and what the datatrust should be. In this chapter, we&amp;rsquo;ll introduce you to the fundamentals of the voting system and describe the basics of on-chain Computable governance.
+Candidates, Candidates, Candidates All voting is done on &amp;ldquo;candidates.</description>
     </item>
     
   </channel>

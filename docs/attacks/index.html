@@ -66,6 +66,7 @@ https://github.com/alex-shpak/hugo-book
 <li><a href="../../docs/parameters/">Market Parameters</a></li>
 <li><a href="../../docs/attacks/">Attacks</a></li>
 <li><a href="../../docs/userjourney/">User Journeys</a></li>
+<li><a href="../../docs/continuing/">Continuing Your Journey</a></li>
 </ul>
 
 
@@ -121,15 +122,12 @@ as a transaction, the adversary could create an
 alternative transaction with the same <code>listingHash</code> to
 attempt to block the original listing.</p>
 
-<h2 id="data-flooding-attack">Data Flooding Attack</h2>
-
-<p>Attackers attempt to flood market with low-quality
-listings This attack is mitigated by the enforced
-council vote needed for listings to be listed.</p>
-
-<h2 id="council-ddos">Council DDoS</h2>
-
-<p>Attackers overwhelm the council with a glut of candidates</p>
+<p>The same attack can be applied to any candidate,
+allowing a determined attacker to bring a market to a
+standstill. However, this attack requires some
+infrastructure, with the attacker having to
+consistently monitor in-coming transactions and
+front-running them, possibly by expending more on gas.</p>
 
 <h2 id="datatrust-fraud">Datatrust Fraud</h2>
 
@@ -141,6 +139,71 @@ researched on the
 <a href="https://forum.computable.io/">forums</a>. Future versions
 of the Computable protocol should lower the trust
 requirements for the datatrust.</p>
+
+<h2 id="reserve-race-conditions">Reserve Race Conditions</h2>
+
+<p>Calls to <code>Reserve.support()</code> and <code>Reserve.withdraw()</code>
+will be publicly visible on the Ethereum network before
+they are confirmed. A dedicated watcher could watch for
+incoming large <code>Reserve.support()</code> orders, front-run by
+buying some amount itself with <code>Reserve.support()</code>,
+then immediately calling <code>Reserve.withdraw()</code> after the
+large order is confirmed.</p>
+
+<p>The <code>spread</code> provides some defense against this type of
+attack, since the watcher would have to pay for the
+spread when executing this attack. As a result, only
+large market shifts would be vulnerable to these sorts
+of attacks.</p>
+
+<h2 id="candidate-flooding-attack">Candidate Flooding Attack</h2>
+
+<p>At present, there is no stake required to propose a new
+candidate (remember that candidates can be for new
+listings, reparameterizations, or change of datatrust).
+This means that it will be relatively easy for a
+malicious party to spawn many candidates. This party
+could then wait till the last minute to vote for one of
+its candidates. If market governance isn&rsquo;t actively
+tracking for such last-minute votes, it&rsquo;s possible that
+a such a candidate could slip through and be accepted
+(particularly since there isn&rsquo;t a quorum requirement
+for votes at present).</p>
+
+<p>If the vote is for reparameterization or change of
+datatrust, the attack could prove to be disruptive. At
+present, there isn&rsquo;t a mitigation for this attack
+beyond careful monitoring by market stakeholders. You
+might ask why this situation arises. The market smart
+contracts were designed to be maximally simple. This
+meant that we made trade-offs that preserved
+simplicity. However, this simplicity opens the door to
+some sophisticated attacks. If these attacks prove to
+be serious in practice, future versions of the protcol
+will likely alter voting to make critical changes
+significantly harder.</p>
+
+<p>There are a number of specialized types of candidate
+flooding which we will explore in more detail below:</p>
+
+<h3 id="data-flooding-attack">Data Flooding Attack</h3>
+
+<p>Attackers attempt to flood market with low-quality
+listings. This is a special case of a candidate
+flooding attack where the candidate is a listing
+candidate. This attack is possible to partially defend
+against by an honest datatrust which can set up
+defenses to prevent obvious DoSing attempts.</p>
+
+<h3 id="reparameterization-attacks">Reparameterization Attacks</h3>
+
+<p>Attackers can flood the market with many
+reparameterizations. If a nonsensical
+reparameterization makes its way through, it&rsquo;s possible
+that the market could be bricked. In particular, an
+attack which sets the voting stake exorbitantly high
+could freeze market governance and make it impossible
+to further change market stake.</p>
 </article>
 
       
@@ -175,9 +238,13 @@ requirements for the datatrust.</p>
 <li><a href="#attacks">Attacks</a>
 <ul>
 <li><a href="#front-running-attacks">Front Running Attacks</a></li>
-<li><a href="#data-flooding-attack">Data Flooding Attack</a></li>
-<li><a href="#council-ddos">Council DDoS</a></li>
 <li><a href="#datatrust-fraud">Datatrust Fraud</a></li>
+<li><a href="#reserve-race-conditions">Reserve Race Conditions</a></li>
+<li><a href="#candidate-flooding-attack">Candidate Flooding Attack</a>
+<ul>
+<li><a href="#data-flooding-attack">Data Flooding Attack</a></li>
+<li><a href="#reparameterization-attacks">Reparameterization Attacks</a></li>
+</ul></li>
 </ul></li>
 </ul>
 </nav>

@@ -66,6 +66,7 @@ https://github.com/alex-shpak/hugo-book
 <li><a href="../../docs/parameters/">Market Parameters</a></li>
 <li><a href="../../docs/attacks/">Attacks</a></li>
 <li><a href="../../docs/userjourney/">User Journeys</a></li>
+<li><a href="../../docs/continuing/">Continuing Your Journey</a></li>
 </ul>
 
 
@@ -159,6 +160,23 @@ def listingAccessed(listing: bytes32, delivery: bytes32, amount: uint256):
 <p>This function can only be called by an authorized
 Datatrust. These reported access numbers are used to
 mint utilization rewards for makers.</p>
+
+<h2 id="proposing-a-new-datatrust">Proposing a new datatrust.</h2>
+
+<p>An interested party can propose itself as a new
+datatrust by calling <code>Datatrust.register()</code></p>
+
+<pre><code>@public
+def register(url: string[128]):
+  &quot;&quot;&quot;
+  @notice Allow a backend to register as a candidate
+  @param url The location of this backend
+  &quot;&quot;&quot;
+</code></pre>
+
+<p>Calling this method triggers a vote. If the vote
+passes, then this this party becomes the new datatrust
+for the system.</p>
 </article>
 
       
@@ -195,6 +213,7 @@ mint utilization rewards for makers.</p>
 <li><a href="#datatrust-implementation-specification">Datatrust Implementation Specification</a></li>
 <li><a href="#listing-handling">Listing handling</a></li>
 <li><a href="#listing-utilization-records">Listing Utilization Records</a></li>
+<li><a href="#proposing-a-new-datatrust">Proposing a new datatrust.</a></li>
 </ul></li>
 </ul>
 </nav>

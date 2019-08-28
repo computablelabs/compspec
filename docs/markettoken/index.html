@@ -66,6 +66,7 @@ https://github.com/alex-shpak/hugo-book
 <li><a href="../../docs/parameters/">Market Parameters</a></li>
 <li><a href="../../docs/attacks/">Attacks</a></li>
 <li><a href="../../docs/userjourney/">User Journeys</a></li>
+<li><a href="../../docs/continuing/">Continuing Your Journey</a></li>
 </ul>
 
 
@@ -116,16 +117,17 @@ hold a mechanism for minting and burning their
 associated token.</p>
 
 <p>The <code>MarketToken</code> is denominated in &ldquo;market wei&rdquo;.  As
-with ETH, a &ldquo;market wei&rdquo; denominates <sup>1</sup>&frasl;<sub>10</sub>^18 of a
+with ETH, a &ldquo;market wei&rdquo; denominates 1/(10^18) of a
 <code>MarketToken</code>. Using wei units throughout prevents
 rounding error propagation and keeps contracts simple.</p>
 
 <p><code>MarketTokens</code> are dynamically minted and burned as the
 market evolves. This flexibility is needed to
 accurately track the evolving value of data in a data
-market.</p>
-
-<p><code>MarketTokens</code> are minted in one of a few scenarios explained below. In each case, the amount minted is set by the <code>Parameterizer</code> which holds <code>Market</code> parameters.</p>
+market.  <code>MarketTokens</code> are minted in one of a few
+scenarios explained below. In each case, the amount
+minted is set by the <code>Parameterizer</code> which holds
+<code>Market</code> parameters.</p>
 
 <h2 id="minting">Minting</h2>
 
@@ -135,12 +137,14 @@ stakeholder vote.</p>
 
 <ul>
 <li>Minting happens when a patron supports the market by
-making a payment into its reserve in <code>EtherToken</code>.
-The algorithmic price curve controls the exchange rate
-which governs the number of <code>MarketToken</code> consequently
-minted.</li>
+making a payment into its reserve in <code>EtherToken</code> via
+<code>Reserve.support()</code>. The algorithmic price curve
+controls the exchange rate
+(<code>Reserve.getSupportPrice()</code>.) which governs the number
+of <code>MarketToken</code> consequently minted.</li>
 <li>Minting happens when a datatrust reports that a
-listing has been queried. The minted tokens are
+listing has been queried
+(<code>Datatrust.listingAccessed()</code>). The minted tokens are
 awarded to the listing owner.</li>
 </ul>
 
@@ -149,9 +153,10 @@ awarded to the listing owner.</li>
 <p>Burning happens in the scenarios explained below.</p>
 
 <ul>
-<li>If a token holder divests from the data market, their
-divested tokens are burned. The origin of the tokens
-being burned does not matter.</li>
+<li>If a token holder divests from the data market
+(<code>Reserve.withdraw()</code>), their divested tokens are
+burned. The origin of the tokens being burned does not
+matter.</li>
 </ul>
 </article>
 

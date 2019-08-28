@@ -66,6 +66,7 @@ https://github.com/alex-shpak/hugo-book
 <li><a href="../../docs/parameters/">Market Parameters</a></li>
 <li><a href="../../docs/attacks/">Attacks</a></li>
 <li><a href="../../docs/userjourney/">User Journeys</a></li>
+<li><a href="../../docs/continuing/">Continuing Your Journey</a></li>
 </ul>
 
 
@@ -108,11 +109,128 @@ https://github.com/alex-shpak/hugo-book
 
 <h1 id="voting">Voting</h1>
 
-<p>Major decisions in the <code>Market</code> are made by token
+<p>Major decisions in the data market are made by token
 holder vote.  These decisions include which new
-listings should be added to the <code>Market</code>, which
-challenged listings should be removed, and what changes
-should be made to the <code>Market</code> parameters.</p>
+listing candidates should be confirmed as listings, which
+challenged listings should be removed, what changes
+should be made to the <code>Parameterizer</code> parameters, and
+what the datatrust should be. In this chapter, we&rsquo;ll
+introduce you to the fundamentals of the voting
+system and describe the basics of on-chain Computable
+governance.</p>
+
+<h2 id="candidates-candidates-candidates">Candidates, Candidates, Candidates</h2>
+
+<p>All voting is done on &ldquo;candidates.&rdquo; Think of a
+candidate as governance question brought up for
+referendum. There are a number of different types of
+candidates:</p>
+
+<ul>
+<li>Listing candidates: A proposal to add a new listing
+to the data market.</li>
+<li>Challenge candidate: A proposal to remove an existing
+listing from the data market.</li>
+<li>Reparameterization candidate: A proposal to change
+the parameters of the data market.</li>
+<li>Datatrust candidate: A proposal to change the
+datatrust used for the market.</li>
+</ul>
+
+<p>On-chain, a candidate is represented by a <code>Candidate</code>
+struct:</p>
+
+<pre><code>struct Candidate:
+  kind: uint256 # one of [1,2,3,4] representing an
+application, challenge, reparam or registration
+respectively
+  owner: address
+  stake: wei_value
+  vote_by: timestamp
+  yea: uint256
+  nay: uint256
+</code></pre>
+
+<p>Let&rsquo;s quickly review the fields of this struct. The
+<code>owner</code> is the Ethereum address of the candidate
+proposer. The <code>stake</code> is the amount of <code>MarketToken</code>
+that must be placed as stake to vote for/against this
+candidate. (We&rsquo;ll say more about this shortly).
+<code>vote_by</code> is how long the the voting poll will be open
+for this candidate. And <code>yea</code> and <code>nay</code> count the
+number of votes in favor and opposing this candidate.</p>
+
+<h2 id="voting-1">Voting</h2>
+
+<p>The voting system is quite simple. To place a vote, a
+stakeholder simply locks up <code>Candidate.stake</code> of its
+<code>MarketToken</code>.</p>
+
+<pre><code>@public
+def vote(hash: bytes32, option: uint256):
+  &quot;&quot;&quot;
+  @notice Cast a vote for a given candidate
+  @dev User mush have approved market token to spend on
+their behalf
+  @param hash The candidate identifier
+  @param option Yea (1) or Nay (!1)
+  &quot;&quot;&quot;
+  assert self.candidates[hash].owner != ZERO_ADDRESS
+  assert self.candidates[hash].vote_by &gt;
+block.timestamp
+  stake: wei_value = self.candidates[hash].stake
+  self.market_token.transferFrom(msg.sender, self,
+stake)
+  self.stakes[msg.sender][hash] += stake
+  if option == 1:
+    self.candidates[hash].yea += 1
+  else:
+    self.candidates[hash].nay += 1
+  log.Voted(hash, msg.sender)
+</code></pre>
+
+<p>A stakeholder may vote as many times as they wish, at
+the cost of locking up more stake. Note that this makes
+a data market an explicit plutocracy: larger
+stakeholders in the data market explicitly have greater
+voting power. While the downsides of plutocratic
+systems are well known, it&rsquo;s worth remembering that
+each data market is a relatively local system. It&rsquo;s not
+unfair that large stakeholders have more say in how its
+run (just as owners of a business have more say in its
+operations than third parties).</p>
+
+<p>The vote passes if the proportion of <code>yea</code> votes is
+greater than the <code>plurality</code> parameter.</p>
+
+<pre><code>@public
+@constant
+def didPass(hash: bytes32, plurality: uint256) -&gt; bool:
+  &quot;&quot;&quot;
+  @notice Return a bool indicating whether a given
+candidate recieved enough votes to exceed the plurality
+  @dev The poll must be closed. Also we cover the
+corner case that no one voted.
+  @return bool
+  &quot;&quot;&quot;
+  assert self.candidates[hash].owner != ZERO_ADDRESS
+  assert self.candidates[hash].vote_by &lt;
+block.timestamp
+  yea: uint256 = self.candidates[hash].yea
+  total: uint256 = yea + self.candidates[hash].nay
+  # edge case that no one voted
+  if total == 0:
+    # theoretically a market could have a 0 plurality
+    return plurality == 0
+  else:
+    return ((yea * 100) / total) &gt;= plurality
+</code></pre>
+
+<p>This simple voting system has the advantage of being
+easy to understand. However, the trade-off is that this
+simplicity allows for some sophisticated vote
+manipulation techniques to be feasible. We discuss such
+attacks in greater detail later.</p>
 </article>
 
       
@@ -144,7 +262,11 @@ should be made to the <code>Market</code> parameters.</p>
   <aside class="book-toc level-6 fixed">
     <nav id="TableOfContents">
 <ul>
-<li><a href="#voting">Voting</a></li>
+<li><a href="#voting">Voting</a>
+<ul>
+<li><a href="#candidates-candidates-candidates">Candidates, Candidates, Candidates</a></li>
+<li><a href="#voting-1">Voting</a></li>
+</ul></li>
 </ul>
 </nav>
   </aside>
