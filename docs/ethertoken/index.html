@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+
+
+
+
+
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>
+  
+    
+    Ethertoken
+  
+ | Computable Spec</title>
+
+
+
+<link rel="stylesheet" href="../../book.min.f4161f5e2de53a2e927f51df1611323a2a12cccb2681f23cb6fc3517852e8643.css">
+
+
+<link rel="icon" href="../../favicon.png" type="image/x-icon">
+
+
+<!--
+Made with Book Theme
+https://github.com/alex-shpak/hugo-book
+-->
+
+  
+</head>
+
+<body>
+  <input type="checkbox" style="display: none" id="menu-control" />
+  <main class="flex container">
+
+    <aside class="book-menu fixed">
+      <nav>
+<h2 class="book-brand">
+  <a href="https://computablelabs.github.io/compspec/">Computable Spec</a>
+</h2>
+
+
+
+    
+  
+  
+  
+
+  <style>
+  nav ul a[href$="\2f docs\2f ethertoken\2f "] {
+      color: #0b3a53;
+  }
+  </style>
+
+<ul>
+<li><a href="../../"><strong>Introduction</strong></a></li>
+<li><a href="../../docs/contracts/">Contracts</a></li>
+<li><a href="../../docs/ethertoken/">Ether Token</a></li>
+<li><a href="../../docs/markettoken/">Market Token</a></li>
+<li><a href="../../docs/voting/">Voting</a></li>
+<li><a href="../../docs/listings/">Listings</a></li>
+<li><a href="../../docs/reserve/">Reserve</a></li>
+<li><a href="../../docs/datatrust/">Datatrusts</a></li>
+<li><a href="../../docs/parameters/">Market Parameters</a></li>
+<li><a href="../../docs/capi/">The Computable API</a></li>
+<li><a href="../../docs/attacks/">Attacks</a></li>
+<li><a href="../../docs/userjourney/">User Journeys</a></li>
+<li><a href="../../docs/continuing/">Continuing Your Journey</a></li>
+</ul>
+
+
+
+
+
+</nav>
+
+
+  
+<script>
+(function() {
+  var menu = document.querySelector('aside.book-menu nav')
+  addEventListener('beforeunload', function(event) {
+    localStorage.setItem('menu.scrollTop', menu.scrollTop)
+  });
+  menu.scrollTop = localStorage.getItem('menu.scrollTop')
+})()
+</script>
+
+
+
+    </aside>
+
+    <div class="book-page">
+      <header class="align-center justify-between book-header">
+  <label for="menu-control">
+    <img src="../../svg/menu.svg" alt="Menu" />
+  </label>
+  <strong>
+  
+    
+    Ethertoken
+  
+</strong>
+</header>
+
+      
+<article class="markdown">
+
+<h1 id="ether-token">Ether Token</h1>
+
+<p>The first point of entry into the Computable ecosystem
+is the <code>EtherToken</code> contract. This contract is simply a
+wrapper for ETH that gives it an ERC-20 interface. You
+will need <code>EtherToken</code> for all your interactions with
+the Computable smart contracts.</p>
+
+<p>To get started, you need to call the
+<code>EtherToken.deposit()</code> function and deposit some ETH</p>
+
+<pre><code>@public
+@payable
+def deposit():
+  &quot;&quot;&quot;
+  @notice Facilitate a user purchasing EtherToken with Eth at a 1:1 ratio
+  &quot;&quot;&quot;
+  self.balances[msg.sender] += msg.value
+  self.supply += msg.value
+  log.Deposited(msg.sender, msg.value)
+</code></pre>
+
+<p>This snippet is the first example in
+this book of Vyper code. Vyper is a smart contract
+language that runs on the Ethereum ecosystem. Vyper&rsquo;s
+syntax is pretty similar to Python code so this code
+shouldn&rsquo;t be too hard to follow. The basic idea is that
+the <code>EtherToken</code> contract maintains an internal ledger,
+<code>self.balances</code>.  Here, <code>msg.value</code> is the ETH that
+you&rsquo;re sending to the <code>EtherToken</code> contract. This
+function stores the ETH you give it in <code>self.supply</code>
+for safe keeping, and awards you an equivalent amount
+of <code>EtherToken</code> in its ledger.  It ends by emitting an
+&ldquo;event,&rdquo; <code>log.Deposited</code> which signals to watchers than
+a deposit has happened on this contract.</p>
+
+<p>There was some detail here, but the basic idea is
+simple. <code>EtherToken.deposit()</code> simply deposits the ETH
+you send it and mints you an equivalent amount of
+<code>EtherToken</code> in a 1-1 fashion.</p>
+
+<p>Now let&rsquo;s suppose that you&rsquo;ve interacted with the
+Computable system to your hearts content and made some
+healthy capital that you&rsquo;d like to take out as ETH. In
+that case, you simply call the <code>EtherToken.withdraw()</code>
+function:</p>
+
+<pre><code>@public
+def withdraw(amount: wei_value):
+  &quot;&quot;&quot;
+  @notice Allow msg.sender to withdraw an amount of ETH
+  @dev The Vyper builtin `send` is used here
+  @param amount An amount of ETH in wei to be withdrawn
+  &quot;&quot;&quot;
+  self.balances[msg.sender] -= amount
+  self.supply -= amount
+  send(msg.sender, amount)
+  log.Withdrawn(msg.sender, amount)
+</code></pre>
+
+<p>This function
+simply undoes the effect of <code>EtherToken.deposit()</code>
+which you just saw. It removes the requested amount
+from its internal ledger and sends back the ETH by
+calling the <code>send</code> function. Finally it issues an event
+with <code>log.Withdrawn</code> to signal that a withdrawal has
+occurred.</p>
+
+<p>If you&rsquo;re new to Vyper, you might be feeling confused
+here. What if <code>amount</code> is bigger than my balance? Can I
+steal money from the system? Luckily, Vyper protects
+against these types of attacks. <code>self.balances</code> stores
+values of type
+<a href="https://vyper.readthedocs.io/en/v0.1.0-beta.11/types.html#wei">wei_value</a>.
+This is an unsigned type. A subtraction that would
+cause a negative value will consequently throw an error
+and fail.</p>
+
+<p>The ease of doing math in this fashion is one of the
+major advantages Vyper has over other languages such as
+Solidity, which require more verbose safe math
+libraries to achieve similar functionality.</p>
+
+<p><a href="../markettoken/index.html">Next Chapter</a></p>
+</article>
+
+      
+<div class="book-footer justify-between">
+  
+  <div>
+    
+    <a href="https://github.com/computablelabs/compspec/commit/2289d20c0f8e11d61ec98b646f11626835b880b6" title='Last modified Aug 28, 2019 by Bharath Ramsundar' target="_blank" rel="noopener">
+      <img src="../../svg/calendar.svg" alt="Changed" /> Aug 28, 2019
+    </a>
+  </div>
+  
+  
+  <div>
+    <a href="https://github.com/computablelabs/compspec/edit/master/docs/ethertoken.md" target="_blank" rel="noopener">
+      <img src="../../svg/edit.svg" alt="Edit" /> Edit this page
+    </a>
+  </div>
+  
+</div>
+
+
+      
+    </div>
+
+    
+  
+
+  <aside class="book-toc level-6 fixed">
+    <nav id="TableOfContents">
+<ul>
+<li><a href="#ether-token">Ether Token</a></li>
+</ul>
+</nav>
+  </aside>
+
+
+
+  </main>
+  
+  
+  
+</body>
+
+</html>

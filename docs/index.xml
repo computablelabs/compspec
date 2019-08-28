@@ -22,6 +22,15 @@ Front Running Attacks In the current version of the protocol, it is possible for
     
     <item>
       <title></title>
+      <link>https://computablelabs.github.io/compspec/docs/capi/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://computablelabs.github.io/compspec/docs/capi/</guid>
+      <description>The Computable API We&amp;rsquo;ve covered the core Computable contracts at some depth in the last few chapters. However, we haven&amp;rsquo;t said too much detail about the datatrust. We&amp;rsquo;ve mentioned briefly that the datatrust is a key-value store that holds data off-chain. What else is a datatrust responsible for doing? When is some piece of software a datatrust? In particular what are the external signals and messages thata datatrust must respond to?</description>
+    </item>
+    
+    <item>
+      <title></title>
       <link>https://computablelabs.github.io/compspec/docs/continuing/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
@@ -48,6 +57,17 @@ You might be now wondering how you can continue learning. As you&amp;rsquo;ve pr
       <description>The Datatrusts A Datatrust is a software system that is responsible for storing data and coordinating with on-chain permissions layers. Put another way, the Datatrust is the off-chain portion of the Computable protocol, responsible for storing data, and delivering it upon purchase.
 Each data market maintains an authorized Datatrust on-chain. A stakeholder vote is needed to authorize or remove a datatrust.
 Datatrust Implementation Specification A Datatrust is a system that is responsible for storing data off-chain.</description>
+    </item>
+    
+    <item>
+      <title></title>
+      <link>https://computablelabs.github.io/compspec/docs/ethertoken/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://computablelabs.github.io/compspec/docs/ethertoken/</guid>
+      <description>Ether Token The first point of entry into the Computable ecosystem is the EtherToken contract. This contract is simply a wrapper for ETH that gives it an ERC-20 interface. You will need EtherToken for all your interactions with the Computable smart contracts.
+To get started, you need to call the EtherToken.deposit() function and deposit some ETH
+@public @payable def deposit(): &amp;quot;&amp;quot;&amp;quot; @notice Facilitate a user purchasing EtherToken with Eth at a 1:1 ratio &amp;quot;&amp;quot;&amp;quot; self.</description>
     </item>
     
     <item>

@@ -34,6 +34,11 @@
   </url>
   
   <url>
+    <loc>https://computablelabs.github.io/compspec/docs/capi/</loc>
+    <priority>0</priority>
+  </url>
+  
+  <url>
     <loc>https://computablelabs.github.io/compspec/docs/continuing/</loc>
     <priority>0</priority>
   </url>
@@ -45,6 +50,11 @@
   
   <url>
     <loc>https://computablelabs.github.io/compspec/docs/datatrust/</loc>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://computablelabs.github.io/compspec/docs/ethertoken/</loc>
     <priority>0</priority>
   </url>
   
