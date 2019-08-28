@@ -111,12 +111,21 @@ https://github.com/alex-shpak/hugo-book
 
 <h1 id="market-token">Market Token</h1>
 
-<p><code>MarketToken</code> is a mintable and burnable ERC20 token.
-The <code>MarketToken</code> is tied to a particular <code>Market</code> and
-is created when the <code>Market</code> is created. Note the
-contrast with token curated registries, which don&rsquo;t
-hold a mechanism for minting and burning their
-associated token.</p>
+<p><code>MarketToken</code> is a mintable and burnable ERC-20 token
+(we&rsquo;ll say more on what those terms mean soon).  The
+<code>MarketToken</code> is tied to a particular data market and
+is created when the data market is created. What is the
+purpose of <code>MarketToken</code>? Well simply put, the
+<code>MarketToken</code> corresponds to &ldquo;shares&rdquo; in a dataset. In
+everyday life, you&rsquo;ve probably bought share in
+companies. These shares give you some rights. You can
+vote on some company decisions, and have rights to some
+portion of the company&rsquo;s wealth (albeit in limited
+form). The <code>MarketToken</code> is similar. It gives you
+partial ownership of the dataset that is hosted in the
+data market along with some governance rights. We&rsquo;ll
+explain the function of the <code>MarketToken</code> in greater
+detail in this and subsequent chapters.</p>
 
 <p>The <code>MarketToken</code> is denominated in &ldquo;market wei&rdquo;.  As
 with ETH, a &ldquo;market wei&rdquo; denominates 1/(10^18) of a
@@ -161,6 +170,21 @@ burned. The origin of the tokens being burned does not
 matter.</li>
 </ul>
 
+<h2 id="comparing-with-token-curated-registries">Comparing with Token Curated Registries</h2>
+
+<p>Those of you who have some experience in crypto might
+wonder if <code>MarketToken</code> is something like a <a href="https://medium.com/@tokencuratedregistry/a-simple-overview-of-token-curated-registries-84e2b7b19a06">token
+curated registry</a>. There are some similarities here, since a data market also manages an on-chain &ldquo;registry.&rdquo;</p>
+
+<p>While our original
+<a href="https://arxiv.org/abs/1806.00139">research</a> on data
+market design used token curated registries as a design
+guide, the current design is quite different. In
+particular, note the contrast of <code>MarketToken</code> with
+token curated registries tokens, which don&rsquo;t have a
+mechanism for minting and burning their associated
+token.</p>
+
 <p><a href="../voting/index.html">Next Chapter</a></p>
 </article>
 
@@ -197,6 +221,7 @@ matter.</li>
 <ul>
 <li><a href="#minting">Minting</a></li>
 <li><a href="#burning">Burning</a></li>
+<li><a href="#comparing-with-token-curated-registries">Comparing with Token Curated Registries</a></li>
 </ul></li>
 </ul>
 </nav>

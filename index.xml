@@ -90,7 +90,7 @@ You might be now wondering how you can continue learning. As you&amp;rsquo;ve pr
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>https://computablelabs.github.io/compspec/docs/contracts/</guid>
-      <description>In this section, we&amp;rsquo;ll review the smart contracts that form the core of the Computable protocol. The clean version of the contracts lives in the Computable repo. These are the stable versions of the contracts and are only updated for major releases. The developer version lives in the Goest repo. We’ve built a number of developer utilities in there, including a custom testing framework that integrates closely with Geth’s tooling to provide a believable simulator engine.</description>
+      <description>The Computable Contracts In this chapter , we&amp;rsquo;ll briefly review the smart contracts that form the core of the Computable protocol. If you haven&amp;rsquo;t encountered smart contracts before, you might not have a clear idea of what they are. Briefly put, they are programs that run on the Ethereum blockchain. You might ask, why is this important? How is it different from just running a program on the cloud? The main difference is that smart contracts run in duplicate on every one of the thousands of nodes that constitute Ethereum.</description>
     </item>
     
     <item>
@@ -133,8 +133,7 @@ struct Listing: owner: address supply: wei_value  Let&amp;rsquo;s take a minute 
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>https://computablelabs.github.io/compspec/docs/markettoken/</guid>
-      <description>Market Token MarketToken is a mintable and burnable ERC20 token. The MarketToken is tied to a particular Market and is created when the Market is created. Note the contrast with token curated registries, which don&amp;rsquo;t hold a mechanism for minting and burning their associated token.
-The MarketToken is denominated in &amp;ldquo;market wei&amp;rdquo;. As with ETH, a &amp;ldquo;market wei&amp;rdquo; denominates 1/(10^18) of a MarketToken. Using wei units throughout prevents rounding error propagation and keeps contracts simple.</description>
+      <description>Market Token MarketToken is a mintable and burnable ERC-20 token (we&amp;rsquo;ll say more on what those terms mean soon). The MarketToken is tied to a particular data market and is created when the data market is created. What is the purpose of MarketToken? Well simply put, the MarketToken corresponds to &amp;ldquo;shares&amp;rdquo; in a dataset. In everyday life, you&amp;rsquo;ve probably bought share in companies. These shares give you some rights. You can vote on some company decisions, and have rights to some portion of the company&amp;rsquo;s wealth (albeit in limited form).</description>
     </item>
     
     <item>
