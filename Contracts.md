@@ -39,7 +39,7 @@ secure on-chain contracts.
 
 The contracts are interlinked in the following fashion
 
-![Contract Diagram](contracts.png)
+![Contract Diagram](../../contracts.png)
 
 In this diagram, arrows correspond to dependencies. An
 outgoing arrow indicates that this contract is

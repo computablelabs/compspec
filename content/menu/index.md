@@ -13,3 +13,5 @@ headless: true
   >}})
 - [Attacks]({{< relref "/docs/attacks.md" >}})
 - [User Journeys]({{< relref "/docs/userjourney.md" >}})
+- [Continuing Your Journey]({{< relref
+  "/docs/continuing.md" >}})

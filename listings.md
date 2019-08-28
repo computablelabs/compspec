@@ -61,7 +61,7 @@ def isListed(hash: bytes32) -> bool:
 Reading through this, if the listing's owner is not
 `ZERO_ADDRESS`, then the listing has been accepted.
 
-#### What is the off-chain part of a listing?
+## What is the off-chain part of a listing?
 We haven't clearly specified what a listing is
 precisely in the preceding material.  Part of the
 challenge is that a "listing" will mean different
@@ -76,12 +76,12 @@ batching might be crucial for efficiency, since the
 transaction rate of Ethereum is not yet sufficient to
 do bulk uploads of datasets otherwise.
 
-#### Applying
+## Applying
 Applying is the process by which a new listing is added
 to a data market. To apply, a maker 
 calls the following method on-chain:
 
-``
+```
 @public
 def list(hash: bytes32):
   """
@@ -98,7 +98,7 @@ def list(hash: bytes32):
 This function does a few basic sanity checks, then puts
 this candidate listing up for a vote. If the vote clears,s the candidacy is resolved and the candidate is listed and its `owner` field is set.
 
-#### Challenging
+## Challenging
 Challenging is the process by which a listing in a data
 market can be challenged and potentially removed. A
 challenge triggers a vote. If the challenge succeeds,
@@ -127,7 +127,7 @@ the victor of the challenge receives a financial reward
 which comes directly from the loser of of the
 challenge.
 
-### Exiting
+## Exiting
 The owner of a listing can remove it from the market at any time by calling the following method:
 
 ```
@@ -148,7 +148,7 @@ There are no controls or barriers on removing listings.
 The listing owner maintains full control over their
 listing in a data market.
 
-### Purchasing access to a listing 
+## Purchasing access to a listing 
 Users may wish to purchase access to a listing. They may do so by calling the `requestDelivery` method in `Datatrust.vy`:
 
 ```
