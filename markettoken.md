@@ -45,3 +45,4 @@ Burning happens in the scenarios explained below.
   burned. The origin of the tokens being burned does not
   matter.
 
+[Next Chapter](../voting/index.html)

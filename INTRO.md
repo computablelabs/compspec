@@ -77,3 +77,5 @@ control and ownership of data and a solid working
 understanding of the libraries Computable provides to
 help you tackle this problem. Welcome onboard to the
 Computable community! It's going to be a ride!
+
+[Next Chapter](docs/contracts/index.html)

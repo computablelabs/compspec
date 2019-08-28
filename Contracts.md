@@ -101,3 +101,5 @@ the algorithmic price curve dramatically simpler.
 Although Vyper is still beta software, we’ve found that
 it’s well written, well maintained and well suited to
 our efforts.
+
+[Next Chapter](../ethertoken/index.html)

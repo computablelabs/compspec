@@ -105,3 +105,5 @@ Precisely, if `spread` is 110, then there will roughly
 be a 10% overhead. This ratio isn't quite precise due
 to the need to handle edge conditions on the price
 curve.
+
+[Next Chapter](../datatrust/index.html)

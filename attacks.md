@@ -95,3 +95,4 @@ attack which sets the voting stake exorbitantly high
 could freeze market governance and make it impossible
 to further change market stake.
 
+[Next Chapter](../userjourney/index.html)

@@ -8,11 +8,21 @@ the Computable smart contracts.
 
 To get started, you need to call the
 `EtherToken.deposit()` function and deposit some ETH
-``` @public @payable def deposit(): """ @notice
-Facilitate a user purchasing EtherToken with Eth at a
-1:1 ratio """ self.balances[msg.sender] += msg.value
-self.supply += msg.value log.Deposited(msg.sender,
-msg.value) ``` This snippet is the first example in
+
+```
+@public
+@payable
+def deposit():
+  """
+  @notice Facilitate a user purchasing EtherToken with Eth at a 1:1 ratio
+  """
+  self.balances[msg.sender] += msg.value
+  self.supply += msg.value
+  log.Deposited(msg.sender, msg.value)
+``` 
+
+
+This snippet is the first example in
 this book of Vyper code. Vyper is a smart contract
 language that runs on the Ethereum ecosystem. Vyper's
 syntax is pretty similar to Python code so this code
@@ -35,13 +45,23 @@ Now let's suppose that you've interacted with the
 Computable system to your hearts content and made some
 healthy capital that you'd like to take out as ETH. In
 that case, you simply call the `EtherToken.withdraw()`
-function: ``` @public def withdraw(amount: wei_value):
-""" @notice Allow msg.sender to withdraw an amount of
-ETH @dev The Vyper builtin `send` is used here @param
-amount An amount of ETH in wei to be withdrawn """
-self.balances[msg.sender] -= amount self.supply -=
-amount send(msg.sender, amount)
-log.Withdrawn(msg.sender, amount) ``` This function
+function:
+
+```
+@public
+def withdraw(amount: wei_value):
+  """
+  @notice Allow msg.sender to withdraw an amount of ETH
+  @dev The Vyper builtin `send` is used here
+  @param amount An amount of ETH in wei to be withdrawn
+  """
+  self.balances[msg.sender] -= amount
+  self.supply -= amount
+  send(msg.sender, amount)
+  log.Withdrawn(msg.sender, amount)
+```
+
+This function
 simply undoes the effect of `EtherToken.deposit()`
 which you just saw. It removes the requested amount
 from its internal ledger and sends back the ETH by
@@ -63,3 +83,5 @@ The ease of doing math in this fashion is one of the
 major advantages Vyper has over other languages such as
 Solidity, which require more verbose safe math
 libraries to achieve similar functionality.
+
+[Next Chapter](../markettoken/index.html)

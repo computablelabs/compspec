@@ -64,3 +64,5 @@ def register(url: string[128]):
 Calling this method triggers a vote. If the vote
 passes, then this this party becomes the new datatrust
 for the system.
+
+[Next Chapter](../parameters/index.html)

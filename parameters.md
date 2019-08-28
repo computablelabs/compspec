@@ -84,10 +84,12 @@ This parameter is of type
 [uint256](https://vyper.readthedocs.io/en/v0.1.0-beta.11/types.html#unsigned-integer-256-bit)
 
 
-#### Reparameterization
+## Reparameterization
 
 All market parameters can be changed with a vote. The
 process of changing data market parameters is referred
 to as reparameterization. The same voting mechanism is
 used for reparameterization as for other market
 processes.
+
+[Next Chapter](../capi/index.html)

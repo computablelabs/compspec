@@ -123,3 +123,5 @@ easy to understand. However, the trade-off is that this
 simplicity allows for some sophisticated vote
 manipulation techniques to be feasible. We discuss such
 attacks in greater detail later.
+
+[Next Chapter](../listings/index.html)
