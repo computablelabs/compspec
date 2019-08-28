@@ -4,6 +4,7 @@ headless: true
 
 - [**Introduction**]({{< relref "/" >}})
 - [Contracts]({{< relref "/docs/contracts.md" >}})
+- [Ether Token]({{< relref "/docs/ethertoken.md" >}})
 - [Market Token]({{< relref "/docs/markettoken.md" >}})
 - [Voting]({{< relref "/docs/voting.md" >}})
 - [Listings]({{< relref "/docs/listings.md" >}})
@@ -11,6 +12,7 @@ headless: true
 - [Datatrusts]({{< relref "/docs/datatrust.md" >}})
 - [Market Parameters]({{< relref "/docs/parameters.md"
   >}})
+- [The Computable API]({{< relref "/docs/capi.md" >}})
 - [Attacks]({{< relref "/docs/attacks.md" >}})
 - [User Journeys]({{< relref "/docs/userjourney.md" >}})
 - [Continuing Your Journey]({{< relref
