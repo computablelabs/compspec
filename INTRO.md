@@ -64,9 +64,16 @@ understanding of the core aspects of the Computable
 protocol grows, this document will be updated
 accordingly.
 
-
-By the time you finish reading this book, you should be
-prepared to launch your own data market and get started
-on gathering new and interesting datasets. Welcome
-onboard to the Computable community! It's going to be a
-ride.
+The site is organized in book format. It's designed to
+be possible to read from end to end cogently. We try to
+provide additional context for newcomers to the field
+and explain intuitions and ideas and not just the raw
+mechanics.  By the time you finish reading this book,
+you should be prepared to launch your own data market
+and get started on gathering new and interesting
+datasets. Even more importantly, you should have an
+understanding of the challenges of decentralizing
+control and ownership of data and a solid working
+understanding of the libraries Computable provides to
+help you tackle this problem. Welcome onboard to the
+Computable community! It's going to be a ride!
