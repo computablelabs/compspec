@@ -12,6 +12,7 @@ headless: true
 - [Datatrusts]({{< relref "/docs/datatrust.md" >}})
 - [Market Parameters]({{< relref "/docs/parameters.md"
   >}})
+- [The Computable API]({{< relref "/docs/capi.md" >}})
 - [Attacks]({{< relref "/docs/attacks.md" >}})
 - [User Journeys]({{< relref "/docs/userjourney.md" >}})
 - [Continuing Your Journey]({{< relref
