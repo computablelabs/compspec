@@ -1,7 +1,26 @@
 # Listings
 A data market holds a set of "listings". Each listing
-corresponds to a chunk of data contributed by a single maker and managed within the data market. The listing is physicaally stored  
-off-chain in the datatrust for this market. 
+corresponds to a chunk of data contributed by a single
+maker and managed within the data market. The listing is
+physically stored  off-chain in the datatrust for this
+market.
+
+As we will see soon, listings are governed by the
+on-chain voting system we discussed in the last
+chapter. Adding a new listing, and challenging someone
+else's listing to have it listing both require on-chain
+votes. This permits for market stakeholders to actively
+manage the set of available listings. It's worth noting
+that listings require some off-chain governance as
+well, since each listing is tied to an off-chain
+(potentially large) chunk of data. For this reason, the
+datatrust plays a role in verifying that makers have
+actually submitted data for listing candidates before
+they can be listed. Don't worry if you didn't digest
+all that just yet. We'll say more in the rest of this
+chapter.
+
+## On-chain Listings
 
 We reproduce the fields of the on-chain listing
 structure (in `Listing.vy`) below.
