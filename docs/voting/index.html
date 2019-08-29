@@ -111,13 +111,22 @@ https://github.com/alex-shpak/hugo-book
 
 <h1 id="voting">Voting</h1>
 
-<p>Major decisions in the data market are made by token
-holder vote.  These decisions include which new
-listing candidates should be confirmed as listings, which
-challenged listings should be removed, what changes
-should be made to the <code>Parameterizer</code> parameters, and
-what the datatrust should be. In this chapter, we&rsquo;ll
-introduce you to the fundamentals of the voting
+<p>As we&rsquo;ve mentioned previously, <code>MarketToken</code>s are
+analogous to company shares. Just as company
+shareholders can vote on some company decisions,
+<code>MarketToken</code> stakeholders are allowed to vote on some
+data market governance questions.  In fact, all major
+decisions in the data market are made by token holder
+vote.  These decisions include which new listing
+candidates (a &ldquo;listing candidate&rdquo; is a chunk of data
+which has not yet been confirmed as a listing in the
+market) should be confirmed as listings, which
+challenged listings should be removed from the market
+(we&rsquo;ll say more about challenges later), what changes
+should be made to the <code>Parameterizer</code> parameters (which
+govern the market&rsquo;s behavior; more on this later), and
+who the datatrust operator should be. In this chapter,
+we&rsquo;ll introduce you to the fundamentals of the voting
 system and describe the basics of on-chain Computable
 governance.</p>
 
@@ -128,16 +137,68 @@ candidate as governance question brought up for
 referendum. There are a number of different types of
 candidates:</p>
 
-<ul>
-<li>Listing candidates: A proposal to add a new listing
-to the data market.</li>
-<li>Challenge candidate: A proposal to remove an existing
-listing from the data market.</li>
-<li>Reparameterization candidate: A proposal to change
-the parameters of the data market.</li>
-<li>Datatrust candidate: A proposal to change the
-datatrust used for the market.</li>
-</ul>
+<h3 id="listing-candidates">Listing candidates</h3>
+
+<p>A proposal to add a new listing to the data market is a
+&ldquo;listing candidate.&rdquo; A maker (a data contributor) who
+has gathered some interesting data, creates a listing
+candidate to propose that their data should be added to
+the data market. If this candidate is accepted, the
+maker is rewarded with <code>listing_reward</code>, a tranche of
+newly minted <code>MarketToken</code>.</p>
+
+<p>Here, the vote serves as a gating mechanism to prevent
+fraudulent data from entering the market. It also
+allows for some quality control checks on data to be
+performed by any interested parties.</p>
+
+<h3 id="challenge-candidate">Challenge candidate</h3>
+
+<p>A proposal to remove an existing listing from the data
+market. Sometimes, the listing process will allow a bad
+listing (with poor data perhaps) to slip through. In
+this case, we need a mechanism to allow for clean-up
+and removal of this data. The challenge mechanism
+allows for this sort of cleanup. An interested party
+can challenge a listing they believe to be fraudulent.
+If the vote succeeds, this listing is removed from the
+market.</p>
+
+<p>To prevent nuisance challenges, creating a challenge
+requires locking up some <code>MarketToken</code>. The amount to
+be locked up is governed by the <code>stake</code> parameter set
+in the <code>Parameterizer</code>. If the challenge is rejected
+(judged by stakeholders to be frivolous), then the
+listing owner is rewarded for the trouble they faced.
+For this reason, challenges will likely be relatively
+uncommon since there&rsquo;s a risk of losing funds.</p>
+
+<p>As a second complication, you might ask, what happens
+to the <code>MarketToken</code> that was minted in the case of a
+successful challenge that removes the associated
+listing? The answer is absolutely nothing. If you
+succeeded in pulling a fast one on the data market, you
+are allowed to walk with the funds. This choice was
+made to keep the contract complexity to manageable
+levels, since having &ldquo;lockups&rdquo; to prevent this
+situation would add quite a bit of extra code.</p>
+
+<h3 id="reparameterization-candidate">Reparameterization candidate</h3>
+
+<p>A proposal to change the parameters of the data market. We&rsquo;ll say more about the parameters that can be altered in a future chapter.</p>
+
+<h3 id="datatrust-candidate">Datatrust candidate</h3>
+
+<p>A proposal to change the datatrust used for the market.
+If a datatrust operator is misbehaving, this mechanism
+allows for the datatrust to be replaced if necessary.
+However, it&rsquo;s worth nothing that the datatrust has
+considerable power in this version of the Computable
+protocol, so this facility is something of a &ldquo;nuclear
+option&rdquo; only to be used if other measures aren&rsquo;t
+panning out.</p>
+
+<h2 id="the-voting-code">The voting code</h2>
 
 <p>On-chain, a candidate is represented by a <code>Candidate</code>
 struct:</p>
@@ -155,17 +216,31 @@ respectively
 
 <p>Let&rsquo;s quickly review the fields of this struct. The
 <code>owner</code> is the Ethereum address of the candidate
-proposer. The <code>stake</code> is the amount of <code>MarketToken</code>
-that must be placed as stake to vote for/against this
-candidate. (We&rsquo;ll say more about this shortly).
-<code>vote_by</code> is how long the the voting poll will be open
-for this candidate. And <code>yea</code> and <code>nay</code> count the
-number of votes in favor and opposing this candidate.</p>
+proposer. As a quick note, the Computable protocol
+doesn&rsquo;t know anything about humans. The only entities
+that it knows about are Ethereum addresses. What is an
+address you might ask? It&rsquo;s simply a 64 character hex
+string that uniquely identifies some entity on
+Ethereum. This entity could be a human, a smart
+contract, a consortium or anything. All the
+participants in the Computable protocol we&rsquo;ve talked
+about (makers, stakeholders, datatrust operators) are
+all Ethereum addresses. Which means that participants
+in the Computable protocol aren&rsquo;t necessarily humans,
+although the could be of course.</p>
+
+<p>Returning to the discussion, the <code>stake</code> is the amount
+of <code>MarketToken</code> that must be placed as stake to vote
+for/against this candidate. (We&rsquo;ll say more about this
+shortly). <code>vote_by</code> is how long the the voting poll
+will be open for this candidate. And <code>yea</code> and <code>nay</code>
+count the number of votes in favor and opposing this
+candidate.</p>
 
 <h2 id="voting-1">Voting</h2>
 
 <p>The voting system is quite simple. To place a vote, a
-stakeholder simply locks up <code>Candidate.stake</code> of its
+stakeholder simply locks up <code>Candidate.stake</code> of
 <code>MarketToken</code>.</p>
 
 <pre><code>@public
@@ -268,7 +343,14 @@ attacks in greater detail later.</p>
 <ul>
 <li><a href="#voting">Voting</a>
 <ul>
-<li><a href="#candidates-candidates-candidates">Candidates, Candidates, Candidates</a></li>
+<li><a href="#candidates-candidates-candidates">Candidates, Candidates, Candidates</a>
+<ul>
+<li><a href="#listing-candidates">Listing candidates</a></li>
+<li><a href="#challenge-candidate">Challenge candidate</a></li>
+<li><a href="#reparameterization-candidate">Reparameterization candidate</a></li>
+<li><a href="#datatrust-candidate">Datatrust candidate</a></li>
+</ul></li>
+<li><a href="#the-voting-code">The voting code</a></li>
 <li><a href="#voting-1">Voting</a></li>
 </ul></li>
 </ul>

@@ -193,8 +193,7 @@ Second, contract method calls are asynchronous and may take an indefinite amount
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>https://computablelabs.github.io/compspec/docs/voting/</guid>
-      <description>Voting Major decisions in the data market are made by token holder vote. These decisions include which new listing candidates should be confirmed as listings, which challenged listings should be removed, what changes should be made to the Parameterizer parameters, and what the datatrust should be. In this chapter, we&amp;rsquo;ll introduce you to the fundamentals of the voting system and describe the basics of on-chain Computable governance.
-Candidates, Candidates, Candidates All voting is done on &amp;ldquo;candidates.</description>
+      <description>Voting As we&amp;rsquo;ve mentioned previously, MarketTokens are analogous to company shares. Just as company shareholders can vote on some company decisions, MarketToken stakeholders are allowed to vote on some data market governance questions. In fact, all major decisions in the data market are made by token holder vote. These decisions include which new listing candidates (a &amp;ldquo;listing candidate&amp;rdquo; is a chunk of data which has not yet been confirmed as a listing in the market) should be confirmed as listings, which challenged listings should be removed from the market (we&amp;rsquo;ll say more about challenges later), what changes should be made to the Parameterizer parameters (which govern the market&amp;rsquo;s behavior; more on this later), and who the datatrust operator should be.</description>
     </item>
     
   </channel>

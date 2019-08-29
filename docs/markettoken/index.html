@@ -127,48 +127,116 @@ data market along with some governance rights. We&rsquo;ll
 explain the function of the <code>MarketToken</code> in greater
 detail in this and subsequent chapters.</p>
 
-<p>The <code>MarketToken</code> is denominated in &ldquo;market wei&rdquo;.  As
-with ETH, a &ldquo;market wei&rdquo; denominates 1/(10^18) of a
-<code>MarketToken</code>. Using wei units throughout prevents
-rounding error propagation and keeps contracts simple.</p>
+<p>One very important point to note here is that each data
+market has a different <code>MarketToken</code>. Let&rsquo;s unpack that
+statement a bit. The Computable ecosystem consists of
+many different data markets. Each data market holds a
+collection of data that is logically tied together in
+some fashion. For example, data market &ldquo;A&rdquo; might hold
+mapping data for self driving cars, and data market &ldquo;B&rdquo;
+might hold biological experimental data for drug
+discovery. There will then exist <em>separate</em> market
+tokens for each market. That is, <code>MarketToken</code> &ldquo;A&rdquo; and
+<code>MarketToken</code> &ldquo;B&rdquo;. These two tokens have nothing to do
+with one another! You might wonder why this is the
+case? Well it&rsquo;s for the same reason that Google shares
+and Merck shares don&rsquo;t have anything to do with one
+another; they&rsquo;re separate companies that should be
+valued on their own merits independently. Similarly,
+different data markets have different <code>MarketToken</code>s to
+allow for separate valuations.</p>
 
-<p><code>MarketTokens</code> are dynamically minted and burned as the
-market evolves. This flexibility is needed to
+<p>Another interesting feature of <code>MarketToken</code> is
+that tokens are dynamically minted and burned as the
+data market evolves. This flexibility is needed to
 accurately track the evolving value of data in a data
 market.  <code>MarketTokens</code> are minted in one of a few
-scenarios explained below. In each case, the amount
-minted is set by the <code>Parameterizer</code> which holds
-<code>Market</code> parameters.</p>
+scenarios explained in the next section.</p>
 
 <h2 id="minting">Minting</h2>
 
-<p>Minting happens when new listings are listed in the
-market. These listings have to be approved by a
-stakeholder vote.</p>
+<p>What does it mean for <code>MarketToken</code> to be minted? Very
+mechanically, it means that new <code>MarketToken</code>s are
+created. Like suppose that a company had 100 shares,
+and they decide to make 50 new shares and sell them to
+people to raise funds. There are now 150 shares. This
+is a minting operation. The mechanism works very
+similiarly for data markets. In the rest of this
+section, we&rsquo;ll talk through the situations in which
+<code>MarketToken</code> can be minted.</p>
 
-<ul>
-<li>Minting happens when a patron supports the market by
-making a payment into its reserve in <code>EtherToken</code> via
-<code>Reserve.support()</code>. The algorithmic price curve
-controls the exchange rate
-(<code>Reserve.getSupportPrice()</code>.) which governs the number
-of <code>MarketToken</code> consequently minted.</li>
-<li>Minting happens when a datatrust reports that a
-listing has been queried
-(<code>Datatrust.listingAccessed()</code>). The minted tokens are
-awarded to the listing owner.</li>
-</ul>
+<p>Minting happens when new data is added to the market.
+The owner of the data is rewarded with some new
+<code>MarketToken</code>. In a data market, a new chunk of data
+has a special name, a &ldquo;listing.&rdquo; To prevent rampant
+inflation, the addition of a new listing to the market
+requires the approval of existing <code>MarketToken</code> holders
+by a vote. You can think of this as a sort of
+&ldquo;shareholder vote.&rdquo; More precisely, this is called a &ldquo;stakeholder vote.&rdquo; Just as the owners of Google stock are Google shareholders, the owners of <code>MarketToken</code> for a particular market are &ldquo;stakeholders.&rdquo;</p>
+
+<p>In this case, the amount minted is set by the
+<code>list_reward</code> market parameter set in the
+<code>Parameterizer</code> contract. We&rsquo;ll say more about this
+parameter in a future chapter.</p>
+
+<p>Minting also happens when a patron supports the market
+by making a payment into its reserve in <code>EtherToken</code>
+via <code>Reserve.support()</code>. We haven&rsquo;t said too much about
+patrons yet, but you can think of them as interested
+parties who want to help a data market grow and gather
+more data. Patrons may be driven by altruistic or
+economic considerations.  The <code>Reserve.support()</code>
+method provides the mechanism by which a patron can
+provide funds to support a market in return for
+<code>MarketToken</code>. The &ldquo;algorithmic price curve&rdquo; is the
+protocol mechanism which sets this exchange rate
+between the patron&rsquo;s funds and the minted <code>MarketToken</code>
+(see <code>Reserve.getSupportPrice()</code>.)</p>
+
+<p>The third case in which minting happens is when a
+datatrust reports that a listing has been queried (We haven&rsquo;t said too much about datatrusts yet. These are the parties which hold the actual data off-chain) via
+<code>Datatrust.listingAccessed()</code>. The minted tokens are
+awarded to the entity which contributed the listing in
+question. The actual mechanics of how many tokens are
+awarded is a little complicated in this case, so we&rsquo;ll
+punt on a thorough explanation till later.</p>
 
 <h2 id="burning">Burning</h2>
 
-<p>Burning happens in the scenarios explained below.</p>
+<p>What does it mean to burn tokens? Simply put, it&rsquo;s
+analogous to a share buyback. Suppose our company has
+100 share, 50 of which are owned by other people. If
+the company management buys out these other owners and
+tears up their share certificates, now there are only
+50 shares left. This is a burning operation.</p>
 
-<ul>
-<li>If a token holder divests from the data market
-(<code>Reserve.withdraw()</code>), their divested tokens are
-burned. The origin of the tokens being burned does not
-matter.</li>
-</ul>
+<p>Burning for <code>MarketToken</code> works similarly. There&rsquo;s only
+one mechanism for burning, the <code>Reserve.withdraw()</code>
+method. This allows any stakeholder (that is, any owner
+of <code>MarketToken</code>) to destroy their <code>MarketToken</code>. Why
+on earth would anyone do this? Well, it&rsquo;s like a
+buyback. Burning your tokens this way entitles you to a
+fraction of the funds under the data market&rsquo;s control
+(the <code>Reserve</code> we&rsquo;ve been seeing is basically a &ldquo;bank
+account&rdquo; of sorts that holds the data market&rsquo;s working
+capital). When you burn your tokens, you can withdraw
+the proportion of funds from the &ldquo;bank account&rdquo; that
+you are entitled to. This operation is interesting
+because there are no limits. Anyone call call this
+function at any time, which allows for interested
+parties to cash out at their wish. This lowers the risk
+for a potential patron or other data market
+participant, since they can always exit if they don&rsquo;t
+like the direction a data market is heading towards.</p>
+
+<h2 id="units">Units</h2>
+
+<p>The <code>MarketToken</code> is denominated in &ldquo;market wei&rdquo;. A wei
+is a unit borrowed from Ethereum. A wei is a
+billion-biollionth of an ETH (<code>1/10**18</code>). As with ETH,
+a &ldquo;market wei&rdquo; denominates <code>1/10**18</code> of a
+<code>MarketToken</code>. Using wei units throughout prevents
+rounding error propagation and keeps contracts simple.</p>
 
 <h2 id="comparing-with-token-curated-registries">Comparing with Token Curated Registries</h2>
 
@@ -221,6 +289,7 @@ token.</p>
 <ul>
 <li><a href="#minting">Minting</a></li>
 <li><a href="#burning">Burning</a></li>
+<li><a href="#units">Units</a></li>
 <li><a href="#comparing-with-token-curated-registries">Comparing with Token Curated Registries</a></li>
 </ul></li>
 </ul>
