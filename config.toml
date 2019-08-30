@@ -1,6 +1,6 @@
 baseURL = "https://computablelabs.github.io/compspec/"
 languageCode = "en-us"
-title = "Computable Spec"
+title = "The Computable Book"
 canonifyurls = true
 relativeURLs = true
 

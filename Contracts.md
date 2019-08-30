@@ -148,4 +148,11 @@ mean in detail).  Although Vyper is still beta
 software, we’ve found that it’s well written, well
 maintained and well suited to our efforts.
 
-[Next Chapter](../ethertoken/index.html)
+## Last Thoughts
+
+This chapter gave you a high level overview of all the
+Computable contracts. In the next chapter, we'll go
+much deeper on the first of these contracts, the
+`EtherToken`.
+
+<div style="text-align: right"> <a href="../../docs/ethertoken">Next Chapter</a> </div>
