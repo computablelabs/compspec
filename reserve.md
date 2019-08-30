@@ -240,14 +240,85 @@ def getSupportPrice() -> wei_value:
     return price_floor + ((spread * reserve * 1000000000) / (100 * total)) # NOTE the multiplier ONE_GWEI
 ```
 
-`Reserve.getSupportPrice()` reports the current
-`EtherToken`/`MarketToken` conversion rate.
-Mathematically, the idea is that the `support()` price
-will be slighly higher than the `withdraw()` price.
-Precisely, if `spread` is 110, then there will roughly
-be a 10% overhead. This ratio isn't quite precise due
-to the need to handle edge conditions on the price
-curve.
+This is the most complex function in the entire
+Computable smart contract system. The main reason for
+this complexity is that today's smart contract systems
+[don't support floating
+point](https://forum.computable.io/t/floating-point-support-for-smart-contracts/65).
+This means thata the basic math gets complicated. At
+heart, what we're trying to implement is a linear
+function. Think of this as
+
+```
+price_floor + spread * withdrawal_price
+```
+
+The actual equations abbove are considerably more
+complex. What gives? The first issue is units. Since we
+don't have floats, we have to perform computations in
+wei (recall a wei is a billion-billionth, or
+`1/10**18`). To make this work out,
+`Reserve.getSupportPrice()` reports the amount of
+`EtherToken` in wei needed to purchase a gwei ("giga
+wei", one-billionth, or `1/10**9`) of a `MarketToken`.
+Take a second and let your mind wrap around this. 
+
+The other complications here arise from the fact that
+we're performing integer division. What is the
+"withdrawal price" in this case? Well, we're purchasing
+a gwei of market token. How much from the reserve would
+that get us? Let's pretend we had floating point:
+
+
+```
+reserve / MarketToken.totalSupply())
+```
+
+Ok, not bad. There's an issue though. What are the
+units of this expression? Well, `reserve` is in
+`EtherToken` wei, and so is `MarketToken` wei. These
+cancel.  Our current expression is basically the amount
+of of `EtherToken` in gwei you could withdraw for one
+gwei of `MarketToken`. We need to multiply by `10**9`
+to get the amount in `EtherToken` wei. (Don't worry if
+this was confusing; getting unit math right is really
+tricky. It took us a number of tries before we derived
+the correct equation ourselves.)
+```
+(10**9 * reserve) /(MarketToken.totalSupply())
+```
+
+Let's add on that `price_floor`. It's just
+an additional term we add on.
+
+```
+price_floor + (10**9 * reserve) /(MarketToken.totalSupply())
+```
+
+Getting a little closer. Let's see if we can work that
+`spread` in. A spread is a percentage (think `110` or
+`150` for 110% or 150%). For a spread of `110`, we want
+to multiply by `1.1`. Or more generally, by
+`(spread/100)`. To deal with the lack of floats, we do
+this:
+
+```
+price_floor + (spread * reserve * 10**9) /(100 * MarketToken.totalSupply())
+```
+
+Ok, this matches one of the equations in the code above. There's one complication though. What if `MarketToken.totalSupply()` is 0? There would be a division by 0. We need some cutoff to prevent division by 0. For conceptual simplicity, we say that if `MarketToken.totalSupply()` is less than 1 whole `MarketToken`, we cap the size of the denominator to get the equation
+
+```
+price_floor + (spread * reserve * 10**9) /(100 * 10**18)
+```
+We've now succeeded in deriving the full form of the
+algorithmic price curve! You might've gotten lost in
+all this math. If so, don't sweat it too much. The
+basic intution is that the `Reserve.support()` price is
+designed to be slightly above the `Reserve.withdraw()`
+price at all times, with a small spread which is
+awarded to the reserve. The rest of this is technical
+detail.
 
 ## The future of the Reserve 
 
