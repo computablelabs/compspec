@@ -73,12 +73,13 @@ by making a payment into its reserve in `EtherToken`
 via `Reserve.support()`. We haven't said too much about
 patrons yet, but you can think of them as interested
 parties who want to help a data market grow and gather
-more data. Patrons may be driven by altruistic or
-economic considerations.  The `Reserve.support()`
-method provides the mechanism by which a patron can
-provide funds to support a market in return for
-`MarketToken`. The "algorithmic price curve" is the
-protocol mechanism which sets this exchange rate
+more data (you'll learn a lot more in a [future
+chapter](../reserve/index.html)). Patrons may be driven
+by altruistic or economic considerations.  The
+`Reserve.support()` method provides the mechanism by
+which a patron can provide funds to support a market in
+return for `MarketToken`. The "algorithmic price curve"
+is the protocol mechanism which sets this exchange rate
 between the patron's funds and the minted `MarketToken`
 (see `Reserve.getSupportPrice()`.)
 

@@ -242,6 +242,11 @@ obtain access to some listings. The datatrust will keep
 track of the on-chain state, and will not permit access
 to more listings than the buyer has paid for.
 
+There's a number of things in this code snippet we're
+not yet explaining in detail. You might wonder what
+this `self.reserve_address` is for example. You'll
+learn in the [next chapter](../reserve/index.html).
+
 ## Last Thoughts
 
 You might not have digested everything in this chapter.
