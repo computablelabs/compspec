@@ -1,13 +1,13 @@
-# The Computable Spec
+# The Computable Book
 
 This repo contains the documents that comprise the
-Computable spec.
+Computable book.
 
 Every document in the top level of the repo is part of
-the official spec, and is canon. 
+the official book, and is canon. 
 ### Viewing the spec
 
-*Recommended:* You can view the spec [here](https://computablelabs.github.io/compspec).
+*Recommended:* You can view the book [here](https://computablelabs.github.io/compspec).
 
 You can also view it locally by using [hugo](https://gohugo.io/).
 
@@ -21,12 +21,12 @@ the rendered output. It is much easier to read and use.
 
 ## Updates process for specs
 
-Specs are updated as new Computable Improvement
+The book contents are updated as new Computable Improvement
 Proposals (CIPs) are accepted and the Computable
 protocol is amended. For more details, check out the
 [CIP repo](https://github.com/computablelabs/CIPs)
 
-## Questions on the spec?
+## Questions on the book?
 
 Post a question on the
 [forums](https://forum.computable.io/). Or raise an
