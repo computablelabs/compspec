@@ -59,6 +59,11 @@
   </url>
   
   <url>
+    <loc>https://computablelabs.github.io/compspec/docs/libraries/</loc>
+    <priority>0</priority>
+  </url>
+  
+  <url>
     <loc>https://computablelabs.github.io/compspec/docs/listings/</loc>
     <priority>0</priority>
   </url>

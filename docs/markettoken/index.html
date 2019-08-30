@@ -14,7 +14,7 @@
     
     Markettoken
   
- | Computable Spec</title>
+ | The Computable Book</title>
 
 
 
@@ -39,7 +39,7 @@ https://github.com/alex-shpak/hugo-book
     <aside class="book-menu fixed">
       <nav>
 <h2 class="book-brand">
-  <a href="https://computablelabs.github.io/compspec/">Computable Spec</a>
+  <a href="https://computablelabs.github.io/compspec/">The Computable Book</a>
 </h2>
 
 
@@ -65,9 +65,10 @@ https://github.com/alex-shpak/hugo-book
 <li><a href="../../docs/reserve/">Reserve</a></li>
 <li><a href="../../docs/datatrust/">Datatrusts</a></li>
 <li><a href="../../docs/parameters/">Market Parameters</a></li>
-<li><a href="../../docs/capi/">The Computable API</a></li>
-<li><a href="../../docs/attacks/">Attacks</a></li>
+<li><a href="../../docs/capi/">CAPI</a></li>
+<li><a href="../../docs/libraries/">Developer Libraries</a></li>
 <li><a href="../../docs/userjourney/">User Journeys</a></li>
+<li><a href="../../docs/attacks/">Attacks</a></li>
 <li><a href="../../docs/continuing/">Continuing Your Journey</a></li>
 </ul>
 
@@ -184,12 +185,13 @@ by making a payment into its reserve in <code>EtherToken</code>
 via <code>Reserve.support()</code>. We haven&rsquo;t said too much about
 patrons yet, but you can think of them as interested
 parties who want to help a data market grow and gather
-more data. Patrons may be driven by altruistic or
-economic considerations.  The <code>Reserve.support()</code>
-method provides the mechanism by which a patron can
-provide funds to support a market in return for
-<code>MarketToken</code>. The &ldquo;algorithmic price curve&rdquo; is the
-protocol mechanism which sets this exchange rate
+more data (you&rsquo;ll learn a lot more in a <a href="../reserve/index.html">future
+chapter</a>). Patrons may be driven
+by altruistic or economic considerations.  The
+<code>Reserve.support()</code> method provides the mechanism by
+which a patron can provide funds to support a market in
+return for <code>MarketToken</code>. The &ldquo;algorithmic price curve&rdquo;
+is the protocol mechanism which sets this exchange rate
 between the patron&rsquo;s funds and the minted <code>MarketToken</code>
 (see <code>Reserve.getSupportPrice()</code>.)</p>
 
@@ -253,7 +255,16 @@ token curated registries tokens, which don&rsquo;t have a
 mechanism for minting and burning their associated
 token.</p>
 
-<p><a href="../voting/index.html">Next Chapter</a></p>
+<h2 id="last-thoughts">Last Thoughts</h2>
+
+<p>Now that you understand <code>EtherToken</code> and <code>MarketToken</code>
+better, it&rsquo;s time to start thinking about how these
+pieces fit together into the market. The first place to
+start is with <code>Voting</code>, which governs all important
+changes in the market. You&rsquo;ll learn more in the next
+chapter.</p>
+
+<div style="text-align: right"> <a href="../../docs/voting">Next Chapter</a> </div>
 </article>
 
       
@@ -291,6 +302,7 @@ token.</p>
 <li><a href="#burning">Burning</a></li>
 <li><a href="#units">Units</a></li>
 <li><a href="#comparing-with-token-curated-registries">Comparing with Token Curated Registries</a></li>
+<li><a href="#last-thoughts">Last Thoughts</a></li>
 </ul></li>
 </ul>
 </nav>

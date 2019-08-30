@@ -14,7 +14,7 @@
     
     Capi
   
- | Computable Spec</title>
+ | The Computable Book</title>
 
 
 
@@ -39,7 +39,7 @@ https://github.com/alex-shpak/hugo-book
     <aside class="book-menu fixed">
       <nav>
 <h2 class="book-brand">
-  <a href="https://computablelabs.github.io/compspec/">Computable Spec</a>
+  <a href="https://computablelabs.github.io/compspec/">The Computable Book</a>
 </h2>
 
 
@@ -65,9 +65,10 @@ https://github.com/alex-shpak/hugo-book
 <li><a href="../../docs/reserve/">Reserve</a></li>
 <li><a href="../../docs/datatrust/">Datatrusts</a></li>
 <li><a href="../../docs/parameters/">Market Parameters</a></li>
-<li><a href="../../docs/capi/">The Computable API</a></li>
-<li><a href="../../docs/attacks/">Attacks</a></li>
+<li><a href="../../docs/capi/">CAPI</a></li>
+<li><a href="../../docs/libraries/">Developer Libraries</a></li>
 <li><a href="../../docs/userjourney/">User Journeys</a></li>
+<li><a href="../../docs/attacks/">Attacks</a></li>
 <li><a href="../../docs/continuing/">Continuing Your Journey</a></li>
 </ul>
 
@@ -109,34 +110,67 @@ https://github.com/alex-shpak/hugo-book
       
 <article class="markdown">
 
-<h1 id="the-computable-api">The Computable API</h1>
+<h1 id="capi-the-computable-api">CAPI: The Computable API</h1>
 
 <p>We&rsquo;ve covered the core Computable contracts at some
 depth in the last few chapters. However, we haven&rsquo;t
-said too much detail about the datatrust. We&rsquo;ve
-mentioned briefly that the datatrust is a key-value
-store that holds data off-chain. What else is a
-datatrust responsible for doing? When is some piece of
-software a datatrust? In particular what are the
-external signals and messages thata datatrust must
-respond to?</p>
+said too much detail about the actual datatrust
+softare. We&rsquo;ll remedy that in this chapter.</p>
+
+<p>Let&rsquo;s start from first principles. A Datatrust is a
+system that is responsible for storing data off-chain.
+As we dicussed in the <a href="../listings/index.html">listings
+chapter</a>, a listing is uniquely
+identified by its <code>listingHash</code>. It makes sense that
+the datatrust should key its listing data by
+<code>listingHash</code>. This suggests that the core of a
+Datatrust is an off-chain key-value store that maps the
+<code>listingHash</code> for a listing to the actual listing data.
+Different implementations of a Datatrust can choose to
+use different software backends to implement this
+key-value store functionality.</p>
+
+<p>We&rsquo;ve mentioned briefly that the datatrust is a
+key-value store that holds data off-chain. What else is
+a datatrust responsible for doing? We saw a few of
+these responsibilities in the <a href="../datatrust/index.html">datatrust contract
+chapter</a>, but what else does a
+datatrust have to do? Or put more generally, when is
+some piece of software a datatrust? In particular what
+are the external signals and messages that a datatrust
+must respond to?</p>
 
 <p>The brief answer to these questions is that a datatrust
 is any piece of software which implements
 <a href="https://github.com/computablelabs/capi">CAPI</a> (the
 Computable API). Briefly, CAPI is a set of endpoints
 with associated functionality that must be implemented
-by a datatrust.</p>
+by a datatrust. In the remainder of this chapter, we&rsquo;ll discuss the endpoints that a datatrust must implement to be compliant with CAPI</p>
+
+<h2 id="listings-endpoint">Listings Endpoint</h2>
 
 <pre><code>/listings
 </code></pre>
+
+<h2 id="candidates-endpoint">Candidates Endpoint</h2>
 
 <pre><code>/candidates
 </code></pre>
 
 <p>TODO: Add more detail on CAPI as it&rsquo;s fleshed out.</p>
 
-<p><a href="../attacks/index.html">Next Chapter</a></p>
+<h2 id="last-thoughts">Last Thoughts</h2>
+
+<p>In this chapter, we covered CAPI, the protocol which
+governs the off-chain datatrust software. In the next
+chapter, you&rsquo;ll learn more about the API libraries that
+permit developers to talk to the on-chain smart
+contracts. In particular, we&rsquo;ll discuss <code>computable.py</code>
+and <code>computable.js</code>, the developer libraries we&rsquo;ve
+built to facilitate interactions with on-chain smart
+contracts.</p>
+
+<div style="text-align: right"> <a href="../../docs/libraries">Next Chapter</a> </div>
 </article>
 
       
@@ -168,7 +202,12 @@ by a datatrust.</p>
   <aside class="book-toc level-6 fixed">
     <nav id="TableOfContents">
 <ul>
-<li><a href="#the-computable-api">The Computable API</a></li>
+<li><a href="#capi-the-computable-api">CAPI: The Computable API</a>
+<ul>
+<li><a href="#listings-endpoint">Listings Endpoint</a></li>
+<li><a href="#candidates-endpoint">Candidates Endpoint</a></li>
+<li><a href="#last-thoughts">Last Thoughts</a></li>
+</ul></li>
 </ul>
 </nav>
   </aside>

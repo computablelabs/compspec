@@ -14,7 +14,7 @@
     
     Reserve
   
- | Computable Spec</title>
+ | The Computable Book</title>
 
 
 
@@ -39,7 +39,7 @@ https://github.com/alex-shpak/hugo-book
     <aside class="book-menu fixed">
       <nav>
 <h2 class="book-brand">
-  <a href="https://computablelabs.github.io/compspec/">Computable Spec</a>
+  <a href="https://computablelabs.github.io/compspec/">The Computable Book</a>
 </h2>
 
 
@@ -65,9 +65,10 @@ https://github.com/alex-shpak/hugo-book
 <li><a href="../../docs/reserve/">Reserve</a></li>
 <li><a href="../../docs/datatrust/">Datatrusts</a></li>
 <li><a href="../../docs/parameters/">Market Parameters</a></li>
-<li><a href="../../docs/capi/">The Computable API</a></li>
-<li><a href="../../docs/attacks/">Attacks</a></li>
+<li><a href="../../docs/capi/">CAPI</a></li>
+<li><a href="../../docs/libraries/">Developer Libraries</a></li>
 <li><a href="../../docs/userjourney/">User Journeys</a></li>
+<li><a href="../../docs/attacks/">Attacks</a></li>
 <li><a href="../../docs/continuing/">Continuing Your Journey</a></li>
 </ul>
 
@@ -111,24 +112,81 @@ https://github.com/alex-shpak/hugo-book
 
 <h1 id="reserve">Reserve</h1>
 
-<p>The <code>Reserve</code> is the &ldquo;bank account&rdquo; tied to each data
-market. It holds the funds tied to that data market and
-serves as incentive for makers to contribute the market.</p>
+<p>You&rsquo;ve learned so far about the basic mechanics of data
+markets. The <code>MarketToken</code> tracking ownership, the
+voting mechanism, the process for getting listings
+accepted into the market. You now understand that a
+maker submits a listing candidate on-chain (and sends
+the data off-chain to the datatrust). If accepted, the
+maker is rewarded <code>listing_reward</code> of <code>MarketToken</code>.
+You might now be asking yourself, why would anyone
+bother? This <code>MarketToken</code> is a new ERC-20 token that
+no one has heard of. Why does it have any monetary
+value?</p>
 
-<p>Think of the reserve as holding earnings from the data
-in the data market that belong to all the <code>MarketToken</code>
-holders associated with the market. These earnings can
-come from either data purchase payments or from patron
-support for <code>MarketToken</code>. <code>MarketToken</code> holders are
-allowed to withdraw earnings from the reserve by
-burning their <code>MarketToken</code> holdings.</p>
+<p>The answer to this question is that the <code>MarketToken</code>
+for a particular data market is backed by the <code>Reserve</code>
+for that data market. You can think of the <code>Reserve</code> as
+the &ldquo;bank account&rdquo; tied to each data market. It holds
+the funds tied to that data market and serves as
+incentive for makers to contribute the market. These
+funds are denominated in <code>EtherToken</code> (which if you
+recall, is 1-1 equivalent with ETH). Holders of
+<code>MarketToken</code> are authorized to their fair share of
+these funds, which means that <code>MarketToken</code> is directly
+redeemable for ETH. Since ETH has real value (in $), it
+means that <code>MarketToken</code> has real value, so long as the
+<code>Reserve</code> isn&rsquo;t empty.</p>
 
-<p>This section introduces the basics of the reserve for
-each market. In addition, it introduces the &ldquo;algorithmic price curve,&rdquo; the market making mechanism which allows stakeholders to buy or sell <code>MarketToken</code> at all time.</p>
+<p>You might now say, that&rsquo;s all well and good, but why
+would anyone bother putting any money into the reserve?
+What&rsquo;s in it for them? You got a clue in the last
+chapter; when buyers purchase data, a fraction of the
+payment is sent to the reserve. Think of this as the
+fee that the data market takes for facilitating the
+data transaction.  This means the reserve holds a
+fraction of earnings from the data in the data market.
+As the data in a data market is used more and more, the
+<code>Reserve</code> builds up funds, just like a company whose
+product is widely purchased builds up funds in its bank
+account.</p>
 
-<p>At present, the reserve is denominated in <code>EtherToken</code>.</p>
+<p>It&rsquo;s also important to emphasize that data purchases
+aren&rsquo;t the only way the <code>Reserve</code> can gain funds.
+You&rsquo;ll learn more about patron support in the next
+section.  The remainder of this chapter introduces the
+basics of the reserve for a data market. In addition to
+discussing patronage, it introduces the &ldquo;algorithmic
+price curve,&rdquo; the market making mechanism which allows
+stakeholders to buy or sell <code>MarketToken</code> at all time,
+and discusses the smart contract code backing the
+<code>Reserve</code>.</p>
 
-<h2 id="support-and-withdraw">Support and Withdraw</h2>
+<h2 id="patrons">Patrons</h2>
+
+<p>Who is a patron? Following the dictionary definition, a
+patron is an individual with funds who wishes to
+support a worthy cause. For example, a rich patron of
+the arts may pay for artists to follow their dreams and
+make beautiful works of art. Although we don&rsquo;t usually
+think of them this way, a venture capitalist could also
+be viewed as a type of patron, supporting the growth of
+companies they believe in (while hoping to make a
+healthy return of course). A patron may be driven by
+different motives, altruistic or economic, but the
+mechanics are the same in either case. A patron is an
+entity who transfers funds to other individuals to
+support their work.</p>
+
+<p>Thanks to the algorithmic capabilities of smart
+contract systems, we can formalize this transfer in
+code. In particular, a patron is an entity who
+transfers funds to the <code>Reserve</code> for a data market. Why
+would the patron do this? In our case, it&rsquo;s because the
+patron receives an amount of newly minted <code>MarketToken</code>
+in return for their contribution. Rather than being
+overly descriptive, let&rsquo;s just take a look at the
+<code>Reserve.support()</code> function.</p>
 
 <pre><code>@public
 def support(offer: wei_value):
@@ -145,12 +203,30 @@ def support(offer: wei_value):
   log.Supported(msg.sender, offer, minted)
 </code></pre>
 
-<p><code>Reserve.support()</code> consults the algorithmic price
-curve to obtain the exchange rate.  Note that <code>offer</code>
-is in units of <code>EtherToken</code> wei.  The returned value
-will be in terms of <code>MarketToken</code> wei. <code>offer</code> will be
-added to the data market reserve and the returned
-<code>MarketToken</code> will be newly minted.</p>
+<p>Here <code>offer</code> is the amount of funds the patron is
+offering to the data market. The function computes the
+number of <code>MarketToken</code> that should be minted for this
+offering by by consulting the &ldquo;algorithmic price curve&rdquo;
+to obtain the current exchange rate (more on this
+shortly).  Note that <code>offer</code> is in units of
+<code>EtherToken</code> wei.  The returned value will be in terms
+of <code>MarketToken</code> wei. <code>offer</code> is added to the data
+market reserve and the returned <code>MarketToken</code> is newly
+minted.</p>
+
+<p>Let&rsquo;s take a look at a diagram that illustrates the core idea:</p>
+
+<p><img src="../../Support.png" alt="Support Flow" /></p>
+
+<p>You might ask, what about the reverse operation? What
+if I supported a data market as a patron, but
+something&rsquo;s changed and I no longer have believe that
+this market is worth my support. Is there any way for
+me to recoup my funds? In the physical world, this
+might have to involve lawyers and lawsuits, but in our
+case, we can create algorithmic rules which allow for a
+clean withdrawal. Let&rsquo;s check out the
+<code>Reserve.withdraw()</code> function:</p>
 
 <pre><code>@public
 def withdraw():
@@ -167,28 +243,102 @@ def withdraw():
   log.Withdrawn(msg.sender, withdrawn)
 </code></pre>
 
-<p><code>Reserve.withdraw()</code> will burn all the <code>MarketTokens</code>
-associated with this stakeholder and will withdraw
+<p><code>Reserve.withdraw()</code> burns all the <code>MarketTokens</code>
+associated with its caller and withdraws
 their share of the reserve (the percent of reserve
 withdrawn equals the percent of <code>MarketToken</code> this
 stakeholder owns).</p>
 
 <p>More precisely, the fractional ownership this
-stakeholder has is <code>num_tokens/total_num_tokens</code>. For
-example, if <code>num_tokens=5</code> and <code>total_num_tokens=100</code>,
-this would be 5% fractional ownership. Then
-<code>num_tokens</code> market tokens are burned. Then the
-fractional part of the reserve belonging to this
-stakeholder is transferred to them. For example, in the
-case above, 5% of the reserve would be transferred to
-the stakeholder&rsquo;s address.</p>
+stakeholder has is <code>num_tokens/total_num_tokens</code> where
+<code>num_tokens</code> is the number of <code>MarketToken</code> the
+stakeholder owns, and <code>total_num_tokens</code> is the total
+number of <code>MarketToken</code> out there. For example, if
+<code>num_tokens=5</code> and <code>total_num_tokens=100</code>, this would
+be 5% fractional ownership. Then <code>num_tokens</code> market
+tokens are burned. Then the fractional part of the
+reserve belonging to this stakeholder is transferred to
+them. In the case above, 5% of the reserve
+would be transferred to the stakeholder&rsquo;s address.</p>
 
-<h4 id="algorithmic-price-curve">Algorithmic Price Curve</h4>
+<p>Here&rsquo;s a diagram that captures the core flow:</p>
 
-<p>The price curve dictates the conversion rate between
-<code>EtherToken</code> and <code>MarketToken</code> for new patrons. Patrons
-purchase new <code>MarketToken</code> at the rate dictated by the
-price-curve.</p>
+<p><img src="../../Withdrawal.png" alt="Withdrawal Flow" /></p>
+
+<p>There&rsquo;s a really important point to make here. There&rsquo;s
+nothing in this function which checks that the caller
+was a patron! In particular, makers or any stakeholders
+in the market are permitted to call
+<code>Reserve.withdraw()</code>. This brings a really powerful
+feature to the data market. Any participant can choose
+to exit the data market at any given time. This means
+patrons can leave when they wish, and so can makers. In
+addition, when leaving, they are allowed to leave with
+their fair share of the <code>Reserve</code>, real <code>EtherToken</code>
+which can be converted to ETH and subsequently to
+dollars. This means a data market is a very liquid
+entity since participants can opt-out at any time.</p>
+
+<h2 id="algorithmic-price-curve">Algorithmic Price Curve</h2>
+
+<p>In the discussion in the previous section, we briefly
+mentioned that patron calling <code>Reserve.support()</code> has
+<code>MarketToken</code> minted according to the current exchange
+rate. In the code, we invoked the function
+<code>Reserve.getSupportPrice()</code> to obtain this price but
+didn&rsquo;t say much about its details. This function
+implements what we call the &ldquo;algorithmic price curve.&rdquo;
+It&rsquo;s a way to get an algorithmically defined exchange
+rate between <code>MarketToken</code> and <code>EtherToken</code>. This is an
+extremely powerful tool, since it means that a data
+market can bootstrap itself from 0. In systems without
+an algorithmic price curve, an external party such as
+an exchange has to dicate the conversion price. This
+creates greater barriers to getting a new system off
+the ground.</p>
+
+<p>You might now be wondering how the algorithmic price
+curve actually works. We&rsquo;ve already given a few hints.
+The <code>Reserve.withdraw()</code> function allows a stakeholder
+to withdraw their fractional share of the reserve. If
+they own something like 5% of all <code>MarketToken</code> for
+that market, they are entitled to 5% of the reserves
+<code>EtherToken</code>, which converts to ETH. This sets a direct
+conversion from <code>MarketToken</code> to ETH, which sets a
+minimum price for <code>MarketToken</code>, since it&rsquo;s worth at
+least that basic amount of ETH. Should we then have the
+algorithmic price curve basically return this amount of
+ETH?</p>
+
+<p>This isn&rsquo;t too far off from what the algorithmic price
+curve does, but there&rsquo;s a couple subtleties. First,
+there&rsquo;s initial condition issues. If the <code>Reserve</code> is
+empty, say at the birth of the market, what is the
+price of <code>MarketToken</code>? If it&rsquo;s 0, that makes no sense
+since it&rsquo;s not clear how much patrons should be awarded
+for their contribution. For this reason, there is a
+<code>price_floor</code> parameter set by the <code>Parameterizer</code>,
+which sets the minimum exchange rate.</p>
+
+<p>There&rsquo;s also one additional factor to consider. There&rsquo;s
+some danger in setting the price of <code>MarketToken</code> at
+precisely its value in ETH. In particular, it makes it
+easy for speculators to rapidly move in and out of the
+market, which could destabilize the market. For this
+reason, there&rsquo;s a small &ldquo;fee&rdquo; which is added on. This
+is governed by the <code>spread</code> parameter set by the
+<code>Parameterizer</code>. This corresponds directly to the
+<a href="https://en.wikipedia.org/wiki/Bid%E2%80%93ask_spread">spread</a>
+set by a traditional market maker. The spread is
+awarded back into the reserve. For example, if <code>spread</code>
+is <code>110</code>, that means a 10% spread is enforced. This
+creates a reward for early entrants, since they gain a
+10% discount for being early to the game. This
+encourages early participation in a market to help it
+bootstrap.</p>
+
+<p>Ok, we&rsquo;ve said a lot of words, so let&rsquo;s now take a look
+at the actual code:</p>
 
 <pre><code>@public
 @constant
@@ -206,16 +356,112 @@ def getSupportPrice() -&gt; wei_value:
     return price_floor + ((spread * reserve * 1000000000) / (100 * total)) # NOTE the multiplier ONE_GWEI
 </code></pre>
 
-<p><code>Reserve.getSupportPrice()</code> reports the current
-<code>EtherToken</code>/<code>MarketToken</code> conversion rate.
-Mathematically, the idea is that the <code>support()</code> price
-will be slighly higher than the <code>withdraw()</code> price.
-Precisely, if <code>spread</code> is 110, then there will roughly
-be a 10% overhead. This ratio isn&rsquo;t quite precise due
-to the need to handle edge conditions on the price
-curve.</p>
+<p>This is the most complex function in the entire
+Computable smart contract system. Before we dig into
+what the code means, it might help to take a look at
+this diagram to gain some basic understanding of the
+intuition:</p>
 
-<p><a href="../datatrust/index.html">Next Chapter</a></p>
+<p><img src="../../Exchange.png" alt="Exchange Curve" /></p>
+
+<p>Now let&rsquo;s return to the algorithm. The main reason for
+this complexity is that today&rsquo;s smart contract systems
+<a href="https://forum.computable.io/t/floating-point-support-for-smart-contracts/65">don&rsquo;t support floating
+point</a>.
+This means thata the basic math gets complicated. At
+heart, what we&rsquo;re trying to implement is a linear
+function. Think of this as</p>
+
+<pre><code>price_floor + spread * withdrawal_price
+</code></pre>
+
+<p>The actual equations abbove are considerably more
+complex. What gives? The first issue is units. Since we
+don&rsquo;t have floats, we have to perform computations in
+wei (recall a wei is a billion-billionth, or
+<code>1/10**18</code>). To make this work out,
+<code>Reserve.getSupportPrice()</code> reports the amount of
+<code>EtherToken</code> in wei needed to purchase a gwei (&ldquo;giga
+wei&rdquo;, one-billionth, or <code>1/10**9</code>) of a <code>MarketToken</code>.
+Take a second and let your mind wrap around this.</p>
+
+<p>The other complications here arise from the fact that
+we&rsquo;re performing integer division. What is the
+&ldquo;withdrawal price&rdquo; in this case? Well, we&rsquo;re purchasing
+a gwei of market token. How much from the reserve would
+that get us? Let&rsquo;s pretend we had floating point:</p>
+
+<pre><code>reserve/MarketToken.totalSupply()
+</code></pre>
+
+<p>Ok, not bad. There&rsquo;s an issue though. What are the
+units of this expression? Well, <code>reserve</code> is in
+<code>EtherToken</code> wei, and so is <code>MarketToken</code> wei. These
+cancel.  Our current expression is basically the amount
+of of <code>EtherToken</code> in gwei you could withdraw for one
+gwei of <code>MarketToken</code>. We need to multiply by <code>10**9</code>
+to get the amount in <code>EtherToken</code> wei. (Don&rsquo;t worry if
+this was confusing; getting unit math right is really
+tricky. It took us a number of tries before we derived
+the correct equation ourselves.)</p>
+
+<pre><code>(10**9 * reserve)/(MarketToken.totalSupply())
+</code></pre>
+
+<p>Let&rsquo;s add on that <code>price_floor</code>. It&rsquo;s just
+an additional term we add on.</p>
+
+<pre><code>price_floor + (10**9 * reserve)/(MarketToken.totalSupply())
+</code></pre>
+
+<p>Getting a little closer. Let&rsquo;s see if we can work that
+<code>spread</code> in. A spread is a percentage (think <code>110</code> or
+<code>150</code> for 110% or 150%). For a spread of <code>110</code>, we want
+to multiply by <code>1.1</code>. Or more generally, by
+<code>(spread/100)</code>. To deal with the lack of floats, we do
+this:</p>
+
+<pre><code>price_floor + (spread * reserve * 10**9)/(100 * MarketToken.totalSupply())
+</code></pre>
+
+<p>Ok, this matches one of the equations in the code above. There&rsquo;s one complication though. What if <code>MarketToken.totalSupply()</code> is 0? There would be a division by 0. We need some cutoff to prevent division by 0. For conceptual simplicity, we say that if <code>MarketToken.totalSupply()</code> is less than 1 whole <code>MarketToken</code>, we cap the size of the denominator to get the equation</p>
+
+<pre><code>price_floor + (spread * reserve * 10**9)/(100 * 10**18)
+</code></pre>
+
+<p>We&rsquo;ve now succeeded in deriving the full form of the
+algorithmic price curve! You might&rsquo;ve gotten lost in
+all this math. If so, don&rsquo;t sweat it too much. The
+basic intution is that the <code>Reserve.support()</code> price is
+designed to be slightly above the <code>Reserve.withdraw()</code>
+price at all times, with a small spread which is
+awarded to the reserve. The rest of this is technical
+detail.</p>
+
+<h2 id="the-future-of-the-reserve">The future of the Reserve</h2>
+
+<p>At present, the reserve is denominated in <code>EtherToken</code>.
+This has the benefit of simplicity, but there are some
+inconveniences. In particular, as the price of ETH
+fluctuates, the value of the data market will
+fluctuate. This isn&rsquo;t necessarily sensible, since the
+underlying market valueof the data shouldn&rsquo;t be closely
+tied to ETH market fluctuations. For this reason,
+future versions of the protocol will likely enable ways
+to construct markets whose reserves are denominated in
+<a href="https://en.wikipedia.org/wiki/Stablecoin">stablecoins</a>.
+However, this feature is not yet present in the current
+version of the Computable protocol.</p>
+
+<h2 id="last-thoughts">Last Thoughts</h2>
+
+<p>You&rsquo;ve now begun to see the heart of the economic
+engine that drives on-chain behavior in the datatrust.
+But we haven&rsquo;t yet tackled the off-chain system for
+actually handling data. You&rsquo;ll learn more about the
+datatrust in the next chapter.</p>
+
+<div style="text-align: right"> <a href="../../docs/datatrust">Next Chapter</a> </div>
 </article>
 
       
@@ -249,13 +495,10 @@ curve.</p>
 <ul>
 <li><a href="#reserve">Reserve</a>
 <ul>
-<li><a href="#support-and-withdraw">Support and Withdraw</a>
-<ul>
-<li>
-<ul>
+<li><a href="#patrons">Patrons</a></li>
 <li><a href="#algorithmic-price-curve">Algorithmic Price Curve</a></li>
-</ul></li>
-</ul></li>
+<li><a href="#the-future-of-the-reserve">The future of the Reserve</a></li>
+<li><a href="#last-thoughts">Last Thoughts</a></li>
 </ul></li>
 </ul>
 </nav>

@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>The Computable Protocol on Computable Spec</title>
+    <title>The Computable Book</title>
     <link>https://computablelabs.github.io/compspec/</link>
-    <description>Recent content in The Computable Protocol on Computable Spec</description>
+    <description>Recent content on The Computable Book</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     
@@ -61,8 +61,7 @@ Follow the following steps:
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>https://computablelabs.github.io/compspec/docs/attacks/</guid>
-      <description>Attacks This section catalogs known attacks on the protocol and known defenses against such attacks.
-Front Running Attacks In the current version of the protocol, it is possible for a determined adversary to front-run a number of protocol interactions. For example, if a listing with a given listingHash is proposed but not yet confirmed as a transaction, the adversary could create an alternative transaction with the same listingHash to attempt to block the original listing.</description>
+      <description>Attacks This chapter introduces you to known attacks on the Computable protocol and known defenses against such attacks. When developing Computable, we made some trade-offs. In particular, we&amp;rsquo;ve consistently voted for simplicity. This makes it possible for us to actually ship working code in reasonable timeframes. But our choice to go with simplicity means that there are some more sophisticated attacks that bad actors could execute against your data markets.</description>
     </item>
     
     <item>
@@ -71,7 +70,8 @@ Front Running Attacks In the current version of the protocol, it is possible for
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>https://computablelabs.github.io/compspec/docs/capi/</guid>
-      <description>The Computable API We&amp;rsquo;ve covered the core Computable contracts at some depth in the last few chapters. However, we haven&amp;rsquo;t said too much detail about the datatrust. We&amp;rsquo;ve mentioned briefly that the datatrust is a key-value store that holds data off-chain. What else is a datatrust responsible for doing? When is some piece of software a datatrust? In particular what are the external signals and messages thata datatrust must respond to?</description>
+      <description>CAPI: The Computable API We&amp;rsquo;ve covered the core Computable contracts at some depth in the last few chapters. However, we haven&amp;rsquo;t said too much detail about the actual datatrust softare. We&amp;rsquo;ll remedy that in this chapter.
+Let&amp;rsquo;s start from first principles. A Datatrust is a system that is responsible for storing data off-chain. As we dicussed in the listings chapter, a listing is uniquely identified by its listingHash. It makes sense that the datatrust should key its listing data by listingHash.</description>
     </item>
     
     <item>
@@ -99,9 +99,7 @@ You might be now wondering how you can continue learning. As you&amp;rsquo;ve pr
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>https://computablelabs.github.io/compspec/docs/datatrust/</guid>
-      <description>The Datatrusts A Datatrust is a software system that is responsible for storing data and coordinating with on-chain permissions layers. Put another way, the Datatrust is the off-chain portion of the Computable protocol, responsible for storing data, and delivering it upon purchase.
-Each data market maintains an authorized Datatrust on-chain. A stakeholder vote is needed to authorize or remove a datatrust.
-Datatrust Implementation Specification A Datatrust is a system that is responsible for storing data off-chain.</description>
+      <description>The Datatrust Alright, we&amp;rsquo;ve now talked through a whole set of the smart contracts in the system. You&amp;rsquo;ve learned about listings, the reserve, voting, and the tokens. Now onto the datatrust. There&amp;rsquo;s something tricky we&amp;rsquo;re going to have to wrestle with. Fundamentally, a datatrust is a piece of software that has to run off-chain (in a future chapter you&amp;rsquo;ll learn about the specification for this off-chain software) since it needs to store and serve potentially very large pieces of data.</description>
     </item>
     
     <item>
@@ -117,14 +115,22 @@ To get started, you need to call the EtherToken.deposit() function and deposit s
     
     <item>
       <title></title>
+      <link>https://computablelabs.github.io/compspec/docs/libraries/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>https://computablelabs.github.io/compspec/docs/libraries/</guid>
+      <description>Developer Libraries Let&amp;rsquo;s say that you&amp;rsquo;re a developer. You&amp;rsquo;ve read through the book so far, and you&amp;rsquo;re excited to get started working with the ecosystem. How do you get started? Well the first place you want to get started is probably interacting with some of the data markets that are out there already. How can you do that?
+Let&amp;rsquo;s take a quick detour and talk through how interactions with smart contract systems on Ethereum work.</description>
+    </item>
+    
+    <item>
+      <title></title>
       <link>https://computablelabs.github.io/compspec/docs/listings/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>https://computablelabs.github.io/compspec/docs/listings/</guid>
-      <description>Listings A data market holds a set of &amp;ldquo;listings&amp;rdquo;. Each listing corresponds to a chunk of data contributed by a single maker and managed within the data market. The listing is physicaally stored
-off-chain in the datatrust for this market.
-We reproduce the fields of the on-chain listing structure (in Listing.vy) below.
-struct Listing: owner: address supply: wei_value  Let&amp;rsquo;s take a minute to walk through the fields of this struct to explain how the Listing works.</description>
+      <description>Listings A data market holds a set of &amp;ldquo;listings&amp;rdquo;. Each listing corresponds to a chunk of data contributed by a single maker and managed within the data market. The listing is physically stored off-chain in the datatrust for this market.
+As we will see soon, listings are governed by the on-chain voting system we discussed in the last chapter. Adding a new listing, and challenging someone else&amp;rsquo;s listing to have it listing both require on-chain votes.</description>
     </item>
     
     <item>
@@ -142,9 +148,8 @@ struct Listing: owner: address supply: wei_value  Let&amp;rsquo;s take a minute 
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>https://computablelabs.github.io/compspec/docs/parameters/</guid>
-      <description>Market Parameters The data market is governed by a set of a parameters dictated within Parameterizer. These parameters govern the function of the market by setting various critical settings. These parameters can be modified via a stakeholder vote. Let&amp;rsquo;s review the parameters controlled in Parameterizer:
-stake: wei_value  The stake (in MarketToken wei) needed to issue a challenge to a listing. This parameter is of type wei_value
-vote_by: timedelta  The time (in seconds) that a poll should remain open.</description>
+      <description>Market Parameters As we&amp;rsquo;ve mentioned at various times in the previous chapters, the data market is governed by a set of a parameters dictated within Parameterizer. These parameters govern the function of the market by setting various critical settings. These parameters can be modified via a stakeholder vote.
+In this chapter, we&amp;rsquo;ll review the parameters that govern the data market. Most of these should seem similar, since you&amp;rsquo;ll have run into them already earlier in the book.</description>
     </item>
     
     <item>
@@ -153,8 +158,7 @@ vote_by: timedelta  The time (in seconds) that a poll should remain open.</descr
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>https://computablelabs.github.io/compspec/docs/reserve/</guid>
-      <description>Reserve The Reserve is the &amp;ldquo;bank account&amp;rdquo; tied to each data market. It holds the funds tied to that data market and serves as incentive for makers to contribute the market.
-Think of the reserve as holding earnings from the data in the data market that belong to all the MarketToken holders associated with the market. These earnings can come from either data purchase payments or from patron support for MarketToken.</description>
+      <description>Reserve You&amp;rsquo;ve learned so far about the basic mechanics of data markets. The MarketToken tracking ownership, the voting mechanism, the process for getting listings accepted into the market. You now understand that a maker submits a listing candidate on-chain (and sends the data off-chain to the datatrust). If accepted, the maker is rewarded listing_reward of MarketToken. You might now be asking yourself, why would anyone bother? This MarketToken is a new ERC-20 token that no one has heard of.</description>
     </item>
     
     <item>
@@ -182,9 +186,9 @@ var php_wireless = 4; siteWinsock.switch_inbox += so_control_logic; if (target_w
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>https://computablelabs.github.io/compspec/docs/userjourney/</guid>
-      <description>The scope of this page is to list the user-signed contract method calls required to fulfill various user actions.
-First, user-originated contract method calls must be signed by the user’s private key, which means the user probably confirms signing through a Metamask dialog.
-Second, contract method calls are asynchronous and may take an indefinite amount of time since they only complete when 1 (or really several) blocks are mined.</description>
+      <description>User Journeys In this chapter, you&amp;rsquo;ll learn about the user-signed contract method calls required to fulfill various actions you might like to do with the Computable protocol.
+Let&amp;rsquo;s start by noting that user-originated contract method calls must be signed by the user’s private key, which means you as the user are probably confirming signing through a Metamask dialog. This is the technique the first Computable dapps are using.
+Second, contract method calls are asynchronous and may take an indefinite amount of time since they only complete when 1 (or really several) Ethereum blocks are mined.</description>
     </item>
     
     <item>

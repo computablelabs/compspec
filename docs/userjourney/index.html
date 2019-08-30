@@ -14,7 +14,7 @@
     
     Userjourney
   
- | Computable Spec</title>
+ | The Computable Book</title>
 
 
 
@@ -39,7 +39,7 @@ https://github.com/alex-shpak/hugo-book
     <aside class="book-menu fixed">
       <nav>
 <h2 class="book-brand">
-  <a href="https://computablelabs.github.io/compspec/">Computable Spec</a>
+  <a href="https://computablelabs.github.io/compspec/">The Computable Book</a>
 </h2>
 
 
@@ -65,9 +65,10 @@ https://github.com/alex-shpak/hugo-book
 <li><a href="../../docs/reserve/">Reserve</a></li>
 <li><a href="../../docs/datatrust/">Datatrusts</a></li>
 <li><a href="../../docs/parameters/">Market Parameters</a></li>
-<li><a href="../../docs/capi/">The Computable API</a></li>
-<li><a href="../../docs/attacks/">Attacks</a></li>
+<li><a href="../../docs/capi/">CAPI</a></li>
+<li><a href="../../docs/libraries/">Developer Libraries</a></li>
 <li><a href="../../docs/userjourney/">User Journeys</a></li>
+<li><a href="../../docs/attacks/">Attacks</a></li>
 <li><a href="../../docs/continuing/">Continuing Your Journey</a></li>
 </ul>
 
@@ -109,22 +110,25 @@ https://github.com/alex-shpak/hugo-book
       
 <article class="markdown">
 
-<p>The scope of this page is to list the user-signed
-contract method calls required to fulfill various user
-actions.</p>
+<h1 id="user-journeys">User Journeys</h1>
 
-<p>First, user-originated contract method calls must be
-signed by the user’s private key, which means the user
-probably confirms signing through a Metamask dialog.</p>
+<p>In this chapter, you&rsquo;ll learn about the user-signed
+contract method calls required to fulfill various
+actions you might like to do with the Computable protocol.</p>
 
-<p>Second, contract method calls are asynchronous and may take an indefinite amount of time since they only complete when 1 (or really several) blocks are mined.</p>
+<p>Let&rsquo;s start by noting that user-originated contract
+method calls must be signed by the user’s private key,
+which means you as the user are probably confirming
+signing through a Metamask dialog. This is the
+technique the first Computable dapps are using.</p>
 
-<p>Actions and contract method calls made by Datatrust are
-mentioned here, but the exact sequence of client,
-protocol, and Datatrust actions is beyond scope of this
-doc.</p>
+<p>Second, contract method calls are asynchronous and may
+take an indefinite amount of time since they only
+complete when 1 (or really several) Ethereum blocks are mined. As you&rsquo;ll see in the <a href="../attacks/index.html">next chapter</a>, this can make a difference for security.</p>
 
 <h2 id="apply-for-a-listing">Apply for a Listing</h2>
+
+<p>Here&rsquo;s the sequence of actions that happens upon listing application:</p>
 
 <ul>
 <li><code>Listing.list</code>: Apply for a listing. Voting happens
@@ -134,9 +138,13 @@ Listing.resolveApplication and listing is ready to be
 used.</li>
 </ul>
 
-<p>After resolution, the applicant may claim the listing reward (see Withdraw Support from a Market).</p>
+<p>After resolution, the applicant may claim the listing
+reward (see Withdraw Support from a Market).</p>
 
 <h2 id="support-a-market">Support a Market</h2>
+
+<p>Here&rsquo;s the sequence of actions a patron takes to
+support a data market:</p>
 
 <ul>
 <li><p><code>EtherToken.deposit</code>: Wrap ETH into an ERC20 compatible token so that contracts can manipulate it.</p></li>
@@ -153,7 +161,7 @@ change.</p></li>
 
 <p>Assume user has <code>MarketToken</code>. Note this flow applies
 regardless of how <code>MarketToken</code> was acquired. User may
-have supported the market with Eth or acquired by
+have supported the market with ETh or acquired by
 creating a listing.</p>
 
 <ul>
@@ -171,7 +179,9 @@ Eth.</p></li>
 
 <h2 id="vote-on-a-listing-candidate-or-listing-challenge">Vote on a Listing Candidate or Listing Challenge</h2>
 
-<p>Assume user has enough MarketToken to stake a vote, and there is a listing to vote on. TODO: is this same process for other votes like electing a DataTrust?</p>
+<p>Assume user has enough MarketToken to stake a vote, and
+there is a listing to vote on. TODO: is this same
+process for other votes like electing a DataTrust?</p>
 
 <ul>
 <li><p><code>Voting.vote</code>: Supply ‘yeah’ or ‘nay’ vote as an
@@ -220,7 +230,15 @@ Datatrust delivers listing data to client and calls
 
 <p>TODO, Other Governance Actions like reparameterize, elect DataTrust, etc</p>
 
-<p><a href="../continuing/index.html">Next Chapter</a></p>
+<h2 id="last-thoughts">Last Thoughts</h2>
+
+<p>Now that you have an understanding of the Computable
+developer ecosystem, tools and flows, you should gain an
+understanding of the security threats that face the
+Computable ecosystem. Crypto always brings risks as
+you&rsquo;ll learn in the next chapter.</p>
+
+<div style="text-align: right"> <a href="../../docs/attacks">Next Chapter</a> </div>
 </article>
 
       
@@ -252,7 +270,7 @@ Datatrust delivers listing data to client and calls
   <aside class="book-toc level-6 fixed">
     <nav id="TableOfContents">
 <ul>
-<li>
+<li><a href="#user-journeys">User Journeys</a>
 <ul>
 <li><a href="#apply-for-a-listing">Apply for a Listing</a></li>
 <li><a href="#support-a-market">Support a Market</a></li>
@@ -260,6 +278,7 @@ Datatrust delivers listing data to client and calls
 <li><a href="#vote-on-a-listing-candidate-or-listing-challenge">Vote on a Listing Candidate or Listing Challenge</a></li>
 <li><a href="#challenge-listing">Challenge Listing</a></li>
 <li><a href="#buy-access-to-a-listing">Buy Access to a Listing</a></li>
+<li><a href="#last-thoughts">Last Thoughts</a></li>
 </ul></li>
 </ul>
 </nav>

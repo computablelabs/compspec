@@ -14,7 +14,7 @@
     
     Attacks
   
- | Computable Spec</title>
+ | The Computable Book</title>
 
 
 
@@ -39,7 +39,7 @@ https://github.com/alex-shpak/hugo-book
     <aside class="book-menu fixed">
       <nav>
 <h2 class="book-brand">
-  <a href="https://computablelabs.github.io/compspec/">Computable Spec</a>
+  <a href="https://computablelabs.github.io/compspec/">The Computable Book</a>
 </h2>
 
 
@@ -65,9 +65,10 @@ https://github.com/alex-shpak/hugo-book
 <li><a href="../../docs/reserve/">Reserve</a></li>
 <li><a href="../../docs/datatrust/">Datatrusts</a></li>
 <li><a href="../../docs/parameters/">Market Parameters</a></li>
-<li><a href="../../docs/capi/">The Computable API</a></li>
-<li><a href="../../docs/attacks/">Attacks</a></li>
+<li><a href="../../docs/capi/">CAPI</a></li>
+<li><a href="../../docs/libraries/">Developer Libraries</a></li>
 <li><a href="../../docs/userjourney/">User Journeys</a></li>
+<li><a href="../../docs/attacks/">Attacks</a></li>
 <li><a href="../../docs/continuing/">Continuing Your Journey</a></li>
 </ul>
 
@@ -111,36 +112,66 @@ https://github.com/alex-shpak/hugo-book
 
 <h1 id="attacks">Attacks</h1>
 
-<p>This section catalogs known attacks on the protocol and
-known defenses against such attacks.</p>
+<p>This chapter introduces you to known attacks on the
+Computable protocol and known defenses against such
+attacks.  When developing Computable, we made some
+trade-offs. In particular, we&rsquo;ve consistently voted for
+simplicity. This makes it possible for us to actually
+ship working code in reasonable timeframes. But our
+choice to go with simplicity means that there are some
+more sophisticated attacks that bad actors could
+execute against your data markets. These aren&rsquo;t
+necessarily easy to do, but forewarned is forearmed and
+we want to give you the best knowledge we have. Let&rsquo;s
+get started.</p>
 
 <h2 id="front-running-attacks">Front Running Attacks</h2>
 
-<p>In the current version of the protocol, it is possible
-for a determined adversary to front-run a number of
-protocol interactions. For example, if a listing with a
-given <code>listingHash</code> is proposed but not yet confirmed
-as a transaction, the adversary could create an
-alternative transaction with the same <code>listingHash</code> to
-attempt to block the original listing.</p>
+<p>In the current version of the Comptuable protocol, it
+is possible for a determined adversary to front-run a
+number of protocol interactions. What does that mean?
+Recall that Ethereum transactions are broadcasted to
+the network of Ethereum nodes at large. That means it&rsquo;s
+possible to detect a transaction while it&rsquo;s being
+propagated and before it&rsquo;s confirmed on the chain as
+permanent. A front running attack is when an attacker
+detects such an unconfirmed transaction and sends an
+alternative transaction which exploits the information
+it&rsquo;s gained before this transaction goes through. This
+is possible if the attacker runs a miner for example,
+or if it&rsquo;s willing to pay high gas cost to incentivize
+miners to pick up its transaction before yours.</p>
+
+<p>How could this work on Computable contracts? Here&rsquo;s an
+example: if a listing with a given <code>listingHash</code> is
+proposed but not yet confirmed as a transaction, the
+adversary could create an alternative transaction with
+the same <code>listingHash</code> to attempt to block the original
+listing.</p>
 
 <p>The same attack can be applied to any candidate,
 allowing a determined attacker to bring a market to a
-standstill. However, this attack requires some
+standstill by preventing all governance actions from
+going through. However, this attack requires some
 infrastructure, with the attacker having to
 consistently monitor in-coming transactions and
-front-running them, possibly by expending more on gas.</p>
+front-running them, possibly by expending more on gas.
+This means that the attack is pretty hard to execute,
+but definitely within the realm of possibility.</p>
 
 <h2 id="datatrust-fraud">Datatrust Fraud</h2>
 
-<p>This attack happens when a datatrust commits fraud and
-doesn&rsquo;t serve its purpose correctly. At present, this
-is a known failure mode of the current version of the
-protocol.  However, this topic is being actively
-researched on the
+<p>This attack happens when a datatrust operator commits
+fraud and doesn&rsquo;t serve its purpose correctly. At
+present, this is a known failure mode of the current
+version of the protocol.  However, this topic is being
+actively researched on the
 <a href="https://forum.computable.io/">forums</a>. Future versions
 of the Computable protocol should lower the trust
-requirements for the datatrust.</p>
+requirements for the datatrust. In addition, future
+versions of the protocol will allow multiple datatrusts
+to serve a data market, making markets more robust
+against fraudulent datatrust operators.</p>
 
 <h2 id="reserve-race-conditions">Reserve Race Conditions</h2>
 
@@ -161,7 +192,7 @@ of attacks.</p>
 <h2 id="candidate-flooding-attack">Candidate Flooding Attack</h2>
 
 <p>At present, there is no stake required to propose a new
-candidate (remember that candidates can be for new
+candidate (remember that candidates can propose new
 listings, reparameterizations, or change of datatrust).
 This means that it will be relatively easy for a
 malicious party to spawn many candidates. This party
@@ -207,7 +238,22 @@ attack which sets the voting stake exorbitantly high
 could freeze market governance and make it impossible
 to further change market stake.</p>
 
-<p><a href="../userjourney/index.html">Next Chapter</a></p>
+<h2 id="last-thoughts">Last Thoughts</h2>
+
+<p>We&rsquo;ve listed a number of known attacks in this chapter,
+but the one thing to remember about security is that
+there are always unknown unknowns. We&rsquo;ve done our best
+to secure the Computable smart contracts and systems,
+but there might be unforeseen subtle bugs. When you
+work with crypto, there is always a risk. Perform your
+own analysis. If you detect anything wrong, share with
+the broader Computable community.</p>
+
+<p>In the next chapter, we&rsquo;ll provide you some tips and
+tools for continuing your journey in the Computable
+ecosystem.</p>
+
+<div style="text-align: right"> <a href="../../docs/continuing">Next Chapter</a> </div>
 </article>
 
       
@@ -249,6 +295,7 @@ to further change market stake.</p>
 <li><a href="#data-flooding-attack">Data Flooding Attack</a></li>
 <li><a href="#reparameterization-attacks">Reparameterization Attacks</a></li>
 </ul></li>
+<li><a href="#last-thoughts">Last Thoughts</a></li>
 </ul></li>
 </ul>
 </nav>

@@ -14,7 +14,7 @@
     
     Listings
   
- | Computable Spec</title>
+ | The Computable Book</title>
 
 
 
@@ -39,7 +39,7 @@ https://github.com/alex-shpak/hugo-book
     <aside class="book-menu fixed">
       <nav>
 <h2 class="book-brand">
-  <a href="https://computablelabs.github.io/compspec/">Computable Spec</a>
+  <a href="https://computablelabs.github.io/compspec/">The Computable Book</a>
 </h2>
 
 
@@ -65,9 +65,10 @@ https://github.com/alex-shpak/hugo-book
 <li><a href="../../docs/reserve/">Reserve</a></li>
 <li><a href="../../docs/datatrust/">Datatrusts</a></li>
 <li><a href="../../docs/parameters/">Market Parameters</a></li>
-<li><a href="../../docs/capi/">The Computable API</a></li>
-<li><a href="../../docs/attacks/">Attacks</a></li>
+<li><a href="../../docs/capi/">CAPI</a></li>
+<li><a href="../../docs/libraries/">Developer Libraries</a></li>
 <li><a href="../../docs/userjourney/">User Journeys</a></li>
+<li><a href="../../docs/attacks/">Attacks</a></li>
 <li><a href="../../docs/continuing/">Continuing Your Journey</a></li>
 </ul>
 
@@ -112,8 +113,27 @@ https://github.com/alex-shpak/hugo-book
 <h1 id="listings">Listings</h1>
 
 <p>A data market holds a set of &ldquo;listings&rdquo;. Each listing
-corresponds to a chunk of data contributed by a single maker and managed within the data market. The listing is physicaally stored<br />
-off-chain in the datatrust for this market.</p>
+corresponds to a chunk of data contributed by a single
+maker and managed within the data market. The listing is
+physically stored  off-chain in the datatrust for this
+market.</p>
+
+<p>As we will see soon, listings are governed by the
+on-chain voting system we discussed in the last
+chapter. Adding a new listing, and challenging someone
+else&rsquo;s listing to have it listing both require on-chain
+votes. This permits for market stakeholders to actively
+manage the set of available listings. It&rsquo;s worth noting
+that listings require some off-chain governance as
+well, since each listing is tied to an off-chain
+(potentially large) chunk of data. For this reason, the
+datatrust plays a role in verifying that makers have
+actually submitted data for listing candidates before
+they can be listed. Don&rsquo;t worry if you didn&rsquo;t digest
+all that just yet. We&rsquo;ll say more in the rest of this
+chapter.</p>
+
+<h2 id="on-chain-listings">On-chain Listings</h2>
 
 <p>We reproduce the fields of the on-chain listing
 structure (in <code>Listing.vy</code>) below.</p>
@@ -130,31 +150,17 @@ data. Note that a listing has a very simple on-chain
 footprint. It simply records the owner of the listing,
 keyed by their Ethereum address, along with the
 <code>supply</code> tied to the listing. The <code>supply</code> is a amount
-of funds tied to this particular listing (TODO: clarify
-this relationship).</p>
+of funds tied to this particular listing. In
+particular, if a listing candidate is approved and
+listed in the market, the <code>listing_reward</code> of minted
+<code>MarketToken</code> is transferred into <code>supply</code>.</p>
 
-<p>You might wonder how two listings are differentiated
-from each other if there&rsquo;s no unique identifier in the
-struct. The answer to this is that the listings are
-stored in a <code>map</code> that keys from the <code>listingHash</code> for
-this listing to the actual struct.</p>
-
-<pre><code>listings: map(bytes32, Listing)
-</code></pre>
-
-<p>There is a last piece of data tied to each listing, the
-<code>dataHash</code>. This is stored in the <code>Datatrust.vy</code>
-contract.</p>
-
-<pre><code>data_hashes: map(bytes32, bytes32) # listing_hash -&gt; data_hash
-</code></pre>
-
-<p>Once the datatrust has received the actual off-chain
-listing data from the maker, it stores the <code>data_hash</code>
-(conceptually the hash of the raw data for the listing,
-but could be something else) within this map.</p>
-
-<p>You might wonder how we can use these fields to tell whether a listing has been formally accepted (and is no longer a candidate). For this, we can use the convenient fact that Vyper defaults fields to 0 if not set:</p>
+<p>Note here that both listing candidates and listings use
+this same struct. A listing candidate simply has its
+owner set to 0 to indicate null ownership. Once the
+candidate is voted in and accepted, its owner is set,
+indicating that it has been listed in the market. We
+can see this in the <code>Listing.isListed</code> function:</p>
 
 <pre><code>@public
 @constant
@@ -165,30 +171,71 @@ def isListed(hash: bytes32) -&gt; bool:
   return self.listings[hash].owner != ZERO_ADDRESS
 </code></pre>
 
-<p>Reading through this, if the listing&rsquo;s owner is not
-<code>ZERO_ADDRESS</code>, then the listing has been accepted.</p>
+<p>If the listing&rsquo;s owner is not <code>ZERO_ADDRESS</code>, then the
+struct corresponds to a listing candidate..</p>
+
+<p>You might wonder how two listings are differentiated
+from each other if there&rsquo;s no unique identifier in the
+struct. The answer to this is that the listings are
+stored in a <code>map</code> that keys from a unique <code>listingHash</code>
+for this listing to the actual struct.</p>
+
+<pre><code>listings: map(bytes32, Listing)
+</code></pre>
+
+<p>This <code>listingHash</code> is used as the unique identifier for
+the listing. It&rsquo;s how you can retrieve the listing from
+a datatrust (if properly authorized; more on this
+later).  There is a last piece of data tied to each
+listing, the <code>dataHash</code>. This is stored in the
+<code>Datatrust.data_hashes</code> field.</p>
+
+<pre><code>data_hashes: map(bytes32, bytes32) # listing_hash -&gt; data_hash
+</code></pre>
+
+<p>Once the datatrust has received the actual off-chain
+listing data from a maker, it stores the <code>data_hash</code>
+(conceptually think of this as the hash of the raw data
+for the listing, but could be something else) within
+this map.</p>
 
 <h2 id="what-is-the-off-chain-part-of-a-listing">What is the off-chain part of a listing?</h2>
 
-<p>We haven&rsquo;t clearly specified what a listing is
-precisely in the preceding material.  Part of the
-challenge is that a &ldquo;listing&rdquo; will mean different
-things for different markets. A record in an off-chain
-SQL database is very different from an image file for a
-deep learning application. For this reason, we say that
-the off-chain part of a a listing is simply an
-arbitrary bytestring.  This bytestring may correspond
-to multiple &ldquo;datapoints&rdquo;.  For example, the bytestring
-may correspond to 10 SQL rows or to 50 images. This
+<p>So far, we&rsquo;ve introduced the on-chain struct that
+specifies listings and listing candidates. But where is
+the actual data tied to the listing? Does it have any
+specific format? Where does the data live?</p>
+
+<p>Part of our challenge is that a &ldquo;listing&rdquo; will mean
+different things for different markets. A biological
+expexperiment outcome in a drug discovery data market
+is very different from an image file for a vision data
+market. For this reason, we say that the off-chain part
+of a a listing is simply an arbitrary bytestring.  This
+bytestring may correspond to multiple &ldquo;datapoints&rdquo; in
+the usual sense.  For example, the bytestring may
+correspond to 10 SQL rows or to 50 images. This
 batching might be crucial for efficiency, since the
 transaction rate of Ethereum is not yet sufficient to
 do bulk uploads of datasets otherwise.</p>
 
+<p>The listing lives in the datatrust associated to the
+data market. As part of the process for getting a
+listing candidate accepted, the maker is responsible
+for sending the listing data to the datatrust for that
+market. (You&rsquo;ll learn more in a <a href="../capi/index.html">future
+chapter</a> about the mechanics of
+actually sending this data).</p>
+
+<p>A buyer who purchases access to a listing similarly
+needs to interact with a datatrust to download the
+listing data.</p>
+
 <h2 id="applying">Applying</h2>
 
-<p>Applying is the process by which a new listing is added
-to a data market. To apply, a maker
-calls the following method on-chain:</p>
+<p>Applying is the process by which a new listing
+candidate is proposed for addition to a data market. To
+apply, a maker calls the following method on-chain:</p>
 
 <pre><code>@public
 def list(hash: bytes32):
@@ -204,17 +251,26 @@ def list(hash: bytes32):
 </code></pre>
 
 <p>This function does a few basic sanity checks, then puts
-this candidate listing up for a vote. If the vote clears,s the candidacy is resolved and the candidate is listed and its <code>owner</code> field is set.</p>
+this listing candidate up for a vote. If the vote
+clears, the candidacy is resolved and the candidate is
+listed when its <code>owner</code> field is set.</p>
+
+<p>If you don&rsquo;t have all this fitting in your head, don&rsquo;t
+worry. Check out this diagram of the application flow
+for makers that captures the basic flow:</p>
+
+<p><img src="../../Make.png" alt="Maker Flow" /></p>
 
 <h2 id="challenging">Challenging</h2>
 
-<p>Challenging is the process by which a listing in a data
-market can be challenged and potentially removed. A
-challenge triggers a vote. If the challenge succeeds,
-the challenged listing is de-listed from the data
-market.  If the challenge fails, the challenging party
-is penalized with a loss of stake (note that posting a
-challenge requires placing <code>MarketToken</code> at stake).</p>
+<p>Challenging is the process by which a listed listing
+can be challenged and potentially removed. A challenge
+triggers a vote. If the challenge succeeds, the
+challenged listing is de-listed from the data market
+(its owner is set to 0).  If the challenge fails, the
+challenging party is penalized with a loss of stake
+(note that posting a challenge requires placing
+<code>MarketToken</code> at stake).</p>
 
 <pre><code>@public
 def challenge(hash: bytes32):
@@ -229,7 +285,7 @@ def challenge(hash: bytes32):
   log.Challenged(hash, msg.sender)
 </code></pre>
 
-<p>Note that unlike a token curated registry, the council
+<p>Note that unlike a token curated registry, stakeholders
 receives no reward for voting upon a challenge. Only
 the victor of the challenge receives a financial reward
 which comes directly from the loser of of the
@@ -256,9 +312,23 @@ def exit(hash: bytes32):
 The listing owner maintains full control over their
 listing in a data market.</p>
 
+<p>You might wonder, couldn&rsquo;t this enable fraud? That is,
+a malicious maker could repeated re-submit the same
+listing, get it accepted, exit and restart. The
+datatrust can prevent this attack to some degree
+(perhaps by checking the hashes of newly submitted
+listing candidates against previously submitted
+listings), but wouldn&rsquo;t some on-chain defense mechanism
+be better? The issue is that this would make it harder
+for an honest maker to pull out data that they don&rsquo;t
+want exposed. The protocol leans towards the rights of
+makers in ambiguous situations, so we chose to not have
+excessive friction for maker exits.</p>
+
 <h2 id="purchasing-access-to-a-listing">Purchasing access to a listing</h2>
 
-<p>Users may wish to purchase access to a listing. They may do so by calling the <code>requestDelivery</code> method in <code>Datatrust.vy</code>:</p>
+<p>Users may wish to purchase access to a listing. They
+may do so by calling the <code>Datatrust.requestDelivery</code>:</p>
 
 <pre><code>@public
 def requestDelivery(hash: bytes32, amount: uint256):
@@ -280,10 +350,34 @@ def requestDelivery(hash: bytes32, amount: uint256):
 </code></pre>
 
 <p>There&rsquo;s a number of things going on here, but the basic
-idea is that the purchaser has to pay up-front. (TODO:
-Add more about the delivery flow)</p>
+idea is that the purchaser has to pay up-front for
+access to a certain number of bytes (<code>amount</code>). Once
+this payment is made, the buyer can communicate with
+the datatrust (details in a  <a href="../capi/index.html">future
+chapter</a>) to obtain access to some
+listings. The datatrust will keep track of the on-chain
+state, and will not permit access to more listings than
+the buyer has paid for.</p>
 
-<p><a href="../reserve/index.html">Next Chapter</a></p>
+<p>There&rsquo;s a number of things in this code snippet we&rsquo;re
+not yet explaining in detail. You might wonder what
+this <code>self.reserve_address</code> is for example. You&rsquo;ll
+learn in the <a href="../reserve/index.html">next chapter</a>. For now, check out this diagram that lays out the flow of funds:</p>
+
+<p><img src="../../Buy.png" alt="Buy Flow" /></p>
+
+<h2 id="last-thoughts">Last Thoughts</h2>
+
+<p>You might not have digested everything in this chapter.
+There&rsquo;s a lot going on with listings since they&rsquo;re the
+central entity of the data market. Keep reading and
+refer back as you&rsquo;re confused. We&rsquo;ll have more examples
+and discussion that will help clarify in the upcoming
+chapters. In particular, in the next chapter, you&rsquo;ll
+learn about the reserve which serves to motivate makers
+to contribute listings.</p>
+
+<div style="text-align: right"> <a href="../../docs/reserve">Next Chapter</a> </div>
 </article>
 
       
@@ -317,11 +411,13 @@ Add more about the delivery flow)</p>
 <ul>
 <li><a href="#listings">Listings</a>
 <ul>
+<li><a href="#on-chain-listings">On-chain Listings</a></li>
 <li><a href="#what-is-the-off-chain-part-of-a-listing">What is the off-chain part of a listing?</a></li>
 <li><a href="#applying">Applying</a></li>
 <li><a href="#challenging">Challenging</a></li>
 <li><a href="#exiting">Exiting</a></li>
 <li><a href="#purchasing-access-to-a-listing">Purchasing access to a listing</a></li>
+<li><a href="#last-thoughts">Last Thoughts</a></li>
 </ul></li>
 </ul>
 </nav>

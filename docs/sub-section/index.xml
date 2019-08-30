@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Computable Spec</title>
+    <title>The Computable Book</title>
     <link>https://computablelabs.github.io/compspec/docs/sub-section/</link>
-    <description>Recent content on Computable Spec</description>
+    <description>Recent content on The Computable Book</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     
