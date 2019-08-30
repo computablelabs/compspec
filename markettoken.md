@@ -144,4 +144,13 @@ token curated registries tokens, which don't have a
 mechanism for minting and burning their associated
 token.
 
-[Next Chapter](../voting/index.html)
+## Last Thoughts
+
+Now that you understand `EtherToken` and `MarketToken`
+better, it's time to start thinking about how these
+pieces fit together into the market. The first place to
+start is with `Voting`, which governs all important
+changes in the market. You'll learn more in the next
+chapter.
+
+<div style="text-align: right"> <a href="../../docs/voting">Next Chapter</a> </div>

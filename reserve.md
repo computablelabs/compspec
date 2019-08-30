@@ -103,6 +103,10 @@ of `MarketToken` wei. `offer` is added to the data
 market reserve and the returned `MarketToken` is newly
 minted.
 
+Let's take a look at a diagram that illustrates the core idea:
+
+![Support Flow](../../Support.png)
+
 You might ask, what about the reverse operation? What
 if I supported a data market as a patron, but
 something's changed and I no longer have believe that
@@ -146,6 +150,10 @@ tokens are burned. Then the fractional part of the
 reserve belonging to this stakeholder is transferred to
 them. In the case above, 5% of the reserve
 would be transferred to the stakeholder's address.
+
+Here's a diagram that captures the core flow:
+
+![Withdrawal Flow](../../Withdrawal.png)
 
 There's a really important point to make here. There's
 nothing in this function which checks that the caller
@@ -241,7 +249,15 @@ def getSupportPrice() -> wei_value:
 ```
 
 This is the most complex function in the entire
-Computable smart contract system. The main reason for
+Computable smart contract system. Before we dig into
+what the code means, it might help to take a look at
+this diagram to gain some basic understanding of the
+intuition:
+
+![Exchange Curve](../../Exchange.png)
+
+
+Now let's return to the algorithm. The main reason for
 this complexity is that today's smart contract systems
 [don't support floating
 point](https://forum.computable.io/t/floating-point-support-for-smart-contracts/65).
@@ -271,7 +287,7 @@ that get us? Let's pretend we had floating point:
 
 
 ```
-reserve / MarketToken.totalSupply())
+reserve/MarketToken.totalSupply()
 ```
 
 Ok, not bad. There's an issue though. What are the
@@ -285,14 +301,14 @@ this was confusing; getting unit math right is really
 tricky. It took us a number of tries before we derived
 the correct equation ourselves.)
 ```
-(10**9 * reserve) /(MarketToken.totalSupply())
+(10**9 * reserve)/(MarketToken.totalSupply())
 ```
 
 Let's add on that `price_floor`. It's just
 an additional term we add on.
 
 ```
-price_floor + (10**9 * reserve) /(MarketToken.totalSupply())
+price_floor + (10**9 * reserve)/(MarketToken.totalSupply())
 ```
 
 Getting a little closer. Let's see if we can work that
@@ -303,13 +319,13 @@ to multiply by `1.1`. Or more generally, by
 this:
 
 ```
-price_floor + (spread * reserve * 10**9) /(100 * MarketToken.totalSupply())
+price_floor + (spread * reserve * 10**9)/(100 * MarketToken.totalSupply())
 ```
 
 Ok, this matches one of the equations in the code above. There's one complication though. What if `MarketToken.totalSupply()` is 0? There would be a division by 0. We need some cutoff to prevent division by 0. For conceptual simplicity, we say that if `MarketToken.totalSupply()` is less than 1 whole `MarketToken`, we cap the size of the denominator to get the equation
 
 ```
-price_floor + (spread * reserve * 10**9) /(100 * 10**18)
+price_floor + (spread * reserve * 10**9)/(100 * 10**18)
 ```
 We've now succeeded in deriving the full form of the
 algorithmic price curve! You might've gotten lost in
@@ -335,5 +351,12 @@ to construct markets whose reserves are denominated in
 However, this feature is not yet present in the current
 version of the Computable protocol.
 
+## Last Thoughts
 
-[Next Chapter](../datatrust/index.html)
+You've now begun to see the heart of the economic
+engine that drives on-chain behavior in the datatrust.
+But we haven't yet tackled the off-chain system for
+actually handling data. You'll learn more about the
+datatrust in the next chapter.
+
+<div style="text-align: right"> <a href="../../docs/datatrust">Next Chapter</a> </div>

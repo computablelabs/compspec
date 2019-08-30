@@ -84,4 +84,11 @@ major advantages Vyper has over other languages such as
 Solidity, which require more verbose safe math
 libraries to achieve similar functionality.
 
-[Next Chapter](../markettoken/index.html)
+## Last Thoughts
+
+Now that you have a grasp of `EtherToken`, let's learn
+about some things we can do with it. To understand this
+better, you'll learn about `MarketToken` in the next
+chapter.
+
+<div style="text-align: right"> <a href="../../docs/markettoken">Next Chapter</a> </div>

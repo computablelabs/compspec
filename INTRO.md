@@ -1,11 +1,8 @@
 ---
-title: The Computable Protocol 
+title: The Computable Book 
 type: docs
 ---
-
-# The Computable Protocol 
-
-## Introduction 
+# Introduction 
 
 The Computable protocol creates decentralized data
 markets. The global Computable network is made up of
@@ -80,4 +77,4 @@ libraries Computable provides to help you tackle this
 problem. Welcome onboard to the Computable community!
 It's going to be a ride!
 
-[Next Chapter](docs/contracts/index.html)
+<div style="text-align: right"> <a href="docs/contracts">Next Chapter</a> </div>

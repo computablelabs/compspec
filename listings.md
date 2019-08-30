@@ -145,6 +145,12 @@ this listing candidate up for a vote. If the vote
 clears, the candidacy is resolved and the candidate is
 listed when its `owner` field is set.
 
+If you don't have all this fitting in your head, don't
+worry. Check out this diagram of the application flow
+for makers that captures the basic flow:
+
+![Maker Flow](../../Make.png)
+
 ## Challenging
 Challenging is the process by which a listed listing
 can be challenged and potentially removed. A challenge
@@ -235,17 +241,21 @@ def requestDelivery(hash: bytes32, amount: uint256):
 
 There's a number of things going on here, but the basic
 idea is that the purchaser has to pay up-front for
-access to a certain number of bytes. Once this payment
-is made, the buyer can communicate with the datatrust
-(details in a  [future chapter](../capi/index.html)) to
-obtain access to some listings. The datatrust will keep
-track of the on-chain state, and will not permit access
-to more listings than the buyer has paid for.
+access to a certain number of bytes (`amount`). Once
+this payment is made, the buyer can communicate with
+the datatrust (details in a  [future
+chapter](../capi/index.html)) to obtain access to some
+listings. The datatrust will keep track of the on-chain
+state, and will not permit access to more listings than
+the buyer has paid for.
 
 There's a number of things in this code snippet we're
 not yet explaining in detail. You might wonder what
 this `self.reserve_address` is for example. You'll
-learn in the [next chapter](../reserve/index.html).
+learn in the [next chapter](../reserve/index.html). For now, check out this diagram that lays out the flow of funds:
+
+![Buy Flow](../../Buy.png)
+
 
 ## Last Thoughts
 
@@ -254,6 +264,8 @@ There's a lot going on with listings since they're the
 central entity of the data market. Keep reading and
 refer back as you're confused. We'll have more examples
 and discussion that will help clarify in the upcoming
-chapters.
+chapters. In particular, in the next chapter, you'll
+learn about the reserve which serves to motivate makers
+to contribute listings.
 
-[Next Chapter](../reserve/index.html)
+<div style="text-align: right"> <a href="../../docs/reserve">Next Chapter</a> </div>

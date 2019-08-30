@@ -200,4 +200,11 @@ simplicity allows for some sophisticated vote
 manipulation techniques to be feasible. We discuss such
 attacks in greater detail later.
 
-[Next Chapter](../listings/index.html)
+## Last Thoughts
+
+Now that you understand how voting works, let's dive
+into the most important thing to be governed by votes,
+the listings themselves. You'll learn more in the next
+chapter.
+
+<div style="text-align: right"> <a href="../../docs/listings">Next Chapter</a> </div>
